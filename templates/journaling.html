@@ -534,17 +534,45 @@ function exportAll() {
   URL.revokeObjectURL(url);
   showToast("All entries exported!");
 }
-// Hamburger toggle for mobile nav
-  document.addEventListener("DOMContentLoaded", function() {
-    const hamburger = document.querySelector('.tm-hamburger');
-    const nav = document.querySelector('.tm-nav');
+document.addEventListener("DOMContentLoaded", () => {
+document.addEventListener("DOMContentLoaded", () => {
+  const hamburger = document.querySelector('.tm-hamburger');
+  const nav = document.querySelector('.tm-nav');
 
-    if (hamburger && nav) {
-      hamburger.addEventListener('click', function() {
-        nav.classList.toggle('show-links');
-      });
+  function updateHamburgerVisibility() {
+    if (window.innerWidth <= 768) {
+      hamburger.style.display = 'block';
+    } else {
+      hamburger.style.display = 'none';
+      nav.classList.remove('show-links');
     }
+  }
+
+  // Toggle mobile nav
+  if (hamburger) {
+    hamburger.addEventListener('click', () => {
+      nav.classList.toggle('show-links');
+    });
+  }
+
+  // Initialize and update on resize
+  updateHamburgerVisibility();
+  window.addEventListener('resize', updateHamburgerVisibility);
+});
+  // === Theme Toggle ===
+  const themeBtn = document.getElementById("themeToggle");
+  const darkStored = localStorage.getItem("theme") === "dark";
+  if (darkStored) document.body.classList.add("dark-theme");
+  themeBtn.textContent = darkStored ? "☀️ Theme" : "🌙 Theme";
+
+  themeBtn.addEventListener("click", () => {
+    document.body.classList.toggle("dark-theme");
+    const isDark = document.body.classList.contains("dark-theme");
+    localStorage.setItem("theme", isDark ? "dark" : "light");
+    themeBtn.textContent = isDark ? "☀️ Theme" : "🌙 Theme";
   });
+
+});
 </script>
 </body>
 </html>

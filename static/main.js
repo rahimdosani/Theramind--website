@@ -500,16 +500,28 @@ document.querySelectorAll('.theme-toggle input').forEach(input =>
   const activeChatId = localStorage.getItem("activeChatId");
   if (activeChatId) loadConversation({ stopPropagation: () => {} }, activeChatId);
 })();
-// Hamburger toggle for mobile nav
-  document.addEventListener("DOMContentLoaded", function() {
-    const hamburger = document.querySelector('.tm-hamburger');
-    const nav = document.querySelector('.tm-nav');
 
-    if (hamburger && nav) {
-      hamburger.addEventListener('click', function() {
-        nav.classList.toggle('show-links');
-      });
+document.addEventListener("DOMContentLoaded", () => {
+  const hamburger = document.querySelector('.tm-hamburger');
+  const nav = document.querySelector('.tm-nav');
+
+  function updateHamburgerVisibility() {
+    if (window.innerWidth <= 768) {
+      hamburger.style.display = 'block';
+    } else {
+      hamburger.style.display = 'none';
+      nav.classList.remove('show-links');
     }
-  });
+  }
 
+  // Toggle mobile nav
+  if (hamburger) {
+    hamburger.addEventListener('click', () => {
+      nav.classList.toggle('show-links');
+    });
+  }
 
+  // Initialize and update on resize
+  updateHamburgerVisibility();
+  window.addEventListener('resize', updateHamburgerVisibility);
+});

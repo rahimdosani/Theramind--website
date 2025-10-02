@@ -513,4 +513,22 @@ body {
   .chat-inputbar textarea { font-size: 0.9rem; }
   .sidebar-btn { font-size: 0.85rem; padding: 0.5rem 0.8rem; }
 }
+/* ==================================
+   Fix for particles visibility
+================================== */
+.main-layout,
+.main,
+.chat-inputbar {
+  background: transparent !important;
+}
 
+/* Ensure particles canvas covers the whole screen */
+#particles-js {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: -1;
+  pointer-events: none; /* lets clicks go through */
+}
