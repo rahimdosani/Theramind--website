@@ -1,0 +1,534 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Theramind – Journal</title>
+  <link rel="icon" href="https://img.icons8.com/fluency/48/brain.png" />
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&family=Shadows+Into+Light&family=Merriweather&family=Roboto+Mono&display=swap" rel="stylesheet" />
+  <script src="https://cdn.jsdelivr.net/npm/tsparticles@2.12.0/tsparticles.bundle.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+  <style>
+    /* ===================== Theme Variables ===================== */
+    :root {
+      --background: #ffffff;
+      --foreground: #111111;
+      --primary: #4f46e5;
+      --accent: #06b6d4;
+      --sidebar-bg: rgba(255,255,255,0.85);
+      --glass-blur: blur(16px) saturate(180%);
+      --button-color: #ffffff;
+    }
+    body.dark-theme {
+      --background: #0d0d0f;
+      --foreground: #f0f0f0;
+      --primary: #6366f1;
+      --accent: #67e8f9;
+      --sidebar-bg: rgba(30,30,30,0.85);
+    }
+
+    /* ===================== Base ===================== */
+    *{box-sizing:border-box;}
+    body {
+      margin:0; font-family:'Poppins',sans-serif;
+      background: var(--background);
+      color: var(--foreground);
+      transition: background 0.3s,color 0.3s;
+    }
+    #tsparticles{position:fixed;width:100%;height:100%;top:0;left:0;z-index:0;}
+
+    /* ===================== Navbar ===================== */
+    .tm-nav {
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      height:75px;
+      padding:0 2rem;
+      background: var(--sidebar-bg);
+      backdrop-filter: var(--glass-blur);
+      box-shadow: 0 6px 25px rgba(0,0,0,0.15);
+      position: sticky;
+      top:0;
+      z-index: 100;
+    }
+    .tm-brand {
+      display:flex;
+      align-items:center;
+      gap:0.75rem;
+      font-weight:700;
+      font-size:1.4rem;
+      color: var(--foreground);
+      text-decoration:none;
+    }
+    .tm-brand img.brand-mark {height:36px;}
+    .tm-navlinks {
+      display:flex;
+      gap:1.5rem;
+      align-items:center;
+      flex-wrap:wrap;
+    }
+    .tm-navlinks a {
+      text-decoration:none;
+      font-weight:600;
+      color: var(--primary);
+      position: relative;
+      transition: color 0.3s;
+    }
+    .tm-navlinks a:hover { color: var(--accent); }
+    .tm-navlinks a.active::after {
+      content:'';
+      position:absolute;
+      bottom:-6px;
+      left:0;
+      width:100%;
+      height:3px;
+      background: var(--primary);
+      border-radius:4px;
+    }
+    .theme-toggle {
+      cursor:pointer;
+      font-size:0.9rem;
+      background: linear-gradient(135deg,var(--primary),var(--accent));
+      padding:6px 10px;
+      border-radius:6px;
+      color: var(--button-color);
+      transition:0.3s;
+    }
+    .theme-toggle:hover { opacity:0.85; }
+
+    /* ===================== Responsive Navbar ===================== */
+    @media (max-width:768px){
+      .tm-nav{flex-direction:column;align-items:flex-start;height:auto;padding:1rem;}
+      .tm-navlinks{flex-direction:column;align-items:flex-start;width:100%;gap:0.6rem;margin-top:0.5rem;}
+      .theme-toggle{align-self:flex-start;margin-top:0.5rem;}
+    }
+
+    /* ===================== Journal Container ===================== */
+    .journal-container{
+      max-width:900px;
+      margin:100px auto;
+      padding:40px;
+      background:rgba(255,255,255,0.08);
+      border-radius:20px;
+      backdrop-filter:blur(12px);
+      position:relative;
+      z-index:2;
+      box-shadow:0 8px 40px rgba(0,0,0,0.2);
+    }
+    body.dark-theme .journal-container{
+      background-color:rgba(44,44,62,0.8);
+    }
+    h2{font-size:2rem;margin-bottom:20px;}
+    .mood-select,.prompt-section,.entry-section,.history-section{margin-top:24px;}
+    select,textarea,input[type="text"]{
+      padding:12px;
+      border-radius:10px;
+      font-size:1rem;
+      width:100%;
+      margin-top:10px;
+      border:1px solid #ccc;
+      background-color:inherit;
+      color:inherit;
+      transition:0.2s;
+    }
+    .prompt-section button,.actions button,.speech-button,#font-select,#export-all,#export-pdf{
+      padding:12px 18px;
+      border:none;
+      border-radius:10px;
+      background-color: var(--primary);
+      color: var(--button-color);
+      font-weight:600;
+      cursor:pointer;
+      margin:10px 10px 0 0;
+      transition:0.2s;
+    }
+    .prompt-section button:hover,.actions button:hover,.speech-button:hover,#font-select:hover,#export-all:hover,#export-pdf:hover{
+      background-color: var(--accent);
+    }
+    #prompt-display{margin-top:10px;font-style:italic;transition:0.3s;}
+    #prompt-display.highlight{box-shadow:0 0 12px var(--primary); padding:6px; border-radius:6px;}
+    .illustration{text-align:center;margin-top:16px;}
+    .illustration img{max-width:220px;height:auto;border-radius:12px;box-shadow:0 4px 12px rgba(0,0,0,0.3);animation:float 3s ease-in-out infinite;}
+    @keyframes float{0%,100%{transform:translateY(0);}50%{transform:translateY(-6px);}}
+    .journal-history{background:#eee;border-radius:12px;padding:14px;white-space:pre-wrap;margin-top:10px;max-height:300px;overflow-y:auto;}
+    body.dark-theme .journal-history{background-color:#3a3a4f;color:white;}
+    .actions{margin-top:10px;display:flex;flex-wrap:wrap;gap:10px;}
+    .search-tags{display:flex;gap:16px;margin-top:20px;flex-wrap:wrap;}
+    .search-tags input{flex:1;min-width:120px;}
+    .entry-item{border-bottom:1px solid #ccc;padding:8px;display:flex;justify-content:space-between;align-items:center;cursor:pointer;transition:0.2s;}
+    .entry-item:hover{background-color:rgba(0,0,0,0.05); box-shadow:0 0 8px var(--primary);}
+    .entry-actions button{margin-left:8px;background-color:#e53e3e;color:white;border:none;padding:6px 10px;border-radius:6px;cursor:pointer;transition:0.2s;}
+    .entry-actions button:hover{background-color:#9b2c2c;}
+    .modal{position:fixed;top:0;left:0;width:100%;height:100%;display:flex;justify-content:center;align-items:center;background:rgba(0,0,0,0.6);visibility:hidden;opacity:0;transition:0.3s;z-index:20;}
+    .modal.active{visibility:visible;opacity:1;}
+    .modal-content{background:white;border-radius:12px;padding:24px;max-width:600px;width:90%;max-height:80%;overflow:auto;position:relative;}
+    body.dark-theme .modal-content{background:#2c2c44;color:white;}
+    .modal-close{position:absolute;top:10px;right:10px;cursor:pointer;font-size:20px;}
+    .toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:var(--primary);color:white;padding:12px 24px;border-radius:12px;opacity:0;pointer-events:none;transition:0.3s;z-index:30;}
+    .toast.show{opacity:1;pointer-events:auto;}
+  </style>
+</head>
+<body>
+  <div id="tsparticles"></div>
+
+  <!-- Navbar -->
+  <header class="tm-nav">
+    <a class="tm-brand" href="/home">
+      <img src="https://img.icons8.com/fluency/48/brain.png" alt="Theramind Logo" class="brand-mark">
+      <span>Theramind</span>
+    </a>
+    <nav class="tm-navlinks">
+      <a href="/home">🏠 Home</a>
+      <a href="/index">💬 Chat</a>
+      <a href="/journaling" class="active">📓 Journal</a>
+      <a href="/breathing">🫁 Breathing</a>
+      <a href="/pick-a-peace">📃 Pick-a-Peace</a>
+      <a href="/calm-corner">🧘 Calm Corner</a>
+      <a href="/ebooks">📚 E-Books</a>
+      <a href="/history">🕰️ History</a>
+    </nav>
+    <div class="theme-toggle" id="themeToggle" onclick="toggleTheme()">🌓 Theme</div>
+  </header>
+
+  <!-- Journal Container -->
+  <div class="journal-container">
+    <h2>How are you feeling today?</h2>
+    <div class="mood-select">
+      <label>Select Your Mood:</label>
+      <select id="mood" onchange="updateIllustrationAndPrompt()">
+        <option>😃 Happy</option>
+        <option>😔 Sad</option>
+        <option>😠 Angry</option>
+        <option>😨 Anxious</option>
+        <option>😌 Calm</option>
+        <option>😵 Overwhelmed</option>
+      </select>
+    </div>
+    <div class="illustration"><img id="mood-image" /></div>
+    <div class="prompt-section">
+      <button onclick="generatePrompt()">🎯 Generate Prompt</button>
+      <p id="prompt-display">Your prompt will appear here...</p>
+    </div>
+    <div class="entry-section">
+      <input type="text" id="entry-title" placeholder="Entry Title" />
+      <textarea id="journal-entry" placeholder="Start writing..."></textarea>
+      <div class="actions">
+        <button onclick="saveEntry()">💾 Save Entry</button>
+        <button class="speech-button" onclick="toggleDictation()">🎤 Start Dictation</button>
+        <button onclick="readAloud()">🔊 Read Journal</button>
+        <select id="font-select" onchange="changeFont(this.value)">
+          <option value="'Shadows Into Light',cursive">Font</option>
+          <option value="'Merriweather',serif">Serif</option>
+          <option value="'Poppins',sans-serif">Sans-serif</option>
+          <option value="'Roboto Mono',monospace">Monospace</option>
+        </select>
+        <button onclick="exportPDF()">📄 Export PDF</button>
+        <button onclick="exportAll()">📤 Export JSON</button>
+      </div>
+      <div class="search-tags">
+        <input type="text" placeholder="Search journal..." oninput="searchJournal(this.value)">
+        <input type="text" placeholder="Tag (comma separated)" id="tags">
+      </div>
+    </div>
+    <div class="history-section">
+      <h3>Previous Entries</h3>
+      <div id="history" class="journal-history"></div>
+    </div>
+  </div>
+
+  <!-- Modals -->
+  <div class="modal" id="entryModal">
+    <div class="modal-content">
+      <span class="modal-close" onclick="closeModal()">×</span>
+      <h3 id="modal-title"></h3>
+      <p id="modal-content"></p>
+      <p id="modal-mood"></p>
+      <p id="modal-tags"></p>
+    </div>
+  </div>
+  <div class="toast" id="toast"></div>
+
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+  // --- Background Particles ---
+  tsParticles.load("tsparticles", {
+    background: { color: { value: "transparent" } },
+    fullScreen: false,
+    particles: {
+      number: { value: 60 },
+      color: { value: "#aab8ff" },
+      shape: { type: "circle" },
+      opacity: { value: 0.2 },
+      size: { value: 3 },
+      move: { enable: true, speed: 1 }
+    }
+  });
+
+  // --- Load Theme from LocalStorage ---
+  const prefersDark = localStorage.getItem("theme") === "dark";
+  const themeToggle = document.getElementById("themeToggle");
+  if(prefersDark){
+    document.body.classList.add("dark-theme");
+    themeToggle.textContent = "☀️ Theme";
+  } else {
+    document.body.classList.remove("dark-theme");
+    themeToggle.textContent = "🌙 Theme";
+  }
+
+  // --- Load Journal Data + Mood Image ---
+  loadHistory();
+  updateIllustrationAndPrompt();
+
+  // --- Auto-Save Every 5s ---
+  setInterval(() => {
+    const entry = document.getElementById("journal-entry").value.trim();
+    if (entry) saveEntry();
+  }, 5000);
+});
+
+// --- Toast Notification ---
+function showToast(msg) {
+  const toast = document.getElementById("toast");
+  toast.textContent = msg;
+  toast.classList.add("show");
+  setTimeout(() => { toast.classList.remove("show"); }, 2500);
+}
+
+// --- Theme Toggle ---
+function toggleTheme() {
+  const themeToggle = document.getElementById("themeToggle");
+  document.body.classList.toggle("dark-theme");
+  const isDark = document.body.classList.contains("dark-theme");
+  localStorage.setItem("theme", isDark ? "dark" : "light");
+  themeToggle.textContent = isDark ? "☀️ Theme" : "🌙 Theme";
+  showToast("Theme changed");
+}
+
+// --- Prompts + Mood Images ---
+const promptMap = {
+  "😃 Happy": ["What made you smile today?","Who brought joy into your life today?","What small victory did you achieve today?","Which moment made you laugh out loud?","What are you grateful for today?","Describe a joyful interaction you had.","What inspired your happiness today?","How can you spread positivity?","Share a happy memory from today.","What energized you today?"],
+  "😔 Sad": ["What’s weighing on your heart?","How are you comforting yourself today?","What made you feel low today?","Describe a moment of sadness today.","What would help lighten your mood?","Who or what can support you today?","Reflect on a challenging emotion.","How can you nurture yourself?","What lesson does your sadness teach?","Share a moment of vulnerability today."],
+  "😠 Angry": ["What triggered your anger?","How can you express it constructively?","Which situation frustrated you?","What could have gone differently?","How can you release anger safely?","Identify any unfair treatment today.","How did you respond to your anger?","What emotions lie beneath your anger?","Share an experience where you stayed calm.","What steps can prevent anger tomorrow?"],
+  "😨 Anxious": ["What's causing anxiety right now?","What can you control in this moment?","Which thoughts are overwhelming you?","How can you ground yourself?","What support can you seek?","Describe your anxious feelings.","What steps help reduce stress?","Identify triggers for anxiety today.","Reflect on past moments you managed anxiety.","What reassures you?"],
+  "😌 Calm": ["What brings you peace?","Today I feel calm because…","Describe a serene moment you had.","What activities help you relax?","Who contributes to your tranquility?","How did you manage stress today?","Reflect on mindful breathing moments.","What music or sounds soothe you?","Share a quiet moment from today.","What positive thoughts keep you grounded?"],
+  "😵 Overwhelmed": ["What’s making you feel overwhelmed?","Break down your feelings into parts.","Identify top stressors today.","Which tasks are weighing on you?","What is outside your control?","What small wins occurred today?","How can you prioritize tasks?","Who can help you manage responsibilities?","Reflect on emotions and reactions.","How can you reset and recharge?"]
+};
+
+const imageMap = {
+  "😃 Happy":"https://img.icons8.com/emoji/96/000000/smiling-face-with-smiling-eyes.png",
+  "😔 Sad":"https://img.icons8.com/emoji/96/000000/pensive-face.png",
+  "😠 Angry":"https://img.icons8.com/emoji/96/000000/pouting-face.png",
+  "😨 Anxious":"https://img.icons8.com/emoji/96/000000/fearful-face.png",
+  "😌 Calm":"https://img.icons8.com/emoji/96/000000/relieved-face.png",
+  "😵 Overwhelmed":"https://img.icons8.com/emoji/96/000000/dizzy-face.png"
+};
+
+function updateIllustrationAndPrompt() {
+  const mood = document.getElementById("mood").value;
+  document.getElementById("mood-image").src = imageMap[mood];
+  generatePrompt();
+}
+function generatePrompt() {
+  const mood = document.getElementById("mood").value;
+  const prompts = promptMap[mood];
+  const prompt = prompts[Math.floor(Math.random() * prompts.length)];
+  document.getElementById("prompt-display").textContent = prompt;
+  document.getElementById("journal-entry").placeholder = prompt.startsWith("Today") ? prompt : "";
+}
+
+// --- Journal Data ---
+let journalData = [];
+let currentModalIndex = 0;
+
+function loadHistory() {
+  const container = document.getElementById("history");
+  container.innerHTML = '';
+  journalData = JSON.parse(localStorage.getItem("journalData") || "[]");
+
+  if (!journalData.length) {
+    container.textContent = "No previous entries yet.";
+    return;
+  }
+
+  journalData.forEach((rec, i) => {
+    const div = document.createElement("div");
+    div.className = "entry-item";
+    div.innerHTML = `<span>${rec.date} - ${rec.title} [${rec.mood}]</span>
+                     <div class="entry-actions"><button onclick="deleteEntry(${i})">🗑️</button></div>`;
+    div.addEventListener("click", (e) => {
+      if (!e.target.closest("button")) openModal(i);
+    });
+    container.appendChild(div);
+  });
+}
+
+// --- Modal Handling ---
+function openModal(index) {
+  currentModalIndex = index;
+  const entry = journalData[index];
+  document.getElementById("modal-title").textContent = entry.title;
+  document.getElementById("modal-content").textContent = entry.entry;
+  document.getElementById("modal-tags").textContent = entry.tags ? `Tags: ${entry.tags}` : '';
+  document.getElementById("modal-mood").textContent = `Mood: ${entry.mood}`;
+  document.getElementById("entryModal").classList.add("active");
+}
+
+function closeModal() {
+  document.getElementById("entryModal").classList.remove("active");
+}
+
+// --- Delete Entries ---
+let deleteIndex = null;
+function deleteEntry(i) {
+  deleteIndex = i;
+  if (confirm("Delete this entry?")) confirmDelete(true);
+  else confirmDelete(false);
+}
+
+function confirmDelete(decision) {
+  if (decision && deleteIndex !== null) {
+    journalData.splice(deleteIndex, 1);
+    localStorage.setItem("journalData", JSON.stringify(journalData));
+    loadHistory();
+    showToast("Entry deleted!");
+    deleteIndex = null;
+  }
+}
+
+// --- Save Entry ---
+function saveEntry() {
+  const title = document.getElementById("entry-title").value.trim() || "Untitled";
+  const entry = document.getElementById("journal-entry").value.trim();
+  const mood = document.getElementById("mood").value;
+  const tags = document.getElementById("tags").value;
+
+  if (!entry) { showToast("Please write something."); return; }
+
+  const date = new Date().toLocaleString();
+  const record = { title, entry, mood, tags, date };
+  journalData.push(record);
+
+  localStorage.setItem("journalData", JSON.stringify(journalData));
+
+  document.getElementById("journal-entry").value = '';
+  document.getElementById("entry-title").value = '';
+  document.getElementById("tags").value = '';
+
+  loadHistory();
+  showToast("Entry saved!");
+}
+
+// --- Search Journal ---
+function searchJournal(query) {
+  const container = document.getElementById("history");
+  const filtered = journalData.filter(rec =>
+    rec.title.toLowerCase().includes(query.toLowerCase()) ||
+    rec.entry.toLowerCase().includes(query.toLowerCase()) ||
+    (rec.tags && rec.tags.toLowerCase().includes(query.toLowerCase()))
+  );
+
+  container.innerHTML = '';
+  if (!filtered.length) {
+    container.textContent = "No entries match your search.";
+    return;
+  }
+
+  filtered.forEach((rec, i) => {
+    const div = document.createElement("div");
+    div.className = "entry-item";
+    div.innerHTML = `<span>${rec.date} - ${rec.title} [${rec.mood}]</span>
+                     <div class="entry-actions"><button onclick="deleteEntry(${i})">🗑️</button></div>`;
+    div.addEventListener("click", (e) => {
+      if (!e.target.closest("button")) openModal(i);
+    });
+    container.appendChild(div);
+  });
+}
+
+// --- Change Font ---
+function changeFont(font) {
+  document.getElementById("journal-entry").style.fontFamily = font;
+  showToast("Font changed!");
+}
+
+// --- Read Aloud ---
+function readAloud() {
+  const text = document.getElementById("journal-entry").value;
+  if (!text) { showToast("No text to read."); return; }
+  const utter = new SpeechSynthesisUtterance(text);
+  utter.voice = speechSynthesis.getVoices()[0];
+  speechSynthesis.speak(utter);
+  showToast("Reading aloud...");
+}
+
+// --- Dictation ---
+let recognition, recognizing = false;
+function toggleDictation() {
+  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!SpeechRecognition) { showToast("Speech recognition not supported."); return; }
+
+  if (!recognition) {
+    recognition = new SpeechRecognition();
+    recognition.continuous = true;
+    recognition.lang = "en-US";
+    recognition.onresult = (e) => {
+      for (let i = e.resultIndex; i < e.results.length; i++) {
+        if (e.results[i].isFinal)
+          document.getElementById("journal-entry").value += e.results[i][0].transcript + " ";
+      }
+    };
+    recognition.onerror = (e) => showToast("Speech recognition error: " + e.error);
+  }
+
+  const btn = document.querySelector('.speech-button');
+  if (!recognizing) {
+    recognition.start();
+    recognizing = true;
+    btn.style.background = "#3e53cc";
+    btn.textContent = '🛑 Stop Dictation';
+    showToast("Dictation started");
+  } else {
+    recognition.stop();
+    recognizing = false;
+    btn.style.background = "#4f6df5";
+    btn.textContent = '🎤 Start Dictation';
+    showToast("Dictation stopped");
+  }
+}
+
+// --- Export PDF ---
+function exportPDF() {
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF();
+
+  journalData.forEach((entry, idx) => {
+    doc.setFontSize(12);
+    doc.text(`Entry ${idx + 1}: ${entry.title} [${entry.mood}] - ${entry.date}`, 10, 10 + idx * 50);
+    doc.text(entry.entry, 10, 20 + idx * 50);
+    if (entry.tags) doc.text(`Tags: ${entry.tags}`, 10, 30 + idx * 50);
+    if (idx < journalData.length - 1) doc.addPage();
+  });
+
+  doc.save("Theramind_Journal.pdf");
+  showToast("PDF exported!");
+}
+
+// --- Export JSON ---
+function exportAll() {
+  if (!journalData.length) { showToast("No entries to export."); return; }
+
+  const blob = new Blob([JSON.stringify(journalData, null, 2)], { type: "application/json" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = "Theramind_Journal.json";
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+  showToast("All entries exported!");
+}
+</script>
+</body>
+</html>

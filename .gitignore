@@ -1,0 +1,18 @@
+# Python compiled files
+*.pyc
+__pycache__/
+
+# Virtual environment
+venv/
+
+# Database files
+*.db
+
+# Log files
+*.log
+
+# Environment file (for secrets)
+.env
+
+# VS Code settings
+.vscode/

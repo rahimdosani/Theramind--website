@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Theramind Chat - A platform for mental wellness conversations." />
+  <title>Theramind Chat</title>
+
+  <!-- Favicon + Icons -->
+  <link rel="icon" href="https://img.icons8.com/color/96/brain.png" type="image/png" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+
+  <!-- Styles -->
+  <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}" />
+
+  <!-- tsParticles -->
+  <script src="https://cdn.jsdelivr.net/npm/tsparticles@2.12.0/tsparticles.bundle.min.js"></script>
+</head>
+<body>
+  <!-- Particles Background -->
+  <div id="particles-js"></div>
+
+  <!-- Top Navbar -->
+  <header class="tm-nav">
+    <button id="sidebarToggle" class="icon-btn" aria-label="Toggle sidebar">
+      <i class="fas fa-bars"></i>
+    </button>
+    <a class="tm-brand" href="#">
+      <img src="https://img.icons8.com/fluency/48/brain.png" alt="Theramind Logo" class="brand-mark">
+      <span>Theramind</span>
+    </a>
+    <nav class="tm-navlinks">
+      <a href="/home">🏠 Home</a>
+      <a href="/chat" class="active">💬 Chat</a>
+      <a href="/journaling">📓 Journal</a>
+      <a href="/breathing">🫁 Breathing</a>
+      <a href="/pick-a-peace">📃 Pick-a-Peace</a>
+      <a href="/calm-corner">🧘 Calm Corner</a>
+      <a href="/ebooks">📚 E-Books</a>
+      <a href="/history">🕰️ History</a>
+    </nav>
+    <div class="theme-toggle" data-sync-key="theme">
+      <input type="radio" id="theme-light-1" name="theme-top" value="light" />
+      <label for="theme-light-1">Light</label>
+      <input type="radio" id="theme-dark-1" name="theme-top" value="dark" />
+      <label for="theme-dark-1">Dark</label>
+      <span class="toggle-handle" aria-hidden="true"></span>
+    </div>
+  </header>
+
+  <!-- Main Layout -->
+  <div class="main-layout">
+    <!-- Sidebar -->
+    <aside id="sidebar" class="tm-sidebar hidden" aria-label="Saved Chats Sidebar">
+      <div class="sidebar-section">
+        <h3 class="sidebar-title">💬 Saved Chats</h3>
+        <button class="sidebar-btn" id="new-chat">➕ New Chat</button>
+        <button class="sidebar-btn" id="save-chat">💾 Save Chat</button>
+        <button class="sidebar-btn" id="view-saved">📁 View Chats</button>
+        <button class="sidebar-btn" id="clear-chat">🧹 Clear Chat</button>
+        <button class="sidebar-btn" id="export-chat">📤 Export Chat</button>
+        <button class="sidebar-btn" id="export-chat-pdf">📄 Download PDF</button>
+        <div class="sidebar-section">
+ 
+      </div>
+      <div class="sidebar-section">
+        <h3 class="sidebar-title">📝 Companion</h3>
+        <button class="sidebar-btn" id="rename-companion">✏️ Rename Companion</button>
+      </div>
+      <div class="sidebar-section">
+        <h3 class="sidebar-title">🎨 Theme</h3>
+        <div class="theme-toggle" data-sync-key="theme">
+          <input type="radio" id="theme-light-2" name="theme-side" value="light" />
+          <label for="theme-light-2">Light</label>
+          <input type="radio" id="theme-dark-2" name="theme-side" value="dark" />
+          <label for="theme-dark-2">Dark</label>
+          <span class="toggle-handle" aria-hidden="true"></span>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Chat Container -->
+    <main class="main">
+      <div id="chat-box" class="chat-surface" aria-live="polite" role="log"></div>
+      <div id="voice-indicator" class="voice-indicator hidden">🎤 Listening...</div>
+      <div class="chat-inputbar">
+        <textarea id="user-input" placeholder="Type your message..." aria-label="Type your message"></textarea>
+        <button id="send" class="btn-primary" aria-label="Send Message">Send</button>
+        <button id="speak" class="speak-btn" aria-label="Speak Message">🎙️ Speak</button>
+      </div>
+    </main>
+  </div>
+
+  <!-- Persona Name Modal -->
+  <div id="personaModal" class="modal" role="dialog" aria-labelledby="personaTitle">
+    <div class="modal-box enhanced">
+      <h2 id="personaTitle" class="modal-title">💡 Name your companion</h2>
+      <p class="modal-subtitle">This makes your conversations feel personal.</p>
+      <input type="text" id="personaNameInput" class="modal-input" placeholder="e.g., Mira, CalmMind" />
+      <div class="modal-actions">
+        <button class="save-btn" id="setPersonaName">✅ Save</button>
+        <button class="close-btn" onclick="closePersonaModal()">×</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Save Chat Modal -->
+  <div id="saveChatModal" class="modal" role="dialog" aria-labelledby="saveChatTitle">
+    <div class="modal-box enhanced">
+      <button class="close-btn" onclick="closeSaveModal()">×</button>
+      <h2 id="saveChatTitle" class="modal-title">📝 Save Your Chat</h2>
+      <input type="text" id="chatTitleInput" class="modal-input" placeholder="e.g. Venting after work..." />
+      <div class="modal-actions">
+        <button class="cancel-btn" onclick="closeSaveModal()">Cancel</button>
+        <button class="save-btn" onclick="saveChat()">💾 Save</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- View Saved Chats Modal -->
+  <div id="savedChatsModal" class="modal" role="dialog" aria-labelledby="savedChatsTitle">
+    <div class="modal-box enhanced">
+      <button class="close-btn" onclick="closeSavedChatsModal()">×</button>
+      <h2 id="savedChatsTitle" class="modal-title">📁 Saved Chats</h2>
+      <div id="savedChatsList" class="saved-chats-list"></div>
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <!-- jsPDF for PDF export -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="{{ url_for('static', filename='main.js') }}"></script>
+</body>
+</html>
