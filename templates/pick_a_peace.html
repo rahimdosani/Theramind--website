@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Pick-a-Peace | Theramind</title>
   <link rel="icon" href="https://img.icons8.com/ios-filled/50/peace.png" type="image/png">
+  <link rel="stylesheet" href="{{ url_for('static', filename='responsive.css') }}">
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet" />
 
   <style>
@@ -177,6 +178,10 @@
       <img src="https://img.icons8.com/fluency/48/brain.png" alt="Theramind Logo">
       <span>Theramind</span>
     </a>
+    <!-- Hamburger for mobile -->
+    <div class="tm-hamburger" onclick="document.querySelector('.tm-nav').classList.toggle('show-links')">
+        ☰
+    </div>
     <nav class="tm-navlinks">
       <a href="/home">🏠 Home</a>
       <a href="/index">💬 Chat</a>
@@ -371,6 +376,19 @@
         line_linked: { enable: false }
       }
     });
+  
+// Hamburger toggle for mobile nav
+  document.addEventListener("DOMContentLoaded", function() {
+    const hamburger = document.querySelector('.tm-hamburger');
+    const nav = document.querySelector('.tm-nav');
+
+    if (hamburger && nav) {
+      hamburger.addEventListener('click', function() {
+        nav.classList.toggle('show-links');
+      });
+    }
+  });
+
   </script>
 </body>
 </html>

@@ -23,9 +23,10 @@ CORS(app)
 # ======================================================
 # Utils: DB
 # ======================================================
-CONV_DB = "conversations.db"
-JOURNAL_DB = "journal.db"
-MOOD_DB = "mood_data.db"
+CONV_DB = os.path.join(os.path.dirname(__file__), "conversations.db")
+JOURNAL_DB = os.path.join(os.path.dirname(__file__), "journal.db")
+MOOD_DB = os.path.join(os.path.dirname(__file__), "mood_data.db")
+
 
 def connect(db_path):
     return sqlite3.connect(db_path, check_same_thread=False)
@@ -418,19 +419,30 @@ def breathing():
 
 @app.route('/history')
 def history():
-    conn1 = connect(MOOD_DB)
-    c1 = conn1.cursor()
-    c1.execute('SELECT date, mood, message FROM mood_logs ORDER BY id DESC')
-    mood_logs = c1.fetchall()
-    conn1.close()
+    try:
+        # Mood logs
+        conn1 = connect(MOOD_DB)
+        c1 = conn1.cursor()
+        c1.execute('SELECT date, mood, message FROM mood_logs ORDER BY id DESC')
+        mood_logs = c1.fetchall()
+        conn1.close()
+    except Exception as e:
+        print("❌ Mood DB error:", e)
+        mood_logs = []
 
-    conn2 = connect(JOURNAL_DB)
-    c2 = conn2.cursor()
-    c2.execute('SELECT date, content FROM journal_entries ORDER BY id DESC')
-    journal_entries = c2.fetchall()
-    conn2.close()
+    try:
+        # Journal entries
+        conn2 = connect(JOURNAL_DB)
+        c2 = conn2.cursor()
+        c2.execute('SELECT date, content FROM journal_entries ORDER BY id DESC')
+        journal_entries = c2.fetchall()
+        conn2.close()
+    except Exception as e:
+        print("❌ Journal DB error:", e)
+        journal_entries = []
 
     return render_template('history.html', mood_logs=mood_logs, journal_entries=journal_entries)
+
 
 @app.route('/pick-a-peace')
 def pick_a_peace():

@@ -1,0 +1,80 @@
+/* ================================ 
+   Responsive Styles for Theramind
+   Mobile & Tablet Only
+================================= */
+
+/* Tablet: 1024px and below */
+@media (max-width: 1024px) {
+    h2 {
+        font-size: 1.4rem;
+    }
+}
+
+/* Mobile: 768px and below */
+@media (max-width: 768px) {
+    h2 {
+        font-size: 1.3rem;
+    }
+
+    /* Navbar adjustments */
+    .tm-navlinks {
+        display: none;
+        flex-direction: column;
+        gap: 1rem;
+        background: rgba(255, 255, 255, 0.95);
+        position: absolute;
+        top: 75px;
+        left: 0;
+        width: 100%;
+        padding: 1rem 2rem;
+        box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+        border-top: 1px solid #ccc;
+        z-index: 99;
+    }
+
+    .tm-nav.show-links .tm-navlinks {
+        display: flex;
+    }
+
+    .tm-navlinks a {
+        font-size: 1.1rem;
+        padding: 0.5rem 0;
+    }
+
+    .tm-hamburger {
+        display: block;
+        color: var(--foreground);
+        font-size: 2rem;
+        cursor: pointer;
+        user-select: none;
+    }
+
+    .tm-nav {
+        height: auto;
+    }
+
+    /* Controls adjustments */
+    .controls input,
+    .controls button {
+        flex: 1 1 100%;
+        margin-bottom: 10px;
+        font-size: 0.85rem;
+    }
+}
+
+/* Small Mobile: 480px and below */
+@media (max-width: 480px) {
+    h2 {
+        font-size: 1.2rem;
+    }
+
+    .controls input,
+    .controls button {
+        font-size: 0.85rem;
+    }
+
+    .entry {
+        padding: 10px;
+        margin: 8px 0;
+    }
+}

@@ -6,6 +6,7 @@
 <title>Theramind - E-Books</title>
 <link rel="icon" href="https://img.icons8.com/fluency/48/brain.png">
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="{{ url_for('static', filename='responsive.css') }}">
 <script src="https://cdn.jsdelivr.net/npm/tsparticles@2.11.1/tsparticles.bundle.min.js"></script>
 <style>
 /* ===================== Theme Variables ===================== */
@@ -140,6 +141,10 @@ body.dark-theme .book-info p { color:#ccc; }
     <img src="https://img.icons8.com/fluency/48/brain.png" alt="Theramind Logo">
     <span>Theramind</span>
   </a>
+  <!-- Hamburger for mobile -->
+    <div class="tm-hamburger" onclick="document.querySelector('.tm-nav').classList.toggle('show-links')">
+        ☰
+    </div>
   <nav class="tm-navlinks">
     <a href="/home">🏠 Home</a>
     <a href="/index">💬 Chat</a>
@@ -255,6 +260,17 @@ books.forEach(book=>{
     </div>`;
   booksGrid.appendChild(card);
 });
+// Hamburger toggle for mobile nav
+  document.addEventListener("DOMContentLoaded", function() {
+    const hamburger = document.querySelector('.tm-hamburger');
+    const nav = document.querySelector('.tm-nav');
+
+    if (hamburger && nav) {
+      hamburger.addEventListener('click', function() {
+        nav.classList.toggle('show-links');
+      });
+    }
+  });
   </script>
 </body>
 </html>
