@@ -1,5 +1,5 @@
 /******************************************************** 
- * Theramind Chat – main.js (Final Ready Version)
+ * Theramind Chat – main.js (Final Ready Version with Particles & Theme Fixes)
  ********************************************************/
 
 let recognition = null;
@@ -347,7 +347,7 @@ function downloadChatPDF() {
   history.forEach(msg => {
     const label = msg.role === "user" ? "You" : assistantName;
     const text = `${label}: ${msg.content}`;
-    const lines = doc.splitTextToSize(text, 180); // Wrap text
+    const lines = doc.splitTextToSize(text, 180);
     lines.forEach(line => {
       doc.text(line, 10, y);
       y += 6;
@@ -398,21 +398,32 @@ function setTheme(mode) {
   document.body.classList.toggle("dark-theme", mode === "dark");
   document.body.classList.toggle("light-theme", mode === "light");
   localStorage.setItem("theme", mode);
-  document.querySelectorAll(".theme-toggle input").forEach(input => { 
-    input.checked = input.value === mode; 
+
+  // Sync toggle inputs
+  document.querySelectorAll(".theme-toggle input").forEach(input => {
+    input.checked = input.value === mode;
   });
+
+  // Optional: update label background for contrast
+  document.querySelectorAll(".theme-toggle label").forEach(label => {
+    label.style.background = mode === "dark" ? "rgba(255,255,255,0.15)" : "rgba(0,0,0,0.1)";
+  });
+
   reloadParticlesForTheme();
 }
 
 function reloadParticlesForTheme() {
-  tsParticles.domItem(0)?.destroy();
-  initParticles(document.body.classList.contains("dark-theme") ? "dark" : "light");
+  if (tsParticles.domItem(0)) tsParticles.domItem(0).destroy();
+  setTimeout(() => {
+    initParticles(document.body.classList.contains("dark-theme") ? "dark" : "light");
+  }, 50);
 }
 
 function initParticles(theme = "light") {
   const container = document.getElementById("particles-js");
   if (!container) return;
   const color = theme === "dark" ? "#8ab4f8" : "#6078ea";
+  
   tsParticles.load("particles-js", {
     fullScreen: { enable: false },
     background: { color: { value: "transparent" } },
@@ -422,7 +433,7 @@ function initParticles(theme = "light") {
       shape: { type: "circle" },
       opacity: { value: 0.6, random: true },
       size: { value: { min: 1, max: 4 } },
-      links: { enable: true, distance: 120, color, opacity: 0.3, width: 1 },
+      links: { enable: true, distance: 120, color: color, opacity: 0.3, width: 1 },
       move: { enable: true, speed: 0.8, outModes: { default: "bounce" } }
     },
     interactivity: {
@@ -500,28 +511,39 @@ document.querySelectorAll('.theme-toggle input').forEach(input =>
   const activeChatId = localStorage.getItem("activeChatId");
   if (activeChatId) loadConversation({ stopPropagation: () => {} }, activeChatId);
 })();
-
 document.addEventListener("DOMContentLoaded", () => {
   const hamburger = document.querySelector('.tm-hamburger');
   const nav = document.querySelector('.tm-nav');
+  const sidebar = document.getElementById("sidebar");
 
   function updateHamburgerVisibility() {
     if (window.innerWidth <= 768) {
-      hamburger.style.display = 'block';
+      hamburger.style.display = 'flex';
     } else {
       hamburger.style.display = 'none';
       nav.classList.remove('show-links');
+      document.body.classList.remove("sidebar-open");
+      sidebar.classList.remove("hidden");
     }
   }
 
-  // Toggle mobile nav
   if (hamburger) {
     hamburger.addEventListener('click', () => {
       nav.classList.toggle('show-links');
+
+      // Close sidebar when hamburger menu opens on mobile
+      if (window.innerWidth <= 768 && !sidebar.classList.contains("hidden")) {
+        sidebar.classList.add("hidden");
+        document.body.classList.remove("sidebar-open");
+      }
     });
   }
 
-  // Initialize and update on resize
   updateHamburgerVisibility();
   window.addEventListener('resize', updateHamburgerVisibility);
 });
+  // Lock body scroll when sidebar is visible on small screens
+  if (window.innerWidth <= 768) {
+    document.body.classList.toggle("sidebar-open", !sidebar.classList.contains("hidden"));
+  }
+

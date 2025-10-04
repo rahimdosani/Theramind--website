@@ -4,14 +4,12 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Theramind – Journal</title>
-  <link rel="icon" href="https://img.icons8.com/fluency/48/brain.png" />
+  <link rel="icon" href="https://img.icons8.com/fluency/48/journal.png" type="image/png" />
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&family=Shadows+Into+Light&family=Merriweather&family=Roboto+Mono&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="{{ url_for('static', filename='responsive.css') }}">
   <script src="https://cdn.jsdelivr.net/npm/tsparticles@2.12.0/tsparticles.bundle.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
   <style>
-    /* ===================== Theme Variables ===================== */
     :root {
       --background: #ffffff;
       --foreground: #111111;
@@ -29,124 +27,40 @@
       --sidebar-bg: rgba(30,30,30,0.85);
     }
 
-    /* ===================== Base ===================== */
     *{box-sizing:border-box;}
-    body {
-      margin:0; font-family:'Poppins',sans-serif;
-      background: var(--background);
-      color: var(--foreground);
-      transition: background 0.3s,color 0.3s;
-    }
-    #tsparticles{position:fixed;width:100%;height:100%;top:0;left:0;z-index:0;}
+    body {margin:0;font-family:'Poppins',sans-serif;background: var(--background);color: var(--foreground);transition: background 0.3s,color 0.3s;}
+    #tsparticles{position:fixed;width:100%;height:100%;top:0;left:0;z-index:1;}
 
-    /* ===================== Navbar ===================== */
     .tm-nav {
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      height:75px;
-      padding:0 2rem;
-      background: var(--sidebar-bg);
-      backdrop-filter: var(--glass-blur);
-      box-shadow: 0 6px 25px rgba(0,0,0,0.15);
-      position: sticky;
-      top:0;
-      z-index: 100;
+      display:flex;align-items:center;justify-content:space-between;height:75px;padding:0 2rem;
+      background: var(--sidebar-bg);backdrop-filter: var(--glass-blur);box-shadow: 0 6px 25px rgba(0,0,0,0.15);
+      position: sticky;top:0;z-index: 100;
     }
-    .tm-brand {
-      display:flex;
-      align-items:center;
-      gap:0.75rem;
-      font-weight:700;
-      font-size:1.4rem;
-      color: var(--foreground);
-      text-decoration:none;
-    }
+    .tm-brand {display:flex;align-items:center;gap:0.75rem;font-weight:700;font-size:1.4rem;color: var(--foreground);text-decoration:none;}
     .tm-brand img.brand-mark {height:36px;}
-    .tm-navlinks {
-      display:flex;
-      gap:1.5rem;
-      align-items:center;
-      flex-wrap:wrap;
-    }
-    .tm-navlinks a {
-      text-decoration:none;
-      font-weight:600;
-      color: var(--primary);
-      position: relative;
-      transition: color 0.3s;
-    }
+    .tm-navlinks {display:flex;gap:1.5rem;align-items:center;flex-wrap:wrap;}
+    .tm-navlinks a {text-decoration:none;font-weight:600;color: var(--primary);position: relative;transition: color 0.3s;}
     .tm-navlinks a:hover { color: var(--accent); }
-    .tm-navlinks a.active::after {
-      content:'';
-      position:absolute;
-      bottom:-6px;
-      left:0;
-      width:100%;
-      height:3px;
-      background: var(--primary);
-      border-radius:4px;
-    }
-    .theme-toggle {
-      cursor:pointer;
-      font-size:0.9rem;
-      background: linear-gradient(135deg,var(--primary),var(--accent));
-      padding:6px 10px;
-      border-radius:6px;
-      color: var(--button-color);
-      transition:0.3s;
-    }
+    .tm-navlinks a.active::after {content:'';position:absolute;bottom:-6px;left:0;width:100%;height:3px;background: var(--primary);border-radius:4px;}
+    .theme-toggle {cursor:pointer;font-size:0.9rem;background: linear-gradient(135deg,var(--primary),var(--accent));padding:6px 10px;border-radius:6px;color: var(--button-color);transition:0.3s;}
     .theme-toggle:hover { opacity:0.85; }
 
-    /* ===================== Responsive Navbar ===================== */
     @media (max-width:768px){
       .tm-nav{flex-direction:column;align-items:flex-start;height:auto;padding:1rem;}
       .tm-navlinks{flex-direction:column;align-items:flex-start;width:100%;gap:0.6rem;margin-top:0.5rem;}
       .theme-toggle{align-self:flex-start;margin-top:0.5rem;}
     }
 
-    /* ===================== Journal Container ===================== */
     .journal-container{
-      max-width:900px;
-      margin:100px auto;
-      padding:40px;
-      background:rgba(255,255,255,0.08);
-      border-radius:20px;
-      backdrop-filter:blur(12px);
-      position:relative;
-      z-index:2;
-      box-shadow:0 8px 40px rgba(0,0,0,0.2);
+      max-width:900px;margin:100px auto;padding:40px;background:rgba(255,255,255,0.08);
+      border-radius:20px;backdrop-filter:blur(12px);position:relative;z-index:2;box-shadow:0 8px 40px rgba(0,0,0,0.2);
     }
-    body.dark-theme .journal-container{
-      background-color:rgba(44,44,62,0.8);
-    }
+    body.dark-theme .journal-container{background-color:rgba(44,44,62,0.8);}
     h2{font-size:2rem;margin-bottom:20px;}
     .mood-select,.prompt-section,.entry-section,.history-section{margin-top:24px;}
-    select,textarea,input[type="text"]{
-      padding:12px;
-      border-radius:10px;
-      font-size:1rem;
-      width:100%;
-      margin-top:10px;
-      border:1px solid #ccc;
-      background-color:inherit;
-      color:inherit;
-      transition:0.2s;
-    }
-    .prompt-section button,.actions button,.speech-button,#font-select,#export-all,#export-pdf{
-      padding:12px 18px;
-      border:none;
-      border-radius:10px;
-      background-color: var(--primary);
-      color: var(--button-color);
-      font-weight:600;
-      cursor:pointer;
-      margin:10px 10px 0 0;
-      transition:0.2s;
-    }
-    .prompt-section button:hover,.actions button:hover,.speech-button:hover,#font-select:hover,#export-all:hover,#export-pdf:hover{
-      background-color: var(--accent);
-    }
+    select,textarea,input[type="text"]{padding:12px;border-radius:10px;font-size:1rem;width:100%;margin-top:10px;border:1px solid #ccc;background-color:inherit;color:inherit;transition:0.2s;}
+    .prompt-section button,.actions button,.speech-button,#font-select,#export-all,#export-pdf{padding:12px 18px;border:none;border-radius:10px;background-color: var(--primary);color: var(--button-color);font-weight:600;cursor:pointer;margin:10px 10px 0 0;transition:0.2s;}
+    .prompt-section button:hover,.actions button:hover,.speech-button:hover,#font-select:hover,#export-all:hover,#export-pdf:hover{background-color: var(--accent);}
     #prompt-display{margin-top:10px;font-style:italic;transition:0.3s;}
     #prompt-display.highlight{box-shadow:0 0 12px var(--primary); padding:6px; border-radius:6px;}
     .illustration{text-align:center;margin-top:16px;}
@@ -168,6 +82,71 @@
     .modal-close{position:absolute;top:10px;right:10px;cursor:pointer;font-size:20px;}
     .toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:var(--primary);color:white;padding:12px 24px;border-radius:12px;opacity:0;pointer-events:none;transition:0.3s;z-index:30;}
     .toast.show{opacity:1;pointer-events:auto;}
+    /* ----------------- Responsive Journal Page ----------------- */
+@media (max-width: 1024px){
+  .journal-container {
+    margin: 80px 20px;
+    padding: 30px;
+  }
+  h2 { font-size: 1.6rem; }
+  .illustration img { max-width: 180px; }
+}
+
+@media (max-width: 768px){
+  .tm-nav { 
+    flex-direction: column; 
+    align-items: flex-start; 
+    height: auto; 
+    padding: 1rem; 
+  }
+  .tm-navlinks { 
+    flex-direction: column; 
+    align-items: flex-start; 
+    width: 100%; 
+    gap: 0.5rem; 
+    margin-top: 0.5rem; 
+    display: none; 
+  }
+  .tm-nav.show-links .tm-navlinks { display: flex; }
+  .tm-hamburger { display: block; cursor: pointer; font-size: 1.4rem; margin-top: 0.5rem; }
+
+  .journal-container {
+    margin: 60px 15px;
+    padding: 25px;
+  }
+  h2 { font-size: 1.4rem; }
+  .illustration img { max-width: 150px; }
+  .prompt-section button, 
+  .actions button, 
+  .speech-button, 
+  #font-select, 
+  #export-all, 
+  #export-pdf {
+    padding: 10px 14px; font-size: 0.9rem; margin: 8px 5px 0 0;
+  }
+  select, textarea, input[type="text"] { font-size: 0.95rem; padding: 10px; }
+  .search-tags input { flex: 1 1 100%; min-width: 100%; }
+  .journal-history { max-height: 200px; font-size: 0.9rem; }
+  .entry-item { font-size: 0.9rem; padding: 6px; }
+}
+
+@media (max-width: 480px){
+  .journal-container { margin: 50px 10px; padding: 20px; }
+  h2 { font-size: 1.2rem; }
+  .illustration img { max-width: 120px; }
+  .prompt-section button, 
+  .actions button, 
+  .speech-button, 
+  #font-select, 
+  #export-all, 
+  #export-pdf {
+    padding: 8px 10px; font-size: 0.85rem; margin: 6px 4px 0 0;
+  }
+  select, textarea, input[type="text"] { font-size: 0.9rem; padding: 8px; }
+  .journal-history { max-height: 180px; font-size: 0.85rem; }
+  .entry-item { font-size: 0.85rem; padding: 5px; }
+}
+
   </style>
 </head>
 <body>
@@ -179,12 +158,9 @@
       <img src="https://img.icons8.com/fluency/48/brain.png" alt="Theramind Logo" class="brand-mark">
       <span>Theramind</span>
     </a>
-    <!-- Hamburger for mobile -->
-    <div class="tm-hamburger" onclick="document.querySelector('.tm-nav').classList.toggle('show-links')">
-        ☰
-    </div>
+    <div class="tm-hamburger">☰</div>
     <nav class="tm-navlinks">
-      <a href="/home">🏠 Home</a>
+      <a href="/">🏠 Home</a>
       <a href="/index">💬 Chat</a>
       <a href="/journaling" class="active">📓 Journal</a>
       <a href="/breathing">🫁 Breathing</a>
@@ -193,7 +169,7 @@
       <a href="/ebooks">📚 E-Books</a>
       <a href="/history">🕰️ History</a>
     </nav>
-    <div class="theme-toggle" id="themeToggle" onclick="toggleTheme()">🌓 Theme</div>
+    <div class="theme-toggle" id="themeToggle">🌓 Theme</div>
   </header>
 
   <!-- Journal Container -->
@@ -256,57 +232,39 @@
 
 <script>
 document.addEventListener("DOMContentLoaded", () => {
-  // --- Background Particles ---
   tsParticles.load("tsparticles", {
     background: { color: { value: "transparent" } },
     fullScreen: false,
-    particles: {
-      number: { value: 60 },
-      color: { value: "#aab8ff" },
-      shape: { type: "circle" },
-      opacity: { value: 0.2 },
-      size: { value: 3 },
-      move: { enable: true, speed: 1 }
-    }
+    particles: { number: { value: 60 }, color: { value: "#aab8ff" }, shape: { type: "circle" }, opacity: { value: 0.2 }, size: { value: 3 }, move: { enable: true, speed: 1 } }
   });
 
-  // --- Load Theme from LocalStorage ---
-  const prefersDark = localStorage.getItem("theme") === "dark";
   const themeToggle = document.getElementById("themeToggle");
-  if(prefersDark){
-    document.body.classList.add("dark-theme");
-    themeToggle.textContent = "☀️ Theme";
-  } else {
-    document.body.classList.remove("dark-theme");
-    themeToggle.textContent = "🌙 Theme";
-  }
+  const prefersDark = localStorage.getItem("theme") === "dark";
+  if(prefersDark){ document.body.classList.add("dark-theme"); themeToggle.textContent = "☀️ Theme"; }
+  else{ document.body.classList.remove("dark-theme"); themeToggle.textContent = "🌙 Theme"; }
 
-  // --- Load Journal Data + Mood Image ---
+  themeToggle.addEventListener("click", toggleTheme);
+
+  const hamburger = document.querySelector('.tm-hamburger');
+  const nav = document.querySelector('.tm-nav');
+  hamburger.addEventListener('click', () => { nav.classList.toggle('show-links'); });
+  const updateHamburgerVisibility = () => { if(window.innerWidth<=768) hamburger.style.display='block'; else { hamburger.style.display='none'; nav.classList.remove('show-links'); }};
+  updateHamburgerVisibility();
+  window.addEventListener('resize', updateHamburgerVisibility);
+
   loadHistory();
   updateIllustrationAndPrompt();
-
-  // --- Auto-Save Every 5s ---
-  setInterval(() => {
-    const entry = document.getElementById("journal-entry").value.trim();
-    if (entry) saveEntry();
-  }, 5000);
+  setInterval(()=>{const entry=document.getElementById("journal-entry").value.trim();if(entry) saveEntry();},5000);
 });
 
-// --- Toast Notification ---
-function showToast(msg) {
-  const toast = document.getElementById("toast");
-  toast.textContent = msg;
-  toast.classList.add("show");
-  setTimeout(() => { toast.classList.remove("show"); }, 2500);
-}
+function showToast(msg){ const toast=document.getElementById("toast"); toast.textContent=msg; toast.classList.add("show"); setTimeout(()=>{toast.classList.remove("show");},2500); }
 
-// --- Theme Toggle ---
-function toggleTheme() {
-  const themeToggle = document.getElementById("themeToggle");
+function toggleTheme(){
+  const themeToggle=document.getElementById("themeToggle");
   document.body.classList.toggle("dark-theme");
-  const isDark = document.body.classList.contains("dark-theme");
-  localStorage.setItem("theme", isDark ? "dark" : "light");
-  themeToggle.textContent = isDark ? "☀️ Theme" : "🌙 Theme";
+  const isDark=document.body.classList.contains("dark-theme");
+  localStorage.setItem("theme", isDark?"dark":"light");
+  themeToggle.textContent=isDark?"☀️ Theme":"🌙 Theme";
   showToast("Theme changed");
 }
 
@@ -319,7 +277,6 @@ const promptMap = {
   "😌 Calm": ["What brings you peace?","Today I feel calm because…","Describe a serene moment you had.","What activities help you relax?","Who contributes to your tranquility?","How did you manage stress today?","Reflect on mindful breathing moments.","What music or sounds soothe you?","Share a quiet moment from today.","What positive thoughts keep you grounded?"],
   "😵 Overwhelmed": ["What’s making you feel overwhelmed?","Break down your feelings into parts.","Identify top stressors today.","Which tasks are weighing on you?","What is outside your control?","What small wins occurred today?","How can you prioritize tasks?","Who can help you manage responsibilities?","Reflect on emotions and reactions.","How can you reset and recharge?"]
 };
-
 const imageMap = {
   "😃 Happy":"https://img.icons8.com/emoji/96/000000/smiling-face-with-smiling-eyes.png",
   "😔 Sad":"https://img.icons8.com/emoji/96/000000/pensive-face.png",
@@ -334,6 +291,7 @@ function updateIllustrationAndPrompt() {
   document.getElementById("mood-image").src = imageMap[mood];
   generatePrompt();
 }
+
 function generatePrompt() {
   const mood = document.getElementById("mood").value;
   const prompts = promptMap[mood];
@@ -342,7 +300,7 @@ function generatePrompt() {
   document.getElementById("journal-entry").placeholder = prompt.startsWith("Today") ? prompt : "";
 }
 
-// --- Journal Data ---
+// --- Journal Storage + Functions ---
 let journalData = [];
 let currentModalIndex = 0;
 
@@ -350,229 +308,151 @@ function loadHistory() {
   const container = document.getElementById("history");
   container.innerHTML = '';
   journalData = JSON.parse(localStorage.getItem("journalData") || "[]");
-
-  if (!journalData.length) {
-    container.textContent = "No previous entries yet.";
-    return;
-  }
-
-  journalData.forEach((rec, i) => {
+  if (!journalData.length) { container.textContent = "No previous entries yet."; return; }
+  journalData.forEach((rec,i) => {
     const div = document.createElement("div");
     div.className = "entry-item";
     div.innerHTML = `<span>${rec.date} - ${rec.title} [${rec.mood}]</span>
                      <div class="entry-actions"><button onclick="deleteEntry(${i})">🗑️</button></div>`;
-    div.addEventListener("click", (e) => {
-      if (!e.target.closest("button")) openModal(i);
-    });
+    div.addEventListener("click", (e)=>{if(!e.target.closest("button")) openModal(i)});
     container.appendChild(div);
   });
 }
 
-// --- Modal Handling ---
 function openModal(index) {
-  currentModalIndex = index;
-  const entry = journalData[index];
-  document.getElementById("modal-title").textContent = entry.title;
-  document.getElementById("modal-content").textContent = entry.entry;
-  document.getElementById("modal-tags").textContent = entry.tags ? `Tags: ${entry.tags}` : '';
-  document.getElementById("modal-mood").textContent = `Mood: ${entry.mood}`;
+  currentModalIndex=index;
+  const entry=journalData[index];
+  document.getElementById("modal-title").textContent=entry.title;
+  document.getElementById("modal-content").textContent=entry.entry;
+  document.getElementById("modal-tags").textContent=entry.tags?`Tags: ${entry.tags}`:'';
+  document.getElementById("modal-mood").textContent=`Mood: ${entry.mood}`;
   document.getElementById("entryModal").classList.add("active");
 }
+function closeModal() { document.getElementById("entryModal").classList.remove("active"); }
 
-function closeModal() {
-  document.getElementById("entryModal").classList.remove("active");
-}
-
-// --- Delete Entries ---
-let deleteIndex = null;
-function deleteEntry(i) {
-  deleteIndex = i;
-  if (confirm("Delete this entry?")) confirmDelete(true);
+let deleteIndex=null;
+function deleteEntry(i){
+  deleteIndex=i;
+  if(confirm("Delete this entry?")) confirmDelete(true);
   else confirmDelete(false);
 }
-
-function confirmDelete(decision) {
-  if (decision && deleteIndex !== null) {
-    journalData.splice(deleteIndex, 1);
-    localStorage.setItem("journalData", JSON.stringify(journalData));
+function confirmDelete(decision){
+  if(decision && deleteIndex!==null){
+    journalData.splice(deleteIndex,1);
+    localStorage.setItem("journalData",JSON.stringify(journalData));
     loadHistory();
     showToast("Entry deleted!");
-    deleteIndex = null;
+    deleteIndex=null;
   }
 }
 
-// --- Save Entry ---
-function saveEntry() {
-  const title = document.getElementById("entry-title").value.trim() || "Untitled";
-  const entry = document.getElementById("journal-entry").value.trim();
-  const mood = document.getElementById("mood").value;
-  const tags = document.getElementById("tags").value;
-
-  if (!entry) { showToast("Please write something."); return; }
-
-  const date = new Date().toLocaleString();
-  const record = { title, entry, mood, tags, date };
-  journalData.push(record);
-
-  localStorage.setItem("journalData", JSON.stringify(journalData));
-
-  document.getElementById("journal-entry").value = '';
-  document.getElementById("entry-title").value = '';
-  document.getElementById("tags").value = '';
-
+function saveEntry(){
+  const title=document.getElementById("entry-title").value.trim()||"Untitled";
+  const entry=document.getElementById("journal-entry").value.trim();
+  const mood=document.getElementById("mood").value;
+  const tags=document.getElementById("tags").value;
+  if(!entry){showToast("Please write something."); return;}
+  const date=new Date().toLocaleString();
+  journalData.push({title,entry,mood,tags,date});
+  localStorage.setItem("journalData",JSON.stringify(journalData));
+  document.getElementById("journal-entry").value='';
+  document.getElementById("entry-title").value='';
+  document.getElementById("tags").value='';
   loadHistory();
   showToast("Entry saved!");
 }
 
-// --- Search Journal ---
-function searchJournal(query) {
-  const container = document.getElementById("history");
-  const filtered = journalData.filter(rec =>
-    rec.title.toLowerCase().includes(query.toLowerCase()) ||
-    rec.entry.toLowerCase().includes(query.toLowerCase()) ||
+function searchJournal(query){
+  const container=document.getElementById("history");
+  const filtered=journalData.filter(rec=>
+    rec.title.toLowerCase().includes(query.toLowerCase())||
+    rec.entry.toLowerCase().includes(query.toLowerCase())||
     (rec.tags && rec.tags.toLowerCase().includes(query.toLowerCase()))
   );
-
-  container.innerHTML = '';
-  if (!filtered.length) {
-    container.textContent = "No entries match your search.";
-    return;
-  }
-
-  filtered.forEach((rec, i) => {
-    const div = document.createElement("div");
-    div.className = "entry-item";
-    div.innerHTML = `<span>${rec.date} - ${rec.title} [${rec.mood}]</span>
-                     <div class="entry-actions"><button onclick="deleteEntry(${i})">🗑️</button></div>`;
-    div.addEventListener("click", (e) => {
-      if (!e.target.closest("button")) openModal(i);
-    });
+  container.innerHTML='';
+  if(!filtered.length){ container.textContent="No entries match your search."; return; }
+  filtered.forEach((rec,i)=>{
+    const div=document.createElement("div");
+    div.className="entry-item";
+    div.innerHTML=`<span>${rec.date} - ${rec.title} [${rec.mood}]</span>
+                   <div class="entry-actions"><button onclick="deleteEntry(${i})">🗑️</button></div>`;
+    div.addEventListener("click",(e)=>{if(!e.target.closest("button")) openModal(i)});
     container.appendChild(div);
   });
 }
 
-// --- Change Font ---
-function changeFont(font) {
-  document.getElementById("journal-entry").style.fontFamily = font;
-  showToast("Font changed!");
-}
+function changeFont(font){ document.getElementById("journal-entry").style.fontFamily=font; showToast("Font changed!"); }
 
-// --- Read Aloud ---
-function readAloud() {
-  const text = document.getElementById("journal-entry").value;
-  if (!text) { showToast("No text to read."); return; }
-  const utter = new SpeechSynthesisUtterance(text);
-  utter.voice = speechSynthesis.getVoices()[0];
+function readAloud(){
+  const text=document.getElementById("journal-entry").value;
+  if(!text){ showToast("No text to read."); return; }
+  const utter=new SpeechSynthesisUtterance(text);
+  utter.voice=speechSynthesis.getVoices()[0];
   speechSynthesis.speak(utter);
   showToast("Reading aloud...");
 }
 
-// --- Dictation ---
-let recognition, recognizing = false;
-function toggleDictation() {
-  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-  if (!SpeechRecognition) { showToast("Speech recognition not supported."); return; }
-
-  if (!recognition) {
-    recognition = new SpeechRecognition();
-    recognition.continuous = true;
-    recognition.lang = "en-US";
-    recognition.onresult = (e) => {
-      for (let i = e.resultIndex; i < e.results.length; i++) {
-        if (e.results[i].isFinal)
-          document.getElementById("journal-entry").value += e.results[i][0].transcript + " ";
+let recognition, recognizing=false;
+function toggleDictation(){
+  const SpeechRecognition=window.SpeechRecognition||window.webkitSpeechRecognition;
+  if(!SpeechRecognition){showToast("Speech recognition not supported."); return;}
+  if(!recognition){
+    recognition=new SpeechRecognition();
+    recognition.continuous=true;
+    recognition.lang="en-US";
+    recognition.onresult=(e)=>{
+      for(let i=e.resultIndex;i<e.results.length;i++){
+        if(e.results[i].isFinal)
+          document.getElementById("journal-entry").value+=e.results[i][0].transcript+" ";
       }
     };
-    recognition.onerror = (e) => showToast("Speech recognition error: " + e.error);
+    recognition.onerror=(e)=>showToast("Speech recognition error: "+e.error);
   }
-
-  const btn = document.querySelector('.speech-button');
-  if (!recognizing) {
+  const btn=document.querySelector('.speech-button');
+  if(!recognizing){
     recognition.start();
-    recognizing = true;
-    btn.style.background = "#3e53cc";
-    btn.textContent = '🛑 Stop Dictation';
+    recognizing=true;
+    btn.style.background="#3e53cc";
+    btn.textContent='🛑 Stop Dictation';
     showToast("Dictation started");
   } else {
     recognition.stop();
-    recognizing = false;
-    btn.style.background = "#4f6df5";
-    btn.textContent = '🎤 Start Dictation';
+    recognizing=false;
+    btn.style.background="#4f6df5";
+    btn.textContent='🎤 Start Dictation';
     showToast("Dictation stopped");
   }
 }
 
 // --- Export PDF ---
-function exportPDF() {
-  const { jsPDF } = window.jspdf;
-  const doc = new jsPDF();
-
-  journalData.forEach((entry, idx) => {
+function exportPDF(){
+  const { jsPDF }=window.jspdf;
+  const doc=new jsPDF();
+  journalData.forEach((entry,idx)=>{
     doc.setFontSize(12);
-    doc.text(`Entry ${idx + 1}: ${entry.title} [${entry.mood}] - ${entry.date}`, 10, 10 + idx * 50);
-    doc.text(entry.entry, 10, 20 + idx * 50);
-    if (entry.tags) doc.text(`Tags: ${entry.tags}`, 10, 30 + idx * 50);
-    if (idx < journalData.length - 1) doc.addPage();
+    doc.text(`Entry ${idx+1}: ${entry.title} [${entry.mood}] - ${entry.date}`,10,10+idx*50);
+    doc.text(entry.entry,10,20+idx*50);
+    if(entry.tags) doc.text(`Tags: ${entry.tags}`,10,30+idx*50);
+    if(idx<journalData.length-1) doc.addPage();
   });
-
   doc.save("Theramind_Journal.pdf");
   showToast("PDF exported!");
 }
 
 // --- Export JSON ---
-function exportAll() {
-  if (!journalData.length) { showToast("No entries to export."); return; }
-
-  const blob = new Blob([JSON.stringify(journalData, null, 2)], { type: "application/json" });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement("a");
-  a.href = url;
-  a.download = "Theramind_Journal.json";
+function exportAll(){
+  if(!journalData.length){ showToast("No entries to export."); return; }
+  const blob=new Blob([JSON.stringify(journalData,null,2)],{type:"application/json"});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement("a");
+  a.href=url;
+  a.download="Theramind_Journal.json";
   document.body.appendChild(a);
   a.click();
   document.body.removeChild(a);
   URL.revokeObjectURL(url);
   showToast("All entries exported!");
 }
-document.addEventListener("DOMContentLoaded", () => {
-document.addEventListener("DOMContentLoaded", () => {
-  const hamburger = document.querySelector('.tm-hamburger');
-  const nav = document.querySelector('.tm-nav');
-
-  function updateHamburgerVisibility() {
-    if (window.innerWidth <= 768) {
-      hamburger.style.display = 'block';
-    } else {
-      hamburger.style.display = 'none';
-      nav.classList.remove('show-links');
-    }
-  }
-
-  // Toggle mobile nav
-  if (hamburger) {
-    hamburger.addEventListener('click', () => {
-      nav.classList.toggle('show-links');
-    });
-  }
-
-  // Initialize and update on resize
-  updateHamburgerVisibility();
-  window.addEventListener('resize', updateHamburgerVisibility);
-});
-  // === Theme Toggle ===
-  const themeBtn = document.getElementById("themeToggle");
-  const darkStored = localStorage.getItem("theme") === "dark";
-  if (darkStored) document.body.classList.add("dark-theme");
-  themeBtn.textContent = darkStored ? "☀️ Theme" : "🌙 Theme";
-
-  themeBtn.addEventListener("click", () => {
-    document.body.classList.toggle("dark-theme");
-    const isDark = document.body.classList.contains("dark-theme");
-    localStorage.setItem("theme", isDark ? "dark" : "light");
-    themeBtn.textContent = isDark ? "☀️ Theme" : "🌙 Theme";
-  });
-
-});
 </script>
 </body>
 </html>

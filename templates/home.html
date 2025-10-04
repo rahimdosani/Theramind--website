@@ -4,9 +4,8 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Theramind – Home</title>
-  <link rel="icon" href="https://img.icons8.com/fluency/48/brain.png" />
+  <link rel="icon" href="https://img.icons8.com/fluency/48/home.png" />
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="{{ url_for('static', filename='responsive.css') }}">
   <script src="https://cdn.jsdelivr.net/npm/particles.js@2.0.0/particles.min.js"></script>
   <style>
     :root {
@@ -130,26 +129,62 @@
     footer nav { margin-top: 10px; }
     footer nav a { color: inherit; margin: 0 10px; text-decoration: none; font-weight: 500; }
     footer nav a:hover { text-decoration: underline; }
-    @media (max-width: 768px) {
-      .hero h1 { font-size: 2.8rem; }
-      .hero p { font-size: 1.1rem; }
-      .hero-buttons a { margin: 8px; padding: 12px 20px; font-size: 0.95rem; }
-      .features { gap: 20px; margin: 60px 15px; }
-      .feature-card { padding: 20px; }
-      .testimonial-grid { gap: 20px; margin: 0 15px; }
-      .testimonial-card { padding: 20px; }
-      header { padding: 15px 20px; }
-      .logo { font-size: 1.4rem; }
-    }
+   /* ------------------- Super Small Devices ------------------- */
+@media (max-width: 360px) {
+  .hero { padding: 80px 8px 50px; }
+  .hero h1 { font-size: 1.8rem; }
+  .hero p { font-size: 0.95rem; }
+  .hero-buttons a { padding: 8px 14px; font-size: 0.85rem; margin: 6px; }
+  .features { gap: 16px; margin: 50px 10px; }
+  .feature-card { padding: 12px; }
+  .feature-card h3 { font-size: 1.2rem; }
+  .feature-card p { font-size: 0.9rem; }
+  .feature-card span { font-size: 2rem; }
+  .testimonial-grid { gap: 16px; margin: 0 10px; }
+  .testimonial-card { padding: 15px; }
+  .testimonial-card p { font-size: 0.9rem; }
+  .testimonial-author strong { font-size: 0.9rem; }
+  footer { padding: 30px 10px; font-size: 0.8rem; }
+  footer nav a { margin: 0 5px; font-size: 0.8rem; }
+  #loader img { width: 70px; }
+}
 
-    @media (max-width: 480px) {
-      .hero h1 { font-size: 2rem; }
-      .hero p { font-size: 1rem; }
-      .hero-buttons a { padding: 10px 16px; font-size: 0.9rem; }
-      .feature-card { padding: 15px; }
-      .testimonial-card { padding: 15px; }
-      .hero { padding: 100px 10px 60px; }
-    }
+/* ------------------- Small Devices (360px - 480px) ------------------- */
+@media (max-width: 480px) {
+  .hero h1 { font-size: 2rem; }
+  .hero p { font-size: 1rem; }
+  .hero-buttons a { padding: 10px 16px; font-size: 0.9rem; }
+  .feature-card { padding: 15px; }
+  .testimonial-card { padding: 15px; }
+  .hero { padding: 100px 10px 60px; }
+}
+
+/* ------------------- Medium Devices (480px - 768px) ------------------- */
+@media (max-width: 768px) {
+  .hero h1 { font-size: 2.8rem; }
+  .hero p { font-size: 1.1rem; }
+  .hero-buttons a { margin: 8px; padding: 12px 20px; font-size: 0.95rem; }
+  .features { gap: 20px; margin: 60px 15px; }
+  .feature-card { padding: 20px; }
+  .testimonial-grid { gap: 20px; margin: 0 15px; }
+  .testimonial-card { padding: 20px; }
+  header { padding: 15px 20px; }
+  .logo { font-size: 1.4rem; }
+}
+
+/* ------------------- Smooth Hover Effects ------------------- */
+.feature-card:hover { transform: translateY(-8px); box-shadow: 0 12px 32px rgba(0,0,0,0.2); }
+.testimonial-card:hover { transform: translateY(-6px); }
+
+/* ------------------- Particles Full Coverage ------------------- */
+#particles-js { width: 100% !important; height: 100% !important; position: fixed; top: 0; left: 0; z-index: 0; pointer-events: none; }
+
+/* ------------------- Theme-based Adjustments ------------------- */
+body.dark .feature-card { background: var(--glass-bg-dark); }
+body.dark .testimonial-card { background: var(--glass-bg-dark); }
+body.dark .mobile-links { background: var(--glass-bg-dark); }
+body.dark .hamburger { color: var(--text-dark); }
+
   </style>
 </head>
 <body>
@@ -232,6 +267,8 @@
 
   <script>
   window.addEventListener("DOMContentLoaded", () => {
+    document.body.classList.remove("sidebar-open");
+
     const loader = document.getElementById("loader");
     if (!sessionStorage.getItem("welcomeShown")) {
       sessionStorage.setItem("welcomeShown", "true");

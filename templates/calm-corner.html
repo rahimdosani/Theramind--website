@@ -4,8 +4,16 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>Calm Corner | Theramind</title>
-<link rel="icon" href="https://img.icons8.com/fluency/48/brain.png" type="image/png">
-<link rel="stylesheet" href="{{ url_for('static', filename='responsive.css') }}">
+<link rel="icon" href="https://img.icons8.com/fluency/48/meditation.png" type="image/png" />
+
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Calm Corner | Theramind</title>
+<link rel="icon" href="https://img.icons8.com/fluency/48/meditation.png" type="image/png" />
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
 <style>
 /* ===================== Theme Variables ===================== */
@@ -14,17 +22,17 @@
   --foreground: #111111;
   --primary: #4f46e5;
   --accent: #06b6d4;
-  --sidebar-bg: rgba(255,255,255,0.55); /* Light navbar */
+  --sidebar-bg: rgba(255,255,255,0.55);
   --glass-blur: blur(16px) saturate(180%);
-  --button-color: #111; /* toggle text in light theme */
+  --button-color: #111;
 }
 body.dark-theme {
   --background: #0d0d0f;
   --foreground: #f0f0f0;
   --primary: #6366f1;
   --accent: #67e8f9;
-  --sidebar-bg: rgba(30,30,30,0.55); /* Dark navbar */
-  --button-color: #fff; /* toggle text in dark theme */
+  --sidebar-bg: rgba(30,30,30,0.55);
+  --button-color: #fff;
 }
 
 /* General */
@@ -77,14 +85,8 @@ body{
 }
 .tm-navlinks a:hover { color: var(--accent); }
 .tm-navlinks a.active::after {
-  content:'';
-  position:absolute;
-  bottom:-6px;
-  left:0;
-  width:100%;
-  height:3px;
-  background: var(--primary);
-  border-radius:4px;
+  content:''; position:absolute; bottom:-6px; left:0; width:100%; height:3px;
+  background: var(--primary); border-radius:4px;
 }
 .theme-toggle {
   cursor:pointer;
@@ -96,20 +98,16 @@ body{
   transition:0.3s;
 }
 .theme-toggle:hover { opacity:0.85; }
-@media (max-width:768px){
-  .tm-nav { flex-direction:column; align-items:flex-start; height:auto; padding:1rem; }
-  .tm-navlinks { flex-direction:column; align-items:flex-start; width:100%; gap:0.6rem; margin-top:0.5rem; }
-  .theme-toggle { align-self:flex-start; margin-top:0.5rem; }
-}
+.tm-hamburger { display:none; font-size:1.5rem; cursor:pointer; margin-top:0.5rem; }
 
-/* Waves Background */
+/* ===================== Waves Background ===================== */
 #waves{position:fixed;bottom:0;left:0;width:100%;height:100%;z-index:-1;overflow:hidden;}
 .wave{position:absolute;width:200%;height:100%;background-repeat:repeat-x;opacity:.4;}
 .wave1{background-image:url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 320"><path fill="%234f6df5" fill-opacity="0.4" d="M0,64L40,90.7C80,117,160,171,240,197.3C320,224,400,224,480,186.7C560,149,640,75,720,80C800,85,880,171,960,202.7C1040,235,1120,213,1200,181.3C1280,149,1360,107,1400,85.3L1440,64L1440,320L0,320Z"/></svg>');animation:waveMove 30s linear infinite;bottom:0;}
 .wave2{background-image:url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 320"><path fill="%23a0c4ff" fill-opacity="0.3" d="M0,96L48,112C96,128,192,160,288,154.7C384,149,480,107,576,112C672,117,768,171,864,197.3C960,224,1056,224,1152,197.3C1248,171,1344,117,1392,90.7L1440,64L1440,320L0,320Z"/></svg>');animation:waveMove 35s linear infinite;bottom:10px;}
 @keyframes waveMove{0%{transform:translateX(0);}100%{transform:translateX(-50%);}}
 
-/* Layout */
+/* ===================== Layout ===================== */
 main{
   max-width:1200px;
   margin:auto;
@@ -164,7 +162,48 @@ body.dark-theme .affirm-text{
   text-shadow:0 2px 6px rgba(0,0,0,.5);
 }
 @keyframes fadeInUp{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:translateY(0);}}
+
+/* ===================== Responsive ===================== */
+@media (max-width:768px){
+  .tm-nav { flex-direction:column; align-items:flex-start; height:auto; padding:1rem; }
+  .tm-navlinks { flex-direction:column; align-items:flex-start; width:100%; display:none; margin-top:0.5rem; gap:0.6rem; }
+  .tm-navlinks.show-links { display:flex; }
+  .theme-toggle { align-self:flex-start; margin-top:0.5rem; }
+  .tm-hamburger { display:block; }
+  .tabs { flex-direction:column; gap:12px; }
+  .tab-button { width:100%; text-align:center; }
+  .audio-section, .audio-card, .affirm-card { width:100%; max-width:100%; margin:0 auto; }
+  .audio-card, .affirm-card { padding:16px; }
+  .affirm-text { font-size:0.95rem; }
+  .tm-navlinks a { width:100%; padding:6px 0; }
+}
+
+@media (max-width:480px){
+  h1 { font-size:1.6rem; }
+  .subtitle { font-size:0.9rem; margin-bottom:20px; }
+  .tab-button { font-size:0.95rem; padding:8px 12px; }
+  .audio-card h3 { font-size:0.95rem; }
+  .audio-card, .affirm-card { padding:12px; width:95%; }
+  .reveal-btn, .hear-btn { font-size:0.85rem; padding:6px 12px; }
+  .affirm-text { font-size:0.9rem; padding:10px 12px; }
+}
+
+@media (max-width:360px){
+  h1 { font-size:1.45rem; }
+  .subtitle { font-size:0.85rem; }
+  .tab-button { font-size:0.85rem; padding:6px 10px; }
+  .audio-card, .affirm-card { width:100%; padding:10px; }
+  .reveal-btn, .hear-btn { font-size:0.8rem; padding:5px 10px; }
+  .affirm-text { font-size:0.85rem; padding:8px 10px; }
+}
+
+/* Waves scaling */
+#waves { height:100%; min-height:400px; }
+.wave { height:100%; }
+
 </style>
+
+
 </head>
 <body>
 
@@ -179,11 +218,9 @@ body.dark-theme .affirm-text{
     <span>Theramind</span>
   </a>
   <!-- Hamburger for mobile -->
-    <div class="tm-hamburger" onclick="document.querySelector('.tm-nav').classList.toggle('show-links')">
-        ☰
-    </div>
+  <div class="tm-hamburger">☰</div>
   <nav class="tm-navlinks">
-    <a href="/home">🏠 Home</a>
+    <a href="/">🏠 Home</a>
     <a href="/index">💬 Chat</a>
     <a href="/journaling">📓 Journal</a>
     <a href="/breathing">🫁 Breathing</a>
@@ -192,7 +229,7 @@ body.dark-theme .affirm-text{
     <a href="/ebooks">📚 E-Books</a>
     <a href="/history">🕰️ History</a>
   </nav>
-  <div class="theme-toggle" id="themeToggle" onclick="toggleTheme()">🌙 Theme</div>
+  <div class="theme-toggle" id="themeToggle">🌙 Theme</div>
 </header>
 
 <main>
@@ -212,117 +249,102 @@ body.dark-theme .affirm-text{
 
 <script>
 // === Audio & Affirmation Data ===
-const sourcesNature=[
-{title:"Ocean Waves", url:"https://commons.wikimedia.org/wiki/Special:FilePath/Oceanwavescrushing.ogg", format:"OGG"},
-{title:"Rain & Thunder", url:"https://commons.wikimedia.org/wiki/Special:FilePath/Rain%20and%20thunder.ogg", format:"OGG"},
-{title:"Forest Birds", url:"https://commons.wikimedia.org/wiki/Special:FilePath/Birds%20forest.ogg", format:"OGG"},
-{title:"Nightingale & Wind", url:"https://commons.wikimedia.org/wiki/Special:FilePath/Nightingale%20wind%20crickets.ogg", format:"OGG"},
-{title:"Water Stream", url:"https://commons.wikimedia.org/wiki/Special:FilePath/Stream.ogg", format:"OGG"},
-{title:"Birdsong Dawn", url:"https://commons.wikimedia.org/wiki/Special:FilePath/DawnBirds.ogg", format:"OGG"},
-{title:"Forest Rain", url:"https://commons.wikimedia.org/wiki/Special:FilePath/ForestRain.ogg", format:"OGG"},
-{title:"Mountain Breeze", url:"https://commons.wikimedia.org/wiki/Special:FilePath/MountainBreeze.ogg", format:"OGG"},
-{title:"Desert Wind", url:"https://commons.wikimedia.org/wiki/Special:FilePath/DesertWind.ogg", format:"OGG"},
-{title:"River Flow", url:"https://commons.wikimedia.org/wiki/Special:FilePath/RiverFlow.ogg", format:"OGG"}
+const sourcesNature = [
+  {title:"Ocean Waves", url:"https://commons.wikimedia.org/wiki/Special:FilePath/Oceanwavescrushing.ogg", format:"OGG"},
+  {title:"Rain & Thunder", url:"https://commons.wikimedia.org/wiki/Special:FilePath/Rain%20and%20thunder.ogg", format:"OGG"},
+  {title:"Forest Birds", url:"https://commons.wikimedia.org/wiki/Special:FilePath/Birds%20forest.ogg", format:"OGG"},
+  {title:"Nightingale & Wind", url:"https://commons.wikimedia.org/wiki/Special:FilePath/Nightingale%20wind%20crickets.ogg", format:"OGG"},
+  {title:"Water Stream", url:"https://commons.wikimedia.org/wiki/Special:FilePath/Stream.ogg", format:"OGG"},
+  {title:"Birdsong Dawn", url:"https://commons.wikimedia.org/wiki/Special:FilePath/DawnBirds.ogg", format:"OGG"},
+  {title:"Forest Rain", url:"https://commons.wikimedia.org/wiki/Special:FilePath/ForestRain.ogg", format:"OGG"},
+  {title:"Mountain Breeze", url:"https://commons.wikimedia.org/wiki/Special:FilePath/MountainBreeze.ogg", format:"OGG"},
+  {title:"Desert Wind", url:"https://commons.wikimedia.org/wiki/Special:FilePath/DesertWind.ogg", format:"OGG"},
+  {title:"River Flow", url:"https://commons.wikimedia.org/wiki/Special:FilePath/RiverFlow.ogg", format:"OGG"}
 ];
 
-const sourcesMusic=[
-{title:"Calm Piano", url:"https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3", format:"MP3"},
-{title:"Relaxing Guitar", url:"https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3", format:"MP3"},
-{title:"Soothing Strings", url:"https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3", format:"MP3"},
-{title:"Meditation Tune", url:"https://www.soundhelix.com/examples/mp3/SoundHelix-Song-4.mp3", format:"MP3"},
-{title:"Ambient Waves", url:"https://www.soundhelix.com/examples/mp3/SoundHelix-Song-5.mp3", format:"MP3"},
-{title:"Deep Focus", url:"https://www.soundhelix.com/examples/mp3/SoundHelix-Song-6.mp3", format:"MP3"},
-{title:"Peaceful Night", url:"https://www.soundhelix.com/examples/mp3/SoundHelix-Song-7.mp3", format:"MP3"},
-{title:"Morning Dew", url:"https://www.soundhelix.com/examples/mp3/SoundHelix-Song-8.mp3", format:"MP3"},
-{title:"Gentle Breeze", url:"https://www.soundhelix.com/examples/mp3/SoundHelix-Song-9.mp3", format:"MP3"},
-{title:"Serenity", url:"https://www.soundhelix.com/examples/mp3/SoundHelix-Song-10.mp3", format:"MP3"}
+const sourcesMusic = [
+  {title:"Calm Piano", url:"https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3", format:"MP3"},
+  {title:"Relaxing Guitar", url:"https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3", format:"MP3"},
+  {title:"Soothing Strings", url:"https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3", format:"MP3"},
+  {title:"Meditation Tune", url:"https://www.soundhelix.com/examples/mp3/SoundHelix-Song-4.mp3", format:"MP3"},
+  {title:"Ambient Waves", url:"https://www.soundhelix.com/examples/mp3/SoundHelix-Song-5.mp3", format:"MP3"},
+  {title:"Deep Focus", url:"https://www.soundhelix.com/examples/mp3/SoundHelix-Song-6.mp3", format:"MP3"},
+  {title:"Peaceful Night", url:"https://www.soundhelix.com/examples/mp3/SoundHelix-Song-7.mp3", format:"MP3"},
+  {title:"Morning Dew", url:"https://www.soundhelix.com/examples/mp3/SoundHelix-Song-8.mp3", format:"MP3"},
+  {title:"Gentle Breeze", url:"https://www.soundhelix.com/examples/mp3/SoundHelix-Song-9.mp3", format:"MP3"},
+  {title:"Serenity", url:"https://www.soundhelix.com/examples/mp3/SoundHelix-Song-10.mp3", format:"MP3"}
 ];
 
-const affirmations=[
-"I am calm and relaxed.","I am at peace with myself.","I release tension from my body.","I breathe deeply and slowly.","I am focused and centered.",
-"I am surrounded by positive energy.","I radiate love and joy.","I trust myself completely.","I am confident and strong.","I am resilient and adaptable.",
-"My mind is clear and peaceful.","I am grateful for today.","I am open to new opportunities.","I am full of positive thoughts.","I am free from worry and fear.",
-"I am healthy and strong.","I choose happiness and joy.","I forgive myself and others.","I am mindful and present.","I am patient and compassionate.",
-"I am creative and inspired.","I attract positivity into my life.","I am calm in stressful situations.","I am balanced and harmonious.","I release negative thoughts.",
-"I am courageous and bold.","I trust the journey of life.","I am successful in my endeavors.","I am worthy of love and respect.","I am kind and gentle.",
-"I am full of energy and vitality.","I am aligned with my purpose.","I am confident in my abilities.","I am loving and lovable.","I am calm amidst chaos.",
-"I am grateful for my blessings.","I am connected to my inner self.","I am motivated and determined.","I am peaceful and serene.","I am optimistic about the future.",
-"I am capable of achieving my goals.","I am free from doubt and fear.","I am mindful of my actions.","I am confident in making decisions.","I am present in every moment.",
-"I am joyful and content.","I am in harmony with the universe.","I am a beacon of positivity.","I am thankful for life.","I am at peace with my past."
+const affirmations = [
+  "I am calm and relaxed.","I am at peace with myself.","I release tension from my body.","I breathe deeply and slowly.","I am focused and centered.",
+  "I am surrounded by positive energy.","I radiate love and joy.","I trust myself completely.","I am confident and strong.","I am resilient and adaptable.",
+  "My mind is clear and peaceful.","I am grateful for today.","I am open to new opportunities.","I am full of positive thoughts.","I am free from worry and fear.",
+  "I am healthy and strong.","I choose happiness and joy.","I forgive myself and others.","I am mindful and present.","I am patient and compassionate.",
+  "I am creative and inspired.","I attract positivity into my life.","I am calm in stressful situations.","I am balanced and harmonious.","I release negative thoughts.",
+  "I am courageous and bold.","I trust the journey of life.","I am successful in my endeavors.","I am worthy of love and respect.","I am kind and gentle.",
+  "I am full of energy and vitality.","I am aligned with my purpose.","I am confident in my abilities.","I am loving and lovable.","I am calm amidst chaos.",
+  "I am grateful for my blessings.","I am connected to my inner self.","I am motivated and determined.","I am peaceful and serene.","I am optimistic about the future.",
+  "I am capable of achieving my goals.","I am free from doubt and fear.","I am mindful of my actions.","I am confident in making decisions.","I am present in every moment.",
+  "I am joyful and content.","I am in harmony with the universe.","I am a beacon of positivity.","I am thankful for life.","I am at peace with my past."
 ];
 
-const cardColors=[
+const cardColors = [
   "linear-gradient(135deg,#a0c4ff,#bdb2ff)",
   "linear-gradient(135deg,#caffbf,#9bf6ff)",
   "linear-gradient(135deg,#ffd6a5,#ffadad)",
   "linear-gradient(135deg,#fdffb6,#caffbf)"
 ];
 
-let currentAudio = null;
-const allAudioElements = {};
+let currentAudio=null;
+const allAudioElements={};
 
 function preloadAudio(sources, sectionName){
-  allAudioElements[sectionName] = [];
+  allAudioElements[sectionName]=[];
   sources.forEach(item=>{
-    const audio = document.createElement('audio');
-    audio.src = item.url;
-    audio.preload = 'auto';
-    audio.onplay = () => {
-      if(currentAudio && currentAudio !== audio) currentAudio.pause();
-      currentAudio = audio;
-    };
-    allAudioElements[sectionName].push({audio, title:item.title, format:item.format, url:item.url});
+    const audio=document.createElement('audio');
+    audio.src=item.url;
+    audio.preload='auto';
+    audio.onplay=()=>{if(currentAudio && currentAudio!==audio) currentAudio.pause(); currentAudio=audio;};
+    allAudioElements[sectionName].push({audio,title:item.title,format:item.format,url:item.url});
   });
 }
 
-// Preload Nature and Music
-preloadAudio(sourcesNature, 'nature');
-preloadAudio(sourcesMusic, 'music');
+preloadAudio(sourcesNature,'nature');
+preloadAudio(sourcesMusic,'music');
 
-function populateAudio(sectionId, sources){
-  const section = document.getElementById(sectionId);
-  section.innerHTML = '';
-  const canPlayOgg = document.createElement('audio').canPlayType('audio/ogg');
-  const items = allAudioElements[sectionId] || [];
-
+function populateAudio(sectionId){
+  const section=document.getElementById(sectionId);
+  section.innerHTML='';
+  const canPlayOgg=document.createElement('audio').canPlayType('audio/ogg');
+  const items=allAudioElements[sectionId]||[];
   items.forEach(item=>{
-    const card = document.createElement('div'); card.className='audio-card';
-    const title = document.createElement('h3'); title.innerText=item.title;
-    const badge = document.createElement('div'); badge.className='badge'; badge.innerText=`Format: ${item.format}`;
-    const audio = item.audio; audio.controls = true;
-    const download = document.createElement('a'); download.href=item.url; download.download=''; download.className='download-link'; download.innerText='📥 Download';
+    const card=document.createElement('div'); card.className='audio-card';
+    const title=document.createElement('h3'); title.innerText=item.title;
+    const badge=document.createElement('div'); badge.className='badge'; badge.innerText=`Format: ${item.format}`;
+    const audio=item.audio; audio.controls=true;
+    const download=document.createElement('a'); download.href=item.url; download.download=''; download.className='download-link'; download.innerText='📥 Download';
     card.append(title,badge,audio,download);
-
     if(item.format==='OGG' && !canPlayOgg){
       const note=document.createElement('div'); note.className='compat';
       note.innerText="If playback doesn't start, tap Download (some browsers don't play .ogg inline).";
       card.appendChild(note);
     }
-
     section.appendChild(card);
   });
 }
 
 function populateAffirmations(){
-  const section = document.getElementById('affirm'); 
+  const section=document.getElementById('affirm');
   section.innerHTML='';
   affirmations.forEach((text,i)=>{
-    const card = document.createElement('div'); card.className='affirm-card';
-    card.style.background = cardColors[i % cardColors.length];
-
-    const revealBtn = document.createElement('button'); revealBtn.className='reveal-btn'; revealBtn.innerText='Reveal';
-    revealBtn.setAttribute('aria-expanded','false');
-    const hearBtn = document.createElement('button'); hearBtn.className='hear-btn'; hearBtn.innerText='Hear';
-    const span = document.createElement('div'); span.className='affirm-text'; span.innerText=text;
-
-    revealBtn.onclick = () => {
-      const isShown = span.style.display === 'block';
-      span.style.display = isShown ? 'none' : 'block';
-      revealBtn.setAttribute('aria-expanded', String(!isShown));
-    };
-    hearBtn.onclick = () => { speak(text); };
-
-    card.append(span, revealBtn, hearBtn);
+    const card=document.createElement('div'); card.className='affirm-card';
+    card.style.background=cardColors[i%cardColors.length];
+    const revealBtn=document.createElement('button'); revealBtn.className='reveal-btn'; revealBtn.innerText='Reveal'; revealBtn.setAttribute('aria-expanded','false');
+    const hearBtn=document.createElement('button'); hearBtn.className='hear-btn'; hearBtn.innerText='Hear';
+    const span=document.createElement('div'); span.className='affirm-text'; span.innerText=text;
+    revealBtn.onclick=()=>{const isShown=span.style.display==='block'; span.style.display=isShown?'none':'block'; revealBtn.setAttribute('aria-expanded',String(!isShown));};
+    hearBtn.onclick=()=>{speak(text);};
+    card.append(span,revealBtn,hearBtn);
     section.appendChild(card);
   });
 }
@@ -332,84 +354,43 @@ function switchTab(tabId, btn){
   document.getElementById(tabId).classList.add('active');
   document.querySelectorAll('.tab-button').forEach(b=>{b.classList.remove('active'); b.setAttribute('aria-selected','false');});
   btn.classList.add('active'); btn.setAttribute('aria-selected','true');
-
-  if(tabId==='nature') populateAudio('nature', sourcesNature);
-  if(tabId==='music') populateAudio('music', sourcesMusic);
+  if(tabId==='nature') populateAudio('nature');
+  if(tabId==='music') populateAudio('music');
   if(tabId==='affirm') populateAffirmations();
 }
 
-// Theme Toggle
+function speak(text){ if(window.speechSynthesis.speaking) window.speechSynthesis.cancel(); window.speechSynthesis.speak(new SpeechSynthesisUtterance(text)); }
+
+// =================== Navbar & Theme ===================
 document.addEventListener("DOMContentLoaded", ()=>{
-  const currentPath = window.location.pathname;
+  const currentPath=window.location.pathname;
   document.querySelectorAll(".tm-navlinks a").forEach(link=>{
     if(currentPath.includes(link.getAttribute("href"))) link.classList.add("active");
   });
 
-  const themeToggle = document.getElementById("themeToggle");
-  if(localStorage.getItem("theme")==="dark"){
-    document.body.classList.add("dark-theme");
-    themeToggle.textContent = "☀️ Theme";
-  } else { themeToggle.textContent = "🌙 Theme"; }
-});
-
-function toggleTheme(){
+  // Theme toggle
   const themeToggle=document.getElementById("themeToggle");
-  document.body.classList.toggle("dark-theme");
-  const isDark = document.body.classList.contains("dark-theme");
-  localStorage.setItem("theme", isDark ? "dark" : "light");
-  themeToggle.textContent = isDark ? "☀️ Theme" : "🌙 Theme";
-}
-
-// Text-to-Speech
-function speak(text){
-  if(window.speechSynthesis.speaking) window.speechSynthesis.cancel();
-  const utter = new SpeechSynthesisUtterance(text);
-  window.speechSynthesis.speak(utter);
-}
-
-// Initialize first tab
-switchTab('nature', document.querySelector('.tab-button.active'));
-document.addEventListener("DOMContentLoaded", () => {
- document.addEventListener("DOMContentLoaded", () => {
-  const hamburger = document.querySelector('.tm-hamburger');
-  const nav = document.querySelector('.tm-nav');
-
-  function updateHamburgerVisibility() {
-    if (window.innerWidth <= 768) {
-      hamburger.style.display = 'block';
-    } else {
-      hamburger.style.display = 'none';
-      nav.classList.remove('show-links');
-    }
-  }
-
-  // Toggle mobile nav
-  if (hamburger) {
-    hamburger.addEventListener('click', () => {
-      nav.classList.toggle('show-links');
-    });
-  }
-
-  // Initialize and update on resize
-  updateHamburgerVisibility();
-  window.addEventListener('resize', updateHamburgerVisibility);
-});
-
-  // === Theme Toggle ===
-  const themeBtn = document.getElementById("themeToggle");
-  const darkStored = localStorage.getItem("theme") === "dark";
-  if (darkStored) document.body.classList.add("dark-theme");
-  themeBtn.textContent = darkStored ? "☀️ Theme" : "🌙 Theme";
-
-  themeBtn.addEventListener("click", () => {
+  const darkStored=localStorage.getItem("theme")==='dark';
+  if(darkStored) document.body.classList.add("dark-theme");
+  themeToggle.textContent=darkStored?"☀️ Theme":"🌙 Theme";
+  themeToggle.addEventListener("click",()=>{
     document.body.classList.toggle("dark-theme");
-    const isDark = document.body.classList.contains("dark-theme");
-    localStorage.setItem("theme", isDark ? "dark" : "light");
-    themeBtn.textContent = isDark ? "☀️ Theme" : "🌙 Theme";
+    const isDark=document.body.classList.contains("dark-theme");
+    localStorage.setItem("theme",isDark?"dark":"light");
+    themeToggle.textContent=isDark?"☀️ Theme":"🌙 Theme";
   });
 
-});
+  // Hamburger menu
+  const hamburger=document.querySelector('.tm-hamburger');
+  const nav=document.querySelector('.tm-navlinks');
+  hamburger.addEventListener('click',()=>{ nav.classList.toggle('show-links'); });
+  window.addEventListener('resize',()=>{ if(window.innerWidth>768) nav.classList.remove('show-links'); });
 
+  // Initialize first tab
+  switchTab('nature',document.querySelector('.tab-button.active'));
+});
 </script>
+
 </body>
 </html>
+
