@@ -4,150 +4,307 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Theramind – Journal</title>
-  <link rel="icon" href="https://img.icons8.com/fluency/48/journal.png" type="image/png" />
+  <link rel="icon" type="image/png" href="{{ url_for('static', filename='journal.png') }}">
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&family=Shadows+Into+Light&family=Merriweather&family=Roboto+Mono&display=swap" rel="stylesheet" />
   <script src="https://cdn.jsdelivr.net/npm/tsparticles@2.12.0/tsparticles.bundle.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
-  <style>
-    :root {
-      --background: #ffffff;
-      --foreground: #111111;
-      --primary: #4f46e5;
-      --accent: #06b6d4;
-      --sidebar-bg: rgba(255,255,255,0.85);
-      --glass-blur: blur(16px) saturate(180%);
-      --button-color: #ffffff;
-    }
-    body.dark-theme {
-      --background: #0d0d0f;
-      --foreground: #f0f0f0;
-      --primary: #6366f1;
-      --accent: #67e8f9;
-      --sidebar-bg: rgba(30,30,30,0.85);
-    }
+<style>
+  /* =====================
+     Theme Variables
+     ===================== */
+  :root {
+    --background: #ffffff;
+    --foreground: #111111;
+    --primary: #4f46e5;
+    --accent: #06b6d4;
+    --sidebar-bg: rgba(255, 255, 255, 0.85);
+    --glass-blur: blur(16px) saturate(180%);
+    --button-color: #ffffff;
+  }
 
-    *{box-sizing:border-box;}
-    body {margin:0;font-family:'Poppins',sans-serif;background: var(--background);color: var(--foreground);transition: background 0.3s,color 0.3s;}
-    #tsparticles{position:fixed;width:100%;height:100%;top:0;left:0;z-index:1;}
+  body.dark-theme {
+    --background: #0b0c1a;
+    --foreground: #f5f7ff;
+    --primary: #4f6df5;
+    --accent: #4fd1c5;
+    --sidebar-bg: rgba(20, 22, 40, 0.85);
+  }
 
-    .tm-nav {
-      display:flex;align-items:center;justify-content:space-between;height:75px;padding:0 2rem;
-      background: var(--sidebar-bg);backdrop-filter: var(--glass-blur);box-shadow: 0 6px 25px rgba(0,0,0,0.15);
-      position: sticky;top:0;z-index: 100;
-    }
-    .tm-brand {display:flex;align-items:center;gap:0.75rem;font-weight:700;font-size:1.4rem;color: var(--foreground);text-decoration:none;}
-    .tm-brand img.brand-mark {height:36px;}
-    .tm-navlinks {display:flex;gap:1.5rem;align-items:center;flex-wrap:wrap;}
-    .tm-navlinks a {text-decoration:none;font-weight:600;color: var(--primary);position: relative;transition: color 0.3s;}
-    .tm-navlinks a:hover { color: var(--accent); }
-    .tm-navlinks a.active::after {content:'';position:absolute;bottom:-6px;left:0;width:100%;height:3px;background: var(--primary);border-radius:4px;}
-    .theme-toggle {cursor:pointer;font-size:0.9rem;background: linear-gradient(135deg,var(--primary),var(--accent));padding:6px 10px;border-radius:6px;color: var(--button-color);transition:0.3s;}
-    .theme-toggle:hover { opacity:0.85; }
+  /* =====================
+     Base Reset
+     ===================== */
+  * {
+    box-sizing: border-box;
+  }
 
-    @media (max-width:768px){
-      .tm-nav{flex-direction:column;align-items:flex-start;height:auto;padding:1rem;}
-      .tm-navlinks{flex-direction:column;align-items:flex-start;width:100%;gap:0.6rem;margin-top:0.5rem;}
-      .theme-toggle{align-self:flex-start;margin-top:0.5rem;}
-    }
+  body {
+    margin: 0;
+    font-family: "Poppins", sans-serif;
+    background: var(--background);
+    color: var(--foreground);
+    transition: background 0.3s, color 0.3s;
+  }
 
-    .journal-container{
-      max-width:900px;margin:100px auto;padding:40px;background:rgba(255,255,255,0.08);
-      border-radius:20px;backdrop-filter:blur(12px);position:relative;z-index:2;box-shadow:0 8px 40px rgba(0,0,0,0.2);
-    }
-    body.dark-theme .journal-container{background-color:rgba(44,44,62,0.8);}
-    h2{font-size:2rem;margin-bottom:20px;}
-    .mood-select,.prompt-section,.entry-section,.history-section{margin-top:24px;}
-    select,textarea,input[type="text"]{padding:12px;border-radius:10px;font-size:1rem;width:100%;margin-top:10px;border:1px solid #ccc;background-color:inherit;color:inherit;transition:0.2s;}
-    .prompt-section button,.actions button,.speech-button,#font-select,#export-all,#export-pdf{padding:12px 18px;border:none;border-radius:10px;background-color: var(--primary);color: var(--button-color);font-weight:600;cursor:pointer;margin:10px 10px 0 0;transition:0.2s;}
-    .prompt-section button:hover,.actions button:hover,.speech-button:hover,#font-select:hover,#export-all:hover,#export-pdf:hover{background-color: var(--accent);}
-    #prompt-display{margin-top:10px;font-style:italic;transition:0.3s;}
-    #prompt-display.highlight{box-shadow:0 0 12px var(--primary); padding:6px; border-radius:6px;}
-    .illustration{text-align:center;margin-top:16px;}
-    .illustration img{max-width:220px;height:auto;border-radius:12px;box-shadow:0 4px 12px rgba(0,0,0,0.3);animation:float 3s ease-in-out infinite;}
-    @keyframes float{0%,100%{transform:translateY(0);}50%{transform:translateY(-6px);}}
-    .journal-history{background:#eee;border-radius:12px;padding:14px;white-space:pre-wrap;margin-top:10px;max-height:300px;overflow-y:auto;}
-    body.dark-theme .journal-history{background-color:#3a3a4f;color:white;}
-    .actions{margin-top:10px;display:flex;flex-wrap:wrap;gap:10px;}
-    .search-tags{display:flex;gap:16px;margin-top:20px;flex-wrap:wrap;}
-    .search-tags input{flex:1;min-width:120px;}
-    .entry-item{border-bottom:1px solid #ccc;padding:8px;display:flex;justify-content:space-between;align-items:center;cursor:pointer;transition:0.2s;}
-    .entry-item:hover{background-color:rgba(0,0,0,0.05); box-shadow:0 0 8px var(--primary);}
-    .entry-actions button{margin-left:8px;background-color:#e53e3e;color:white;border:none;padding:6px 10px;border-radius:6px;cursor:pointer;transition:0.2s;}
-    .entry-actions button:hover{background-color:#9b2c2c;}
-    .modal{position:fixed;top:0;left:0;width:100%;height:100%;display:flex;justify-content:center;align-items:center;background:rgba(0,0,0,0.6);visibility:hidden;opacity:0;transition:0.3s;z-index:20;}
-    .modal.active{visibility:visible;opacity:1;}
-    .modal-content{background:white;border-radius:12px;padding:24px;max-width:600px;width:90%;max-height:80%;overflow:auto;position:relative;}
-    body.dark-theme .modal-content{background:#2c2c44;color:white;}
-    .modal-close{position:absolute;top:10px;right:10px;cursor:pointer;font-size:20px;}
-    .toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:var(--primary);color:white;padding:12px 24px;border-radius:12px;opacity:0;pointer-events:none;transition:0.3s;z-index:30;}
-    .toast.show{opacity:1;pointer-events:auto;}
-    /* ----------------- Responsive Journal Page ----------------- */
-@media (max-width: 1024px){
+  #tsparticles {
+    position: fixed;
+    inset: 0;
+    z-index: 1;
+  }
+
+  /* =====================
+     Top Navigation
+     ===================== */
+  .tm-nav {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 75px;
+    padding: 0 2rem;
+    background: var(--sidebar-bg);
+    backdrop-filter: var(--glass-blur);
+    box-shadow: 0 6px 25px rgba(0, 0, 0, 0.15);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+
+  .tm-brand {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    font-weight: 700;
+    font-size: 1.4rem;
+    color: var(--foreground);
+    text-decoration: none;
+  }
+
+  .tm-brand img.brand-mark {
+    height: 36px;
+  }
+
+  .tm-navlinks {
+    display: flex;
+    gap: 1.5rem;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+
+  .tm-navlinks a {
+    text-decoration: none;
+    font-weight: 600;
+    color: var(--primary);
+    position: relative;
+    transition: color 0.3s;
+  }
+
+  .tm-navlinks a:hover {
+    color: var(--accent);
+  }
+
+  .tm-navlinks a.active::after {
+    content: "";
+    position: absolute;
+    bottom: -6px;
+    left: 0;
+    width: 100%;
+    height: 3px;
+    background: var(--primary);
+    border-radius: 4px;
+  }
+
+  .theme-toggle {
+    cursor: pointer;
+    font-size: 0.9rem;
+    background: linear-gradient(135deg, var(--primary), var(--accent));
+    padding: 6px 10px;
+    border-radius: 6px;
+    color: var(--button-color);
+    transition: opacity 0.3s;
+  }
+
+  .theme-toggle:hover {
+    opacity: 0.85;
+  }
+
+  /* =====================
+     Journal Layout
+     ===================== */
   .journal-container {
-    margin: 80px 20px;
-    padding: 30px;
+    max-width: 900px;
+    margin: 100px auto;
+    padding: 40px;
+    background: rgba(255, 255, 255, 0.08);
+    border-radius: 20px;
+    backdrop-filter: blur(12px);
+    position: relative;
+    z-index: 2;
+    box-shadow: 0 8px 40px rgba(0, 0, 0, 0.2);
   }
-  h2 { font-size: 1.6rem; }
-  .illustration img { max-width: 180px; }
-}
 
-@media (max-width: 768px){
-  .tm-nav { 
-    flex-direction: column; 
-    align-items: flex-start; 
-    height: auto; 
-    padding: 1rem; 
+  body.dark-theme .journal-container {
+    background-color: rgba(44, 44, 62, 0.8);
   }
-  .tm-navlinks { 
-    flex-direction: column; 
-    align-items: flex-start; 
-    width: 100%; 
-    gap: 0.5rem; 
-    margin-top: 0.5rem; 
-    display: none; 
-  }
-  .tm-nav.show-links .tm-navlinks { display: flex; }
-  .tm-hamburger { display: block; cursor: pointer; font-size: 1.4rem; margin-top: 0.5rem; }
 
-  .journal-container {
-    margin: 60px 15px;
-    padding: 25px;
+  h2 {
+    font-size: 2rem;
+    margin-bottom: 20px;
   }
-  h2 { font-size: 1.4rem; }
-  .illustration img { max-width: 150px; }
-  .prompt-section button, 
-  .actions button, 
-  .speech-button, 
-  #font-select, 
-  #export-all, 
+
+  .mood-select,
+  .prompt-section,
+  .entry-section,
+  .history-section {
+    margin-top: 24px;
+  }
+
+  select,
+  textarea,
+  input[type="text"] {
+    width: 100%;
+    margin-top: 10px;
+    padding: 12px;
+    font-size: 1rem;
+    border-radius: 10px;
+    border: 1px solid #ccc;
+    background-color: inherit;
+    color: inherit;
+    transition: 0.2s;
+  }
+
+  /* =====================
+     Buttons
+     ===================== */
+  .prompt-section button,
+  .actions button,
+  .speech-button,
+  #font-select,
+  #export-all,
   #export-pdf {
-    padding: 10px 14px; font-size: 0.9rem; margin: 8px 5px 0 0;
+    padding: 12px 18px;
+    border: none;
+    border-radius: 10px;
+    background-color: var(--primary);
+    color: var(--button-color);
+    font-weight: 600;
+    cursor: pointer;
+    margin: 10px 10px 0 0;
+    transition: background-color 0.2s;
   }
-  select, textarea, input[type="text"] { font-size: 0.95rem; padding: 10px; }
-  .search-tags input { flex: 1 1 100%; min-width: 100%; }
-  .journal-history { max-height: 200px; font-size: 0.9rem; }
-  .entry-item { font-size: 0.9rem; padding: 6px; }
-}
 
-@media (max-width: 480px){
-  .journal-container { margin: 50px 10px; padding: 20px; }
-  h2 { font-size: 1.2rem; }
-  .illustration img { max-width: 120px; }
-  .prompt-section button, 
-  .actions button, 
-  .speech-button, 
-  #font-select, 
-  #export-all, 
-  #export-pdf {
-    padding: 8px 10px; font-size: 0.85rem; margin: 6px 4px 0 0;
+  .prompt-section button:hover,
+  .actions button:hover,
+  .speech-button:hover,
+  #font-select:hover,
+  #export-all:hover,
+  #export-pdf:hover {
+    background-color: var(--accent);
   }
-  select, textarea, input[type="text"] { font-size: 0.9rem; padding: 8px; }
-  .journal-history { max-height: 180px; font-size: 0.85rem; }
-  .entry-item { font-size: 0.85rem; padding: 5px; }
-}
 
-  </style>
+  /* =====================
+     Illustration
+     ===================== */
+  .illustration {
+    text-align: center;
+    margin-top: 16px;
+  }
+
+  .illustration img {
+    max-width: 220px;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    animation: float 3s ease-in-out infinite;
+  }
+
+  @keyframes float {
+    0%,
+    100% {
+      transform: translateY(0);
+    }
+    50% {
+      transform: translateY(-6px);
+    }
+  }
+
+  /* =====================
+     Insights Panel
+     ===================== */
+  .insights-card {
+    margin: 16px 0;
+    padding: 14px 16px;
+    border-radius: 14px;
+    background: var(--sidebar-bg);
+    backdrop-filter: blur(14px);
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.08);
+  }
+
+  .insights-card h3 {
+    margin-bottom: 8px;
+    font-size: 1rem;
+    color: var(--primary);
+  }
+
+  .insights-card ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+
+  .insights-card li {
+    font-size: 0.9rem;
+    opacity: 0.85;
+    margin-bottom: 6px;
+  }
+
+  .insights-card.hidden {
+    display: none;
+  }
+
+  /* =====================
+     Dark Mode Select Fix
+     ===================== */
+  select {
+    background-color: var(--background);
+    color: var(--foreground);
+  }
+
+  body.dark-theme select {
+    background-color: #0f1225;
+    color: #f5f7ff;
+    border-color: rgba(255, 255, 255, 0.25);
+  }
+
+  body.dark-theme select option {
+    background-color: #0f1225;
+    color: #f5f7ff;
+  }
+
+  /* =====================
+     Responsive
+     ===================== */
+  @media (max-width: 768px) {
+    .journal-container {
+      margin: 60px 15px;
+      padding: 25px;
+    }
+
+    h2 {
+      font-size: 1.4rem;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .journal-container {
+      margin: 50px 10px;
+      padding: 20px;
+    }
+
+    h2 {
+      font-size: 1.2rem;
+    }
+  }
+</style>
+
 </head>
 <body>
   <div id="tsparticles"></div>
@@ -158,7 +315,6 @@
       <img src="https://img.icons8.com/fluency/48/brain.png" alt="Theramind Logo" class="brand-mark">
       <span>Theramind</span>
     </a>
-    <div class="tm-hamburger">☰</div>
     <nav class="tm-navlinks">
       <a href="/">🏠 Home</a>
       <a href="/index">💬 Chat</a>
@@ -174,10 +330,20 @@
 
   <!-- Journal Container -->
   <div class="journal-container">
-    <h2>How are you feeling today?</h2>
+    <h2 id="journalGreeting">How are you feeling today?</h2>
+    <!-- Reflection Insights -->
+<div id="reflectionInsights" class="insights-card hidden">
+  <h3>🧠 Reflection Insights</h3>
+  <ul>
+    <li id="insightMood"></li>
+    <li id="insightPattern"></li>
+    <li id="insightEncouragement"></li>
+  </ul>
+</div>
+
     <div class="mood-select">
       <label>Select Your Mood:</label>
-      <select id="mood" onchange="updateIllustrationAndPrompt()">
+      <select id="moodSelect" onchange="updateIllustrationAndPrompt()">
         <option>😃 Happy</option>
         <option>😔 Sad</option>
         <option>😠 Angry</option>
@@ -203,6 +369,10 @@
           <option value="'Merriweather',serif">Serif</option>
           <option value="'Poppins',sans-serif">Sans-serif</option>
           <option value="'Roboto Mono',monospace">Monospace</option>
+          <option value="'Inter',sans-serif">Inter</option>
+          <option value="'Playfair Display',serif">Playfair Display</option>
+          <option value="'Source Serif 4',serif">Source Serif</option>
+
         </select>
         <button onclick="exportPDF()">📄 Export PDF</button>
         <button onclick="exportAll()">📤 Export JSON</button>
@@ -230,13 +400,154 @@
   </div>
   <div class="toast" id="toast"></div>
 
+  <div class="modal" id="deleteModal">
+  <div class="modal-content">
+    <h3>Delete journal entry?</h3>
+    <p>This action cannot be undone.</p>
+    <div style="margin-top:16px;display:flex;gap:10px;">
+      <button onclick="confirmDelete()" style="background:#e53e3e;color:white;">Delete</button>
+      <button onclick="closeDeleteModal()">Cancel</button>
+    </div>
+  </div>
+</div>
+
+
 <script>
+  const JOURNAL_DRAFT_KEY = "journalDraft";
+
+function autoSaveDraft() {
+  const entry = document.getElementById("journal-entry").value.trim();
+  if (!entry) return;
+
+  localStorage.setItem(
+    JOURNAL_DRAFT_KEY,
+    JSON.stringify({
+      title: document.getElementById("entry-title").value,
+      mood: document.getElementById("moodSelect").value,
+      content: entry,
+      timestamp: Date.now()
+    })
+  );
+
+  showToast("Draft saved quietly");
+}
+
+  // --- Session-aware Journal Greeting ---
+const JOURNAL_USER_NAME = localStorage.getItem("userName");
+const JOURNAL_GREETING_SHOWN =
+  sessionStorage.getItem("journalGreetingShown") === "true";
+
+function setJournalGreeting() {
+  const el = document.getElementById("journalGreeting");
+  if (!el) return;
+
+  if (!JOURNAL_GREETING_SHOWN) {
+    el.textContent = JOURNAL_USER_NAME
+      ? `Welcome back, ${JOURNAL_USER_NAME}. How are you feeling today?`
+      : "Welcome back. How are you feeling today?";
+
+    sessionStorage.setItem("journalGreetingShown", "true");
+  } else {
+    el.textContent = "How are you feeling right now?";
+  }
+}
+
+function generateReflectionInsights() {
+  if (!journalData || journalData.length < 1) return;
+
+  const insightsEl = document.getElementById("reflectionInsights");
+  if (!insightsEl) return;
+
+  // Filter last 7 days
+  const oneWeekAgo = Date.now() - 7 * 24 * 60 * 60 * 1000;
+  const recentEntries = journalData.filter(e => {
+  const d = new Date(e.date).getTime();
+  return !isNaN(d) && d >= oneWeekAgo;
+});
+
+
+  if (recentEntries.length === 0) return;
+
+  // Mood frequency
+  const moodCount = {};
+  recentEntries.forEach(e => {
+    if (e.mood) moodCount[e.mood] = (moodCount[e.mood] || 0) + 1;
+  });
+
+  const dominantMood = Object.keys(moodCount).reduce((a, b) =>
+    moodCount[a] > moodCount[b] ? a : b
+  );
+
+  // Writing length vs mood
+  const lengthByMood = {};
+  recentEntries.forEach(e => {
+    if (!e.mood || !e.content) return;
+    if (!lengthByMood[e.mood]) lengthByMood[e.mood] = [];
+    lengthByMood[e.mood].push(e.content.length);
+  });
+
+  let longestMood = null;
+  let longestAvg = 0;
+  Object.keys(lengthByMood).forEach(m => {
+    const avg =
+      lengthByMood[m].reduce((a, b) => a + b, 0) /
+      lengthByMood[m].length;
+    if (avg > longestAvg) {
+      longestAvg = avg;
+      longestMood = m;
+    }
+  });
+
+  // Populate UI
+  document.getElementById("insightMood").textContent =
+    `Most frequent mood this week: ${dominantMood}`;
+
+  document.getElementById("insightPattern").textContent =
+    longestMood
+      ? `You tend to write longer entries when you feel ${longestMood}.`
+      : `Your writing patterns are becoming more consistent.`;
+
+  document.getElementById("insightEncouragement").textContent =
+    `Regular journaling helps build self-awareness over time.`;
+
+  insightsEl.classList.remove("hidden");
+}
+
 document.addEventListener("DOMContentLoaded", () => {
   tsParticles.load("tsparticles", {
-    background: { color: { value: "transparent" } },
-    fullScreen: false,
-    particles: { number: { value: 60 }, color: { value: "#aab8ff" }, shape: { type: "circle" }, opacity: { value: 0.2 }, size: { value: 3 }, move: { enable: true, speed: 1 } }
-  });
+     background: { color: { value: "transparent" } },
+  fullScreen: false,
+  particles: {
+    number: {
+      value: 70,
+      density: { enable: true, area: 800 }
+    },
+    color: {
+      value: ["#6b7cff", "#67e8f9"]
+    },
+    shape: { type: "circle" },
+    opacity: {
+      value: 0.35,
+      random: true
+    },
+    size: {
+      value: { min: 1.5, max: 3.5 }
+    },
+    links: {
+      enable: true,
+      distance: 120,
+      color: "#aab8ff",
+      opacity: 0.15,
+      width: 1
+    },
+    move: {
+      enable: true,
+      speed: 0.6,
+      direction: "none",
+      outModes: "out"
+    }
+  }
+});
 
   const themeToggle = document.getElementById("themeToggle");
   const prefersDark = localStorage.getItem("theme") === "dark";
@@ -245,17 +556,25 @@ document.addEventListener("DOMContentLoaded", () => {
 
   themeToggle.addEventListener("click", toggleTheme);
 
-  const hamburger = document.querySelector('.tm-hamburger');
-  const nav = document.querySelector('.tm-nav');
-  hamburger.addEventListener('click', () => { nav.classList.toggle('show-links'); });
-  const updateHamburgerVisibility = () => { if(window.innerWidth<=768) hamburger.style.display='block'; else { hamburger.style.display='none'; nav.classList.remove('show-links'); }};
-  updateHamburgerVisibility();
-  window.addEventListener('resize', updateHamburgerVisibility);
+  const draft = localStorage.getItem(JOURNAL_DRAFT_KEY);
+  if (draft) {
+    try {
+      const d = JSON.parse(draft);
+      document.getElementById("entry-title").value = d.title || "";
+      document.getElementById("moodSelect").value = d.mood || "";
+      document.getElementById("journal-entry").value = d.content || "";
+      showToast("Draft restored");
+    } catch (e) {
+      console.warn("Failed to restore journal draft", e);
+    }
+  }
 
   loadHistory();
   updateIllustrationAndPrompt();
-  setInterval(()=>{const entry=document.getElementById("journal-entry").value.trim();if(entry) saveEntry();},5000);
+  setInterval(autoSaveDraft, 5000);
+  setJournalGreeting();
 });
+
 
 function showToast(msg){ const toast=document.getElementById("toast"); toast.textContent=msg; toast.classList.add("show"); setTimeout(()=>{toast.classList.remove("show");},2500); }
 
@@ -287,13 +606,16 @@ const imageMap = {
 };
 
 function updateIllustrationAndPrompt() {
-  const mood = document.getElementById("mood").value;
-  document.getElementById("mood-image").src = imageMap[mood];
+  const select = document.getElementById("moodSelect");
+  if (!select || !select.value || !imageMap[select.value]) return;
+
+  document.getElementById("mood-image").src = imageMap[select.value];
   generatePrompt();
 }
 
+
 function generatePrompt() {
-  const mood = document.getElementById("mood").value;
+  const mood = document.getElementById("moodSelect").value;
   const prompts = promptMap[mood];
   const prompt = prompts[Math.floor(Math.random() * prompts.length)];
   document.getElementById("prompt-display").textContent = prompt;
@@ -304,20 +626,44 @@ function generatePrompt() {
 let journalData = [];
 let currentModalIndex = 0;
 
-function loadHistory() {
+async function loadHistory() {
   const container = document.getElementById("history");
-  container.innerHTML = '';
-  journalData = JSON.parse(localStorage.getItem("journalData") || "[]");
-  if (!journalData.length) { container.textContent = "No previous entries yet."; return; }
-  journalData.forEach((rec,i) => {
-    const div = document.createElement("div");
-    div.className = "entry-item";
-    div.innerHTML = `<span>${rec.date} - ${rec.title} [${rec.mood}]</span>
-                     <div class="entry-actions"><button onclick="deleteEntry(${i})">🗑️</button></div>`;
-    div.addEventListener("click", (e)=>{if(!e.target.closest("button")) openModal(i)});
-    container.appendChild(div);
-  });
+  container.innerHTML = "Loading…";
+
+  try {
+    const res = await fetch("/api/history/journals");
+    if (!res.ok) throw new Error();
+
+    journalData = await res.json();
+    container.innerHTML = "";
+
+    if (!journalData.length) {
+      container.textContent = "No previous entries yet.";
+      return;
+    }
+
+    journalData.forEach((rec, i) => {
+      const div = document.createElement("div");
+      div.className = "entry-item";
+      div.innerHTML = `
+        <span>${rec.date} [${rec.mood || "—"}]</span>
+        <div class="entry-actions">
+          <button onclick="deleteEntry(${i})">🗑️</button>
+        </div>
+      `;
+      div.addEventListener("click", e => {
+        if (!e.target.closest("button")) openModal(i);
+      });
+      container.appendChild(div);
+    });
+
+    generateReflectionInsights();
+
+  } catch {
+    container.textContent = "Could not load journal history.";
+  }
 }
+
 
 function openModal(index) {
   currentModalIndex=index;
@@ -330,36 +676,90 @@ function openModal(index) {
 }
 function closeModal() { document.getElementById("entryModal").classList.remove("active"); }
 
-let deleteIndex=null;
+let deleteIndex = null;
+
 function deleteEntry(i){
-  deleteIndex=i;
-  if(confirm("Delete this entry?")) confirmDelete(true);
-  else confirmDelete(false);
-}
-function confirmDelete(decision){
-  if(decision && deleteIndex!==null){
-    journalData.splice(deleteIndex,1);
-    localStorage.setItem("journalData",JSON.stringify(journalData));
-    loadHistory();
-    showToast("Entry deleted!");
-    deleteIndex=null;
-  }
+  deleteIndex = i;
+  document.getElementById("deleteModal").classList.add("active");
 }
 
-function saveEntry(){
-  const title=document.getElementById("entry-title").value.trim()||"Untitled";
-  const entry=document.getElementById("journal-entry").value.trim();
-  const mood=document.getElementById("mood").value;
-  const tags=document.getElementById("tags").value;
-  if(!entry){showToast("Please write something."); return;}
-  const date=new Date().toLocaleString();
-  journalData.push({title,entry,mood,tags,date});
-  localStorage.setItem("journalData",JSON.stringify(journalData));
-  document.getElementById("journal-entry").value='';
-  document.getElementById("entry-title").value='';
-  document.getElementById("tags").value='';
-  loadHistory();
-  showToast("Entry saved!");
+function closeDeleteModal(){
+  document.getElementById("deleteModal").classList.remove("active");
+  deleteIndex = null;
+}
+
+async function confirmDelete() {
+  if (deleteIndex === null || !journalData[deleteIndex]) {
+    closeDeleteModal();
+    return;
+  }
+
+  const entryId = journalData[deleteIndex].id;
+
+  try {
+    const res = await fetch(`/api/journals/${entryId}`, {
+      method: "DELETE",
+    });
+
+    if (!res.ok) throw new Error("Delete failed");
+
+    showToast("Entry deleted 🗑️");
+    await loadHistory(); // reload from backend
+
+  } catch (err) {
+    console.error(err);
+    showToast("Could not delete entry.");
+  }
+
+  closeDeleteModal();
+}
+
+async function saveEntry() {
+  const title =
+    document.getElementById("entry-title").value.trim() || "Untitled";
+  const entry =
+    document.getElementById("journal-entry").value.trim();
+  const mood =
+    document.getElementById("moodSelect").value;
+  const tags =
+    document.getElementById("tags").value;
+
+  if (!entry) {
+    showToast("Please write something.");
+    return;
+  }
+
+  try {
+    const res = await fetch("/journaling", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        title,
+        content: entry,
+        mood,
+        tags,
+      }),
+    });
+
+    if (!res.ok) throw new Error("Save/job failed");
+
+    // Clear inputs
+    document.getElementById("journal-entry").value = "";
+    document.getElementById("entry-title").value = "";
+    document.getElementById("tags").value = "";
+
+    // Refresh history from backend
+    await loadHistory();
+
+    showToast("Entry saved!");
+    localStorage.removeItem(JOURNAL_DRAFT_KEY);
+
+  } catch (err) {
+    console.error(err);
+    showToast("Could not save entry. Please try again.");
+  }
 }
 
 function searchJournal(query){
@@ -386,12 +786,16 @@ function changeFont(font){ document.getElementById("journal-entry").style.fontFa
 function readAloud(){
   const text=document.getElementById("journal-entry").value;
   if(!text){ showToast("No text to read."); return; }
-  const utter=new SpeechSynthesisUtterance(text);
-  utter.voice=speechSynthesis.getVoices()[0];
+  const utter = new SpeechSynthesisUtterance(text);
+  utter.lang = detectJournalLanguage(text);
   speechSynthesis.speak(utter);
   showToast("Reading aloud...");
 }
 
+function detectJournalLanguage(text) {
+  // Hindi vs English
+  return /[ऀ-ॿ]/.test(text) ? "hi-IN" : "en-IN";
+}
 let recognition, recognizing=false;
 function toggleDictation(){
   const SpeechRecognition=window.SpeechRecognition||window.webkitSpeechRecognition;
@@ -399,7 +803,10 @@ function toggleDictation(){
   if(!recognition){
     recognition=new SpeechRecognition();
     recognition.continuous=true;
-    recognition.lang="en-US";
+    recognition.lang = detectJournalLanguage(
+  document.getElementById("journal-entry").value || ""
+);
+
     recognition.onresult=(e)=>{
       for(let i=e.resultIndex;i<e.results.length;i++){
         if(e.results[i].isFinal)
@@ -424,35 +831,82 @@ function toggleDictation(){
   }
 }
 
-// --- Export PDF ---
-function exportPDF(){
-  const { jsPDF }=window.jspdf;
-  const doc=new jsPDF();
-  journalData.forEach((entry,idx)=>{
-    doc.setFontSize(12);
-    doc.text(`Entry ${idx+1}: ${entry.title} [${entry.mood}] - ${entry.date}`,10,10+idx*50);
-    doc.text(entry.entry,10,20+idx*50);
-    if(entry.tags) doc.text(`Tags: ${entry.tags}`,10,30+idx*50);
-    if(idx<journalData.length-1) doc.addPage();
-  });
-  doc.save("Theramind_Journal.pdf");
-  showToast("PDF exported!");
+async function exportPDF() {
+  try {
+    const res = await fetch("/api/history/journals");
+    if (!res.ok) throw new Error("Failed to fetch journals");
+
+    const journalData = await res.json();
+
+    if (!journalData.length) {
+      showToast("No entries to export.");
+      return;
+    }
+
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF();
+
+    journalData.forEach((entry, idx) => {
+      doc.setFontSize(12);
+      doc.text(
+        `Entry ${idx + 1} – ${entry.mood || ""} – ${entry.date}`,
+        10,
+        15
+      );
+      doc.setFontSize(10);
+      doc.text(entry.entry || "", 10, 25, { maxWidth: 180 });
+
+      if (entry.tags) {
+        doc.text(`Tags: ${entry.tags}`, 10, 40);
+      }
+
+      if (idx < journalData.length - 1) doc.addPage();
+    });
+
+    doc.save("Theramind_Journal.pdf");
+    showToast("PDF exported!");
+
+  } catch (err) {
+    console.error(err);
+    showToast("Could not export PDF.");
+  }
 }
 
-// --- Export JSON ---
-function exportAll(){
-  if(!journalData.length){ showToast("No entries to export."); return; }
-  const blob=new Blob([JSON.stringify(journalData,null,2)],{type:"application/json"});
-  const url=URL.createObjectURL(blob);
-  const a=document.createElement("a");
-  a.href=url;
-  a.download="Theramind_Journal.json";
-  document.body.appendChild(a);
-  a.click();
-  document.body.removeChild(a);
-  URL.revokeObjectURL(url);
-  showToast("All entries exported!");
+async function exportAll() {
+  try {
+    const res = await fetch("/api/history/journals");
+    if (!res.ok) throw new Error("Failed to fetch journals");
+
+    const journalData = await res.json();
+
+    if (!journalData.length) {
+      showToast("No entries to export.");
+      return;
+    }
+
+    const blob = new Blob(
+      [JSON.stringify(journalData, null, 2)],
+      { type: "application/json" }
+    );
+
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "Theramind_Journal.json";
+
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+
+    showToast("All entries exported!");
+
+  } catch (err) {
+    console.error(err);
+    showToast("Could not export entries.");
+  }
 }
+
 </script>
 </body>
 </html>

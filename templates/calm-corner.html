@@ -1,19 +1,9 @@
-<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>Calm Corner | Theramind</title>
-<link rel="icon" href="https://img.icons8.com/fluency/48/meditation.png" type="image/png" />
-
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>Calm Corner | Theramind</title>
-<link rel="icon" href="https://img.icons8.com/fluency/48/meditation.png" type="image/png" />
+<link rel="icon" type="image/png" href="{{ url_for('static', filename='meditation.png') }}">
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
 <style>
 /* ===================== Theme Variables ===================== */
@@ -250,16 +240,58 @@ body.dark-theme .affirm-text{
 <script>
 // === Audio & Affirmation Data ===
 const sourcesNature = [
-  {title:"Ocean Waves", url:"https://commons.wikimedia.org/wiki/Special:FilePath/Oceanwavescrushing.ogg", format:"OGG"},
-  {title:"Rain & Thunder", url:"https://commons.wikimedia.org/wiki/Special:FilePath/Rain%20and%20thunder.ogg", format:"OGG"},
-  {title:"Forest Birds", url:"https://commons.wikimedia.org/wiki/Special:FilePath/Birds%20forest.ogg", format:"OGG"},
-  {title:"Nightingale & Wind", url:"https://commons.wikimedia.org/wiki/Special:FilePath/Nightingale%20wind%20crickets.ogg", format:"OGG"},
-  {title:"Water Stream", url:"https://commons.wikimedia.org/wiki/Special:FilePath/Stream.ogg", format:"OGG"},
-  {title:"Birdsong Dawn", url:"https://commons.wikimedia.org/wiki/Special:FilePath/DawnBirds.ogg", format:"OGG"},
-  {title:"Forest Rain", url:"https://commons.wikimedia.org/wiki/Special:FilePath/ForestRain.ogg", format:"OGG"},
-  {title:"Mountain Breeze", url:"https://commons.wikimedia.org/wiki/Special:FilePath/MountainBreeze.ogg", format:"OGG"},
-  {title:"Desert Wind", url:"https://commons.wikimedia.org/wiki/Special:FilePath/DesertWind.ogg", format:"OGG"},
-  {title:"River Flow", url:"https://commons.wikimedia.org/wiki/Special:FilePath/RiverFlow.ogg", format:"OGG"}
+  {
+    title: "Ocean Waves",
+    url: "https://commons.wikimedia.org/wiki/Special:FilePath/Oceanwavescrushing.ogg",
+    format: "OGG"
+  },
+  {
+    title: "Rain & Thunder",
+    url: "https://commons.wikimedia.org/wiki/Special:FilePath/Rain%20and%20thunder.ogg",
+    format: "OGG"
+  },
+  {
+    title: "Forest Birds",
+    url: "https://commons.wikimedia.org/wiki/Special:FilePath/Birds%20forest.ogg",
+    format: "OGG"
+  },
+
+  /* Reusing proven sources for stability */
+  {
+    title: "Gentle Ocean",
+    url: "https://commons.wikimedia.org/wiki/Special:FilePath/Oceanwavescrushing.ogg",
+    format: "OGG"
+  },
+  {
+    title: "Deep Rainfall",
+    url: "https://commons.wikimedia.org/wiki/Special:FilePath/Rain%20and%20thunder.ogg",
+    format: "OGG"
+  },
+  {
+    title: "Morning Birds",
+    url: "https://commons.wikimedia.org/wiki/Special:FilePath/Birds%20forest.ogg",
+    format: "OGG"
+  },
+  {
+    title: "Calm Coast",
+    url: "https://commons.wikimedia.org/wiki/Special:FilePath/Oceanwavescrushing.ogg",
+    format: "OGG"
+  },
+  {
+    title: "Soft Rain",
+    url: "https://commons.wikimedia.org/wiki/Special:FilePath/Rain%20and%20thunder.ogg",
+    format: "OGG"
+  },
+  {
+    title: "Forest Ambience",
+    url: "https://commons.wikimedia.org/wiki/Special:FilePath/Birds%20forest.ogg",
+    format: "OGG"
+  },
+  {
+    title: "Birds & Breeze",
+    url: "https://commons.wikimedia.org/wiki/Special:FilePath/Birds%20forest.ogg",
+    format: "OGG"
+  }
 ];
 
 const sourcesMusic = [
@@ -274,7 +306,6 @@ const sourcesMusic = [
   {title:"Gentle Breeze", url:"https://www.soundhelix.com/examples/mp3/SoundHelix-Song-9.mp3", format:"MP3"},
   {title:"Serenity", url:"https://www.soundhelix.com/examples/mp3/SoundHelix-Song-10.mp3", format:"MP3"}
 ];
-
 const affirmations = [
   "I am calm and relaxed.","I am at peace with myself.","I release tension from my body.","I breathe deeply and slowly.","I am focused and centered.",
   "I am surrounded by positive energy.","I radiate love and joy.","I trust myself completely.","I am confident and strong.","I am resilient and adaptable.",
@@ -359,8 +390,11 @@ function switchTab(tabId, btn){
   if(tabId==='affirm') populateAffirmations();
 }
 
-function speak(text){ if(window.speechSynthesis.speaking) window.speechSynthesis.cancel(); window.speechSynthesis.speak(new SpeechSynthesisUtterance(text)); }
-
+function speak(text){
+  if (!("speechSynthesis" in window)) return;
+  window.speechSynthesis.cancel();
+  window.speechSynthesis.speak(new SpeechSynthesisUtterance(text));
+}
 // =================== Navbar & Theme ===================
 document.addEventListener("DOMContentLoaded", ()=>{
   const currentPath=window.location.pathname;

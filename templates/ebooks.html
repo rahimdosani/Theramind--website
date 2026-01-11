@@ -1,265 +1,713 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Theramind - E-Books</title>
-<link rel="icon" href="https://img.icons8.com/fluency/48/open-book.png" type="image/png" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Theramind – E-Books</title>
+ <link rel="icon" type="image/png" href="{{ url_for('static', filename='books.png') }}">
+  <!-- Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
 
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
-<script src="https://cdn.jsdelivr.net/npm/tsparticles@2.11.1/tsparticles.bundle.min.js"></script>
-<style>
-:root {
-  --background: #ffffff;
-  --foreground: #111111;
-  --primary: #4f46e5;
-  --accent: #06b6d4;
-  --sidebar-bg: rgba(255,255,255,0.55);
-  --glass-blur: blur(16px) saturate(180%);
-  --button-color: #111;
-}
-body.dark-theme {
-  --background: #0d0d0f;
-  --foreground: #f0f0f0;
-  --primary: #6366f1;
-  --accent: #67e8f9;
-  --sidebar-bg: rgba(30,30,30,0.55);
-  --button-color: #fff;
-}
-*{margin:0;padding:0;box-sizing:border-box;}
-body{
-  font-family:'Poppins',sans-serif;
-  background:var(--background);
-  color:var(--foreground);
-  min-height:100vh;
-  overflow-x:hidden;
-  transition: background 0.3s, color 0.3s;
-}
-.tm-nav {
-  display:flex; align-items:center; justify-content:space-between;
-  height:75px; padding:0 2rem;
-  background: var(--sidebar-bg);
-  backdrop-filter: var(--glass-blur);
-  box-shadow: 0 6px 25px rgba(0,0,0,0.15);
-  position: sticky; top:0; z-index:1000;
-}
-.tm-brand { display:flex; align-items:center; gap:0.75rem; font-weight:700; font-size:1.4rem; color: var(--foreground); text-decoration:none; }
-.tm-brand img { height:36px; }
-.tm-navlinks { display:flex; gap:1.5rem; align-items:center; flex-wrap:wrap; }
-.tm-navlinks a { text-decoration:none; font-weight:600; color: var(--primary); position: relative; transition: color 0.3s; }
-.tm-navlinks a:hover { color: var(--accent); }
-.tm-navlinks a.active::after { content:''; position:absolute; bottom:-6px; left:0; width:100%; height:3px; background: var(--primary); border-radius:4px; }
-.theme-toggle { cursor:pointer; font-size:0.9rem; background: linear-gradient(135deg,var(--primary),var(--accent)); padding:6px 10px; border-radius:6px; color: var(--button-color); transition:0.3s; }
-.theme-toggle:hover { opacity:0.85; }
-@media (max-width:768px){
-  .tm-nav { flex-direction:column; align-items:flex-start; height:auto; padding:1rem; }
-  .tm-navlinks { flex-direction:column; align-items:flex-start; width:100%; gap:0.6rem; margin-top:0.5rem; }
-  .theme-toggle { align-self:flex-start; margin-top:0.5rem; }
-}
-#tsparticles { position: fixed; width: 100%; height: 100%; top:0; left:0; z-index:0; }
-.container { max-width:1200px; margin:100px auto 60px; padding:0 20px; position:relative; z-index:2; }
-h1.page-title { text-align:center; font-size:2.4rem; margin-bottom:20px; }
-blockquote { font-size:1.2rem; font-style:italic; text-align:center; margin:20px auto; padding:10px 20px; border-left:4px solid var(--primary); max-width:800px; }
-.books-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(180px,1fr)); gap:24px; }
-.book-card {
-  background: rgba(255,255,255,0.2);
-  border-radius:16px;
-  overflow:hidden;
-  box-shadow:0 8px 20px rgba(0,0,0,0.15);
-  text-align:center;
-  transition: transform 0.3s, box-shadow 0.3s;
-  backdrop-filter: blur(6px);
-}
-.book-card:hover { transform: translateY(-5px) scale(1.02); box-shadow:0 12px 28px rgba(0,0,0,0.25); }
-.book-card img { width:100%; height:260px; object-fit:cover; display:block; }
-.book-info { padding:10px 8px 16px; }
-.book-info h3 { font-size:1rem; margin:8px 0 4px; }
-.book-info p { font-size:0.85rem; color:#666; }
-.book-info a { display:inline-block; margin-top:8px; background-color:var(--primary); color:#fff; padding:6px 14px; border-radius:8px; text-decoration:none; font-weight:600; font-size:0.9rem; }
-.book-info a:hover { background-color:#3e53cc; }
-body.dark-theme .book-card { background: rgba(30,30,30,0.6); }
-body.dark-theme .book-info p { color:#ccc; }
-/* ===================== Responsive Overrides ===================== */
-@media (max-width:1024px){
-  .container { margin:80px auto 40px; padding:0 15px; }
-  h1.page-title { font-size:2rem; }
-  blockquote { font-size:1.1rem; padding:8px 16px; }
-}
+  <!-- tsParticles -->
+  <script src="https://cdn.jsdelivr.net/npm/tsparticles@2.11.1/tsparticles.bundle.min.js"></script>
 
-@media (max-width:768px){
-  .tm-nav { flex-direction:column; align-items:flex-start; height:auto; padding:1rem; }
-  .tm-navlinks { flex-direction:column; width:100%; gap:0.6rem; margin-top:0.5rem; display:none; }
-  .tm-nav.show-links .tm-navlinks { display:flex; }
-  .theme-toggle { align-self:flex-start; margin-top:0.5rem; }
-  .tm-hamburger { display:block; font-size:1.5rem; cursor:pointer; margin-top:0.5rem; }
+  <style>
+    :root {
+      --background: #ffffff;
+      --foreground: #111111;
+      --primary: #4f46e5;
+      --accent: #06b6d4;
+      --sidebar-bg: rgba(255,255,255,0.55);
+      --glass-blur: blur(16px) saturate(180%);
+      --button-color: #111;
+    }
+    body.dark-theme {
+      --background: #0d0d0f;
+      --foreground: #f0f0f0;
+      --primary: #6366f1;
+      --accent: #67e8f9;
+      --sidebar-bg: rgba(30,30,30,0.55);
+      --button-color: #fff;
+    }
 
-  .books-grid { grid-template-columns:repeat(auto-fill,minmax(140px,1fr)); gap:16px; }
-  .book-card img { height:200px; }
-  .book-info h3 { font-size:0.95rem; }
-  .book-info p { font-size:0.8rem; }
-  .book-info a { font-size:0.85rem; padding:5px 12px; }
-}
+    * { margin:0; padding:0; box-sizing:border-box; }
 
-@media (max-width:480px){
-  h1.page-title { font-size:1.6rem; margin-bottom:15px; }
-  blockquote { font-size:1rem; padding:6px 12px; }
-  .books-grid { grid-template-columns:repeat(auto-fill,minmax(120px,1fr)); gap:12px; }
-  .book-card img { height:160px; }
-  .book-info h3 { font-size:0.85rem; }
-  .book-info p { font-size:0.75rem; }
-  .book-info a { font-size:0.8rem; padding:4px 10px; }
-}
+    body {
+      font-family: 'Poppins', sans-serif;
+      background: var(--background);
+      color: var(--foreground);
+      min-height: 100vh;
+      overflow-x: hidden;
+      transition: background 0.3s, color 0.3s;
+    }
 
+    /* ===================== Navbar ===================== */
+    .tm-nav {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 75px;
+      padding: 0 2rem;
+      background: var(--sidebar-bg);
+      backdrop-filter: var(--glass-blur);
+      box-shadow: 0 6px 25px rgba(0,0,0,0.15);
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+    }
 
-</style>
+    .tm-brand {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      font-weight: 700;
+      font-size: 1.4rem;
+      color: var(--foreground);
+      text-decoration: none;
+    }
+
+    .tm-brand img { height: 36px; }
+
+    .tm-navlinks {
+      display: flex;
+      gap: 1.5rem;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .tm-navlinks a {
+      text-decoration: none;
+      font-weight: 600;
+      color: var(--primary);
+      position: relative;
+      transition: color 0.3s;
+    }
+
+    .tm-navlinks a:hover { color: var(--accent); }
+
+    .tm-navlinks a.active::after {
+      content: '';
+      position: absolute;
+      bottom: -6px;
+      left: 0;
+      width: 100%;
+      height: 3px;
+      background: var(--primary);
+      border-radius: 4px;
+    }
+
+    .theme-toggle {
+      cursor: pointer;
+      font-size: 0.9rem;
+      background: linear-gradient(135deg, var(--primary), var(--accent));
+      padding: 6px 10px;
+      border-radius: 6px;
+      color: var(--button-color);
+      transition: 0.3s;
+    }
+
+    .theme-toggle:hover { opacity: 0.85; }
+
+    .tm-hamburger {
+      display: none;
+      font-size: 1.5rem;
+      cursor: pointer;
+      margin-top: 0.5rem;
+    }
+
+    /* ===================== Particles ===================== */
+    #tsparticles {
+      position: fixed;
+      width: 100%;
+      height: 100%;
+      top: 0;
+      left: 0;
+      z-index: 0;
+      pointer-events: none;
+    }
+
+    /* ===================== Layout ===================== */
+    .container {
+      max-width: 1200px;
+      margin: 100px auto 60px;
+      padding: 0 20px;
+      position: relative;
+      z-index: 2;
+    }
+
+    h1.page-title {
+      text-align: center;
+      font-size: 2.4rem;
+      margin-bottom: 20px;
+    }
+
+    blockquote {
+      font-size: 1.2rem;
+      font-style: italic;
+      text-align: center;
+      margin: 20px auto;
+      padding: 10px 20px;
+      border-left: 4px solid var(--primary);
+      max-width: 800px;
+    }
+
+    .books-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+      gap: 24px;
+    }
+
+    .book-card {
+      background: rgba(255,255,255,0.2);
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+      text-align: center;
+      transition: transform 0.3s, box-shadow 0.3s;
+      backdrop-filter: blur(6px);
+    }
+
+    .book-card:hover {
+      transform: translateY(-5px) scale(1.02);
+      box-shadow: 0 12px 28px rgba(0,0,0,0.25);
+    }
+
+    .book-card img {
+      width: 100%;
+      height: 260px;
+      object-fit: cover;
+      display: block;
+    }
+
+    .book-info {
+      padding: 10px 8px 16px;
+    }
+
+    .book-info h3 {
+      font-size: 1rem;
+      margin: 8px 0 4px;
+    }
+
+    .book-info p {
+      font-size: 0.85rem;
+      color: #666;
+    }
+
+    .book-info a {
+      display: inline-block;
+      margin-top: 8px;
+      background-color: var(--primary);
+      color: #fff;
+      padding: 6px 14px;
+      border-radius: 8px;
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 0.9rem;
+    }
+
+    .book-info a:hover { background-color: #3e53cc; }
+
+    body.dark-theme .book-card { background: rgba(30,30,30,0.6); }
+    body.dark-theme .book-info p { color: #ccc; }
+
+    /* ===================== Responsive ===================== */
+    @media (max-width: 1024px) {
+      .container {
+        margin: 80px auto 40px;
+        padding: 0 15px;
+      }
+      h1.page-title { font-size: 2rem; }
+      blockquote { font-size: 1.1rem; padding: 8px 16px; }
+    }
+
+    @media (max-width: 768px) {
+      .tm-nav {
+        flex-direction: column;
+        align-items: flex-start;
+        height: auto;
+        padding: 1rem;
+      }
+
+      .tm-navlinks {
+        flex-direction: column;
+        align-items: flex-start;
+        width: 100%;
+        gap: 0.6rem;
+        margin-top: 0.5rem;
+        display: none;
+      }
+
+      .tm-nav.show-links .tm-navlinks {
+        display: flex;
+      }
+
+      .theme-toggle {
+        align-self: flex-start;
+        margin-top: 0.5rem;
+      }
+
+      .tm-hamburger {
+        display: block;
+      }
+
+      .books-grid {
+        grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+        gap: 16px;
+      }
+
+      .book-card img { height: 200px; }
+      .book-info h3 { font-size: 0.95rem; }
+      .book-info p { font-size: 0.8rem; }
+      .book-info a {
+        font-size: 0.85rem;
+        padding: 5px 12px;
+      }
+    }
+
+    @media (max-width: 480px) {
+      h1.page-title {
+        font-size: 1.6rem;
+        margin-bottom: 15px;
+      }
+
+      blockquote {
+        font-size: 1rem;
+        padding: 6px 12px;
+      }
+
+      .books-grid {
+        grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+        gap: 12px;
+      }
+
+      .book-card img { height: 160px; }
+      .book-info h3 { font-size: 0.85rem; }
+      .book-info p { font-size: 0.75rem; }
+      .book-info a {
+        font-size: 0.8rem;
+        padding: 4px 10px;
+      }
+    }
+  </style>
 </head>
 <body>
-<div id="tsparticles"></div>
+  <div id="tsparticles"></div>
 
-<header class="tm-nav">
-  <a class="tm-brand" href="/home">
-    <img src="https://img.icons8.com/fluency/48/brain.png" alt="Theramind Logo">
-    <span>Theramind</span>
-  </a>
-  <div class="tm-hamburger">☰</div>
-  <nav class="tm-navlinks">
-    <a href="/">🏠 Home</a>
-    <a href="/index">💬 Chat</a>
-    <a href="/journaling">📓 Journal</a>
-    <a href="/breathing">🫁 Breathing</a>
-    <a href="/pick-a-peace">📃 Pick-a-Peace</a>
-    <a href="/calm-corner">🧘 Calm Corner</a>
-    <a href="/ebooks" class="active">📚 E-Books</a>
-    <a href="/history">🕰️ History</a>
-  </nav>
-  <div class="theme-toggle" id="themeToggle">🌙 Theme</div>
-</header>
+  <header class="tm-nav">
+    <a class="tm-brand" href="/">
+      <img src="https://img.icons8.com/fluency/48/brain.png" alt="Theramind Logo">
+      <span>Theramind</span>
+    </a>
+    <div class="tm-hamburger">☰</div>
+    <nav class="tm-navlinks">
+      <a href="/">🏠 Home</a>
+      <a href="/index">💬 Chat</a>
+      <a href="/journaling">📓 Journal</a>
+      <a href="/breathing">🫁 Breathing</a>
+      <a href="/pick-a-peace">📃 Pick-a-Peace</a>
+      <a href="/calm-corner">🧘 Calm Corner</a>
+      <a href="/ebooks" class="active">📚 E-Books</a>
+      <a href="/history">🕰️ History</a>
+    </nav>
+    <div class="theme-toggle" id="themeToggle">🌙 Theme</div>
+  </header>
 
-<div class="container">
-  <h1 class="page-title">E-Books Library</h1>
-  <blockquote>"A room without books is like a body without a soul." – Marcus Tullius Cicero</blockquote>
-  <div class="books-grid" id="booksGrid"></div>
-</div>
+  <div class="container">
+    <h1 class="page-title">E-Books Library</h1>
+    <blockquote>“A room without books is like a body without a soul.” – Marcus Tullius Cicero</blockquote>
+    <div class="books-grid" id="booksGrid"></div>
+  </div>
 
-<script>
-tsParticles.load("tsparticles", {
-  fullScreen: { enable:true },
-  background: { color:{value:"transparent"} },
-  particles: {
-    number:{value:60},
-    color:{value:"#aab8ff"},
-    shape:{type:"circle"},
-    opacity:{value:0.3},
-    size:{value:2},
-    move:{enable:true,speed:1},
-    links:{enable:true,color:"#aab8ff",distance:120,opacity:0.4,width:1}
-  }
-});
+  <script>
+    // Particles
+    tsParticles.load("tsparticles", {
+      fullScreen: { enable: false },
+      background: { color: { value: "transparent" } },
+      particles: {
+        number: { value: 60 },
+        color: { value: "#aab8ff" },
+        shape: { type: "circle" },
+        opacity: { value: 0.3 },
+        size: { value: 2 },
+        move: { enable: true, speed: 1 },
+        links: {
+          enable: true,
+          color: "#aab8ff",
+          distance: 120,
+          opacity: 0.4,
+          width: 1
+        }
+      }
+    });
 
-document.addEventListener("DOMContentLoaded", () => {
-  // Activate current nav link
-  const currentPath = window.location.pathname;
-  document.querySelectorAll(".tm-navlinks a").forEach(link => {
-    if(currentPath.includes(link.getAttribute("href"))) link.classList.add("active");
-  });
+    document.addEventListener("DOMContentLoaded", () => {
+      // Active nav link
+      const currentPath = window.location.pathname;
+      document.querySelectorAll(".tm-navlinks a").forEach(link => {
+        if (currentPath === link.getAttribute("href")) {
+          link.classList.add("active");
+        }
+      });
 
-  // Theme toggle
-  const themeBtn = document.getElementById("themeToggle");
-  if(localStorage.getItem("theme") === "dark") {
-    document.body.classList.add("dark-theme");
-    themeBtn.textContent = "☀️ Theme";
-  }
-  themeBtn.addEventListener("click", () => {
-    document.body.classList.toggle("dark-theme");
-    const isDark = document.body.classList.contains("dark-theme");
-    localStorage.setItem("theme", isDark ? "dark" : "light");
-    themeBtn.textContent = isDark ? "☀️ Theme" : "🌙 Theme";
-  });
+      // Theme toggle
+      const themeBtn = document.getElementById("themeToggle");
+      if (localStorage.getItem("theme") === "dark") {
+        document.body.classList.add("dark-theme");
+        themeBtn.textContent = "☀️ Theme";
+      }
 
-  // Hamburger menu
-  const hamburger = document.querySelector('.tm-hamburger');
-  const nav = document.querySelector('.tm-nav');
-  function updateHamburgerVisibility() {
-    if(window.innerWidth <= 768) {
-      hamburger.style.display = 'block';
-    } else {
-      hamburger.style.display = 'none';
-      nav.classList.remove('show-links');
-    }
-  }
-  hamburger.addEventListener('click', () => { nav.classList.toggle('show-links'); });
-  updateHamburgerVisibility();
-  window.addEventListener('resize', updateHamburgerVisibility);
+      themeBtn.addEventListener("click", () => {
+        document.body.classList.toggle("dark-theme");
+        const isDark = document.body.classList.contains("dark-theme");
+        localStorage.setItem("theme", isDark ? "dark" : "light");
+        themeBtn.textContent = isDark ? "☀️ Theme" : "🌙 Theme";
+      });
+
+      // Hamburger menu
+      const hamburger = document.querySelector(".tm-hamburger");
+      const nav = document.querySelector(".tm-nav");
+
+      function updateHamburgerVisibility() {
+        if (window.innerWidth <= 768) {
+          hamburger.style.display = "block";
+        } else {
+          hamburger.style.display = "none";
+          nav.classList.remove("show-links");
+        }
+      }
+
+      hamburger.addEventListener("click", () => {
+        nav.classList.toggle("show-links");
+      });
+
+      updateHamburgerVisibility();
+      window.addEventListener("resize", updateHamburgerVisibility);
+
+      // E-books data (same as your original list)
     const books = [
-  {"title":"Pride and Prejudice","author":"Jane Austen","cover":"https://www.gutenberg.org/cache/epub/1342/pg1342.cover.medium.jpg","link":"https://www.gutenberg.org/ebooks/1342"},
-  {"title":"The Adventures of Sherlock Holmes","author":"Arthur Conan Doyle","cover":"https://www.gutenberg.org/cache/epub/1661/pg1661.cover.medium.jpg","link":"https://www.gutenberg.org/ebooks/1661"},
-  {"title":"Alice's Adventures in Wonderland","author":"Lewis Carroll","cover":"https://www.gutenberg.org/cache/epub/11/pg11.cover.medium.jpg","link":"https://www.gutenberg.org/ebooks/11"},
-  {"title":"Dracula","author":"Bram Stoker","cover":"https://www.gutenberg.org/cache/epub/345/pg345.cover.medium.jpg","link":"https://www.gutenberg.org/ebooks/345"},
-  {"title":"Frankenstein","author":"Mary Shelley","cover":"https://www.gutenberg.org/cache/epub/84/pg84.cover.medium.jpg","link":"https://www.gutenberg.org/ebooks/84"},
-  {"title":"The Picture of Dorian Gray","author":"Oscar Wilde","cover":"https://www.gutenberg.org/cache/epub/174/pg174.cover.medium.jpg","link":"https://www.gutenberg.org/ebooks/174"},
-  {"title":"Moby Dick","author":"Herman Melville","cover":"https://www.gutenberg.org/cache/epub/2701/pg2701.cover.medium.jpg","link":"https://www.gutenberg.org/ebooks/2701"},
-  {"title":"Great Expectations","author":"Charles Dickens","cover":"https://www.gutenberg.org/cache/epub/1400/pg1400.cover.medium.jpg","link":"https://www.gutenberg.org/ebooks/1400"},
-  {"title":"Jane Eyre","author":"Charlotte Brontë","cover":"https://www.gutenberg.org/cache/epub/1260/pg1260.cover.medium.jpg","link":"https://www.gutenberg.org/ebooks/1260"},
-  {"title":"Wuthering Heights","author":"Emily Brontë","cover":"https://www.gutenberg.org/cache/epub/768/pg768.cover.medium.jpg","link":"https://www.gutenberg.org/ebooks/768"},
-  {"title":"The Count of Monte Cristo","author":"Alexandre Dumas","cover":"https://www.gutenberg.org/cache/epub/1184/pg1184.cover.medium.jpg","link":"https://www.gutenberg.org/ebooks/1184"},
-  {"title":"Les Misérables","author":"Victor Hugo","cover":"https://www.gutenberg.org/cache/epub/135/pg135.cover.medium.jpg","link":"https://www.gutenberg.org/ebooks/135"},
-  {"title":"Anna Karenina","author":"Leo Tolstoy","cover":"https://www.gutenberg.org/cache/epub/1399/pg1399.cover.medium.jpg","link":"https://www.gutenberg.org/ebooks/1399"},
-  {"title":"War and Peace","author":"Leo Tolstoy","cover":"https://www.gutenberg.org/cache/epub/2600/pg2600.cover.medium.jpg","link":"https://www.gutenberg.org/ebooks/2600"},
-  {"title":"A Tale of Two Cities","author":"Charles Dickens","cover":"https://www.gutenberg.org/cache/epub/98/pg98.cover.medium.jpg","link":"https://www.gutenberg.org/ebooks/98"},
-  {"title":"The Adventures of Tom Sawyer","author":"Mark Twain","cover":"https://www.gutenberg.org/cache/epub/74/pg74.cover.medium.jpg","link":"https://www.gutenberg.org/ebooks/74"},
-  {"title":"Adventures of Huckleberry Finn","author":"Mark Twain","cover":"https://www.gutenberg.org/cache/epub/76/pg76.cover.medium.jpg","link":"https://www.gutenberg.org/ebooks/76"},
-  {"title":"Treasure Island","author":"Robert Louis Stevenson","cover":"https://www.gutenberg.org/cache/epub/120/pg120.cover.medium.jpg","link":"https://www.gutenberg.org/ebooks/120"},
-  {"title":"The War of the Worlds","author":"H.G. Wells","cover":"https://www.gutenberg.org/cache/epub/36/pg36.cover.medium.jpg","link":"https://www.gutenberg.org/ebooks/36"},
-  {"title":"The Time Machine","author":"H.G. Wells","cover":"https://www.gutenberg.org/cache/epub/35/pg35.cover.medium.jpg","link":"https://www.gutenberg.org/ebooks/35"},
-  {"title":"Journey to the Center of the Earth","author":"Jules Verne","cover":"https://www.gutenberg.org/cache/epub/18857/pg18857.cover.medium.jpg","link":"https://www.gutenberg.org/ebooks/18857"},
-  {"title":"Twenty Thousand Leagues Under the Sea","author":"Jules Verne","cover":"https://www.gutenberg.org/cache/epub/164/pg164.cover.medium.jpg","link":"https://www.gutenberg.org/ebooks/164"},
-  {"title":"Around the World in 80 Days","author":"Jules Verne","cover":"https://www.gutenberg.org/cache/epub/103/pg103.cover.medium.jpg","link":"https://www.gutenberg.org/ebooks/103"},
-  {"title":"The Invisible Man","author":"H.G. Wells","cover":"https://www.gutenberg.org/cache/epub/5230/pg5230.cover.medium.jpg","link":"https://www.gutenberg.org/ebooks/5230"},
-  {"title":"The Call of the Wild","author":"Jack London","cover":"https://www.gutenberg.org/cache/epub/215/pg215.cover.medium.jpg","link":"https://www.gutenberg.org/ebooks/215"},
-  {"title":"White Fang","author":"Jack London","cover":"https://www.gutenberg.org/cache/epub/910/pg910.cover.medium.jpg","link":"https://www.gutenberg.org/ebooks/910"},
-  {"title":"The Jungle Book","author":"Rudyard Kipling","cover":"https://www.gutenberg.org/cache/epub/236/pg236.cover.medium.jpg","link":"https://www.gutenberg.org/ebooks/236"},
-  {"title":"Kim","author":"Rudyard Kipling","cover":"https://www.gutenberg.org/cache/epub/244/pg244.cover.medium.jpg","link":"https://www.gutenberg.org/ebooks/244"},
-  {"title":"The Hound of the Baskervilles","author":"Arthur Conan Doyle","cover":"https://www.gutenberg.org/cache/epub/2852/pg2852.cover.medium.jpg","link":"https://www.gutenberg.org/ebooks/2852"},
-  {"title":"Heart of Darkness","author":"Joseph Conrad","cover":"https://www.gutenberg.org/cache/epub/219/pg219.cover.medium.jpg","link":"https://www.gutenberg.org/ebooks/219"},
-  {"title":"Lord of the Flies","author":"William Golding","cover":"https://www.gutenberg.org/cache/epub/111/pg111.cover.medium.jpg","link":"https://www.gutenberg.org/ebooks/111"},
-  {"title":"The Strange Case of Dr Jekyll and Mr Hyde","author":"Robert Louis Stevenson","cover":"https://www.gutenberg.org/cache/epub/43/pg43.cover.medium.jpg","link":"https://www.gutenberg.org/ebooks/43"},
-  {"title":"The Scarlet Letter","author":"Nathaniel Hawthorne","cover":"https://www.gutenberg.org/cache/epub/33/pg33.cover.medium.jpg","link":"https://www.gutenberg.org/ebooks/33"},
-  {"title":"Uncle Tom's Cabin","author":"Harriet Beecher Stowe","cover":"https://www.gutenberg.org/cache/epub/203/pg203.cover.medium.jpg","link":"https://www.gutenberg.org/ebooks/203"},
-  {"title":"The Wonderful Wizard of Oz","author":"L. Frank Baum","cover":"https://www.gutenberg.org/cache/epub/55/pg55.cover.medium.jpg","link":"https://www.gutenberg.org/ebooks/55"},
-  {"title":"The Prince","author":"Niccolò Machiavelli","cover":"https://www.gutenberg.org/cache/epub/1232/pg1232.cover.medium.jpg","link":"https://www.gutenberg.org/ebooks/1232"},
-  {"title":"Meditations","author":"Marcus Aurelius","cover":"https://www.gutenberg.org/cache/epub/2680/pg2680.cover.medium.jpg","link":"https://www.gutenberg.org/ebooks/2680"},
-  {"title":"Tales of the Grotesque and Arabesque","author":"Edgar Allan Poe","cover":"https://www.gutenberg.org/cache/epub/2148/pg2148.cover.medium.jpg","link":"https://www.gutenberg.org/ebooks/2148"},
-  {"title":"The Raven","author":"Edgar Allan Poe","cover":"https://www.gutenberg.org/cache/epub/1065/pg1065.cover.medium.jpg","link":"https://www.gutenberg.org/ebooks/1065"},
-  {"title":"The Complete Works of William Shakespeare","author":"William Shakespeare","cover":"https://www.gutenberg.org/cache/epub/100/pg100.cover.medium.jpg","link":"https://www.gutenberg.org/ebooks/100"},
-  {"title":"Emma","author":"Jane Austen","cover":"https://www.gutenberg.org/cache/epub/158/pg158.cover.medium.jpg","link":"https://www.gutenberg.org/ebooks/158"},
-  {"title":"Sense and Sensibility","author":"Jane Austen","cover":"https://www.gutenberg.org/cache/epub/161/pg161.cover.medium.jpg","link":"https://www.gutenberg.org/ebooks/161"},
-  {"title":"Northanger Abbey","author":"Jane Austen","cover":"https://www.gutenberg.org/cache/epub/121/pg121.cover.medium.jpg","link":"https://www.gutenberg.org/ebooks/121"},
-  {"title":"Persuasion","author":"Jane Austen","cover":"https://www.gutenberg.org/cache/epub/105/pg105.cover.medium.jpg","link":"https://www.gutenberg.org/ebooks/105"},
-  {"title":"Mansfield Park","author":"Jane Austen","cover":"https://www.gutenberg.org/cache/epub/141/pg141.cover.medium.jpg","link":"https://www.gutenberg.org/ebooks/141"},
-  {"title":"David Copperfield","author":"Charles Dickens","cover":"https://www.gutenberg.org/cache/epub/766/pg766.cover.medium.jpg","link":"https://www.gutenberg.org/ebooks/766"},
-  {"title":"Oliver Twist","author":"Charles Dickens","cover":"https://www.gutenberg.org/cache/epub/730/pg730.cover.medium.jpg","link":"https://www.gutenberg.org/ebooks/730"},
-  {"title":"Hard Times","author":"Charles Dickens","cover":"https://www.gutenberg.org/cache/epub/786/pg786.cover.medium.jpg","link":"https://www.gutenberg.org/ebooks/786"},
-  {"title":"Bleak House","author":"Charles Dickens","cover":"https://www.gutenberg.org/cache/epub/1023/pg1023.cover.medium.jpg","link":"https://www.gutenberg.org/ebooks/1023"}
+  {
+    title: "Meditations",
+    author: "Marcus Aurelius",
+    cover: "https://www.gutenberg.org/cache/epub/2680/pg2680.cover.medium.jpg",
+    link: "https://www.gutenberg.org/ebooks/2680"
+  },
+  {
+    title: "The Enchiridion",
+    author: "Epictetus",
+    cover: "https://www.gutenberg.org/cache/epub/45109/pg45109.cover.medium.jpg",
+    link: "https://www.gutenberg.org/ebooks/45109"
+  },
+  {
+    title: "Discourses",
+    author: "Epictetus",
+    cover: "https://www.gutenberg.org/cache/epub/45108/pg45108.cover.medium.jpg",
+    link: "https://www.gutenberg.org/ebooks/45108"
+  },
+  {
+    title: "Letters from a Stoic",
+    author: "Seneca",
+    cover: "https://www.gutenberg.org/cache/epub/3794/pg3794.cover.medium.jpg",
+    link: "https://www.gutenberg.org/ebooks/3794"
+  },
+  {
+    title: "On the Shortness of Life",
+    author: "Seneca",
+    cover: "https://www.gutenberg.org/cache/epub/56075/pg56075.cover.medium.jpg",
+    link: "https://www.gutenberg.org/ebooks/56075"
+  },
+  {
+    title: "The Tao Te Ching",
+    author: "Lao Tzu",
+    cover: "https://www.gutenberg.org/cache/epub/216/pg216.cover.medium.jpg",
+    link: "https://www.gutenberg.org/ebooks/216"
+  },
+  {
+    title: "The Art of Happiness",
+    author: "Epicurus",
+    cover: "https://www.gutenberg.org/cache/epub/49782/pg49782.cover.medium.jpg",
+    link: "https://www.gutenberg.org/ebooks/49782"
+  },
+  {
+    title: "The Consolation of Philosophy",
+    author: "Boethius",
+    cover: "https://www.gutenberg.org/cache/epub/14328/pg14328.cover.medium.jpg",
+    link: "https://www.gutenberg.org/ebooks/14328"
+  },
+  {
+    title: "Self-Reliance",
+    author: "Ralph Waldo Emerson",
+    cover: "https://www.gutenberg.org/cache/epub/16643/pg16643.cover.medium.jpg",
+    link: "https://www.gutenberg.org/ebooks/16643"
+  },
+  {
+    title: "Walden",
+    author: "Henry David Thoreau",
+    cover: "https://www.gutenberg.org/cache/epub/205/pg205.cover.medium.jpg",
+    link: "https://www.gutenberg.org/ebooks/205"
+  },
+  {
+    title: "Walking",
+    author: "Henry David Thoreau",
+    cover: "https://www.gutenberg.org/cache/epub/1022/pg1022.cover.medium.jpg",
+    link: "https://www.gutenberg.org/ebooks/1022"
+  },
+  {
+    title: "The Prophet",
+    author: "Kahlil Gibran",
+    cover: "https://www.gutenberg.org/cache/epub/58585/pg58585.cover.medium.jpg",
+    link: "https://www.gutenberg.org/ebooks/58585"
+  },
+  {
+    title: "Bhagavad Gita",
+    author: "Vyasa",
+    cover: "https://www.gutenberg.org/cache/epub/2388/pg2388.cover.medium.jpg",
+    link: "https://www.gutenberg.org/ebooks/2388"
+  },
+  {
+    title: "The Republic",
+    author: "Plato",
+    cover: "https://www.gutenberg.org/cache/epub/1497/pg1497.cover.medium.jpg",
+    link: "https://www.gutenberg.org/ebooks/1497"
+  },
+  {
+    title: "Apology of Socrates",
+    author: "Plato",
+    cover: "https://www.gutenberg.org/cache/epub/1656/pg1656.cover.medium.jpg",
+    link: "https://www.gutenberg.org/ebooks/1656"
+  },
+  {
+    title: "Phaedo",
+    author: "Plato",
+    cover: "https://www.gutenberg.org/cache/epub/1658/pg1658.cover.medium.jpg",
+    link: "https://www.gutenberg.org/ebooks/1658"
+  },
+  {
+    title: "Confessions",
+    author: "St. Augustine",
+    cover: "https://www.gutenberg.org/cache/epub/3296/pg3296.cover.medium.jpg",
+    link: "https://www.gutenberg.org/ebooks/3296"
+  },
+  {
+    title: "Utopia",
+    author: "Thomas More",
+    cover: "https://www.gutenberg.org/cache/epub/2130/pg2130.cover.medium.jpg",
+    link: "https://www.gutenberg.org/ebooks/2130"
+  },
+  {
+    title: "Enneads",
+    author: "Plotinus",
+    cover: "https://www.gutenberg.org/cache/epub/42930/pg42930.cover.medium.jpg",
+    link: "https://www.gutenberg.org/ebooks/42930"
+  },
+  {
+    title: "The Secret Garden",
+    author: "Frances Hodgson Burnett",
+    cover: "https://www.gutenberg.org/cache/epub/113/pg113.cover.medium.jpg",
+    link: "https://www.gutenberg.org/ebooks/113"
+  },
+  {
+    title: "Anne of Green Gables",
+    author: "L. M. Montgomery",
+    cover: "https://www.gutenberg.org/cache/epub/45/pg45.cover.medium.jpg",
+    link: "https://www.gutenberg.org/ebooks/45"
+  },
+  {
+    title: "The Blue Castle",
+    author: "L. M. Montgomery",
+    cover: "https://www.gutenberg.org/cache/epub/67979/pg67979.cover.medium.jpg",
+    link: "https://www.gutenberg.org/ebooks/67979"
+  },
+  {
+    title: "Heidi",
+    author: "Johanna Spyri",
+    cover: "https://www.gutenberg.org/cache/epub/1448/pg1448.cover.medium.jpg",
+    link: "https://www.gutenberg.org/ebooks/1448"
+  },
+  {
+    title: "Pollyanna",
+    author: "Eleanor H. Porter",
+    cover: "https://www.gutenberg.org/cache/epub/1450/pg1450.cover.medium.jpg",
+    link: "https://www.gutenberg.org/ebooks/1450"
+  },
+  {
+    title: "The Wind in the Willows",
+    author: "Kenneth Grahame",
+    cover: "https://www.gutenberg.org/cache/epub/289/pg289.cover.medium.jpg",
+    link: "https://www.gutenberg.org/ebooks/289"
+  },
+  {
+    title: "The Wonderful Wizard of Oz",
+    author: "L. Frank Baum",
+    cover: "https://www.gutenberg.org/cache/epub/55/pg55.cover.medium.jpg",
+    link: "https://www.gutenberg.org/ebooks/55"
+  },
+  {
+    title: "On the Happy Life",
+    author: "Seneca",
+    cover: "https://www.gutenberg.org/cache/epub/56076/pg56076.cover.medium.jpg",
+    link: "https://www.gutenberg.org/ebooks/56076"
+  },
+  {
+    title: "Of Peace of Mind",
+    author: "Seneca",
+    cover: "https://www.gutenberg.org/cache/epub/56077/pg56077.cover.medium.jpg",
+    link: "https://www.gutenberg.org/ebooks/56077"
+  },
+  {
+    title: "Fragments",
+    author: "Heraclitus",
+    cover: "https://www.gutenberg.org/cache/epub/39863/pg39863.cover.medium.jpg",
+    link: "https://www.gutenberg.org/ebooks/39863"
+  },
+  {
+    title: "The Analects",
+    author: "Confucius",
+    cover: "https://www.gutenberg.org/cache/epub/3330/pg3330.cover.medium.jpg",
+    link: "https://www.gutenberg.org/ebooks/3330"
+  },
+  {
+    title: "Taoist Yoga",
+    author: "Lu K'uan Yu",
+    cover: "https://www.gutenberg.org/cache/epub/54949/pg54949.cover.medium.jpg",
+    link: "https://www.gutenberg.org/ebooks/54949"
+  },
+  {
+    title: "Manual for Living",
+    author: "Epictetus",
+    cover: "https://www.gutenberg.org/cache/epub/45109/pg45109.cover.medium.jpg",
+    link: "https://www.gutenberg.org/ebooks/45109"
+  },
+  {
+    title: "Sayings of Marcus Aurelius",
+    author: "Marcus Aurelius",
+    cover: "https://www.gutenberg.org/cache/epub/2680/pg2680.cover.medium.jpg",
+    link: "https://www.gutenberg.org/ebooks/2680"
+  },
+  {
+    title: "The Imitation of Christ",
+    author: "Thomas à Kempis",
+    cover: "https://www.gutenberg.org/cache/epub/1653/pg1653.cover.medium.jpg",
+    link: "https://www.gutenberg.org/ebooks/1653"
+  },
+  {
+    title: "The Life of the Buddha",
+    author: "Asvaghosa",
+    cover: "https://www.gutenberg.org/cache/epub/32960/pg32960.cover.medium.jpg",
+    link: "https://www.gutenberg.org/ebooks/32960"
+  },
+  {
+    title: "Yoga Aphorisms of Patanjali",
+    author: "Patanjali",
+    cover: "https://www.gutenberg.org/cache/epub/2526/pg2526.cover.medium.jpg",
+    link: "https://www.gutenberg.org/ebooks/2526"
+  },
+  {
+    title: "Thoughts",
+    author: "Blaise Pascal",
+    cover: "https://www.gutenberg.org/cache/epub/18269/pg18269.cover.medium.jpg",
+    link: "https://www.gutenberg.org/ebooks/18269"
+  },
+  {
+    title: "A Treatise of Human Nature",
+    author: "David Hume",
+    cover: "https://www.gutenberg.org/cache/epub/4705/pg4705.cover.medium.jpg",
+    link: "https://www.gutenberg.org/ebooks/4705"
+  },
+  {
+    title: "The Practice of the Presence of God",
+    author: "Brother Lawrence",
+    cover: "https://www.gutenberg.org/cache/epub/5657/pg5657.cover.medium.jpg",
+    link: "https://www.gutenberg.org/ebooks/5657"
+  },
+  {
+    title: "Simple Living",
+    author: "Charles Wagner",
+    cover: "https://www.gutenberg.org/cache/epub/3953/pg3953.cover.medium.jpg",
+    link: "https://www.gutenberg.org/ebooks/3953"
+  },
+  {
+    title: "The Way of All Flesh (Essays)",
+    author: "Samuel Butler",
+    cover: "https://www.gutenberg.org/cache/epub/2084/pg2084.cover.medium.jpg",
+    link: "https://www.gutenberg.org/ebooks/2084"
+  },
+  {
+    title: "The Moral Letters to Lucilius",
+    author: "Seneca",
+    cover: "https://www.gutenberg.org/cache/epub/3794/pg3794.cover.medium.jpg",
+    link: "https://www.gutenberg.org/ebooks/3794"
+  },
+  {
+    title: "How to Live on 24 Hours a Day",
+    author: "Arnold Bennett",
+    cover: "https://www.gutenberg.org/cache/epub/2274/pg2274.cover.medium.jpg",
+    link: "https://www.gutenberg.org/ebooks/2274"
+  },
+  {
+    title: "The Power of Concentration",
+    author: "Theron Q. Dumont",
+    cover: "https://www.gutenberg.org/cache/epub/1726/pg1726.cover.medium.jpg",
+    link: "https://www.gutenberg.org/ebooks/1726"
+  },
+  {
+    title: "As a Man Thinketh",
+    author: "James Allen",
+    cover: "https://www.gutenberg.org/cache/epub/4507/pg4507.cover.medium.jpg",
+    link: "https://www.gutenberg.org/ebooks/4507"
+  },
+  {
+    title: "From Poverty to Power",
+    author: "James Allen",
+    cover: "https://www.gutenberg.org/cache/epub/2196/pg2196.cover.medium.jpg",
+    link: "https://www.gutenberg.org/ebooks/2196"
+  },
+  {
+    title: "Light on the Path",
+    author: "Mabel Collins",
+    cover: "https://www.gutenberg.org/cache/epub/1212/pg1212.cover.medium.jpg",
+    link: "https://www.gutenberg.org/ebooks/1212"
+  },
+  {
+    title: "The Way to Will Power",
+    author: "Henry Hazlitt",
+    cover: "https://www.gutenberg.org/cache/epub/2027/pg2027.cover.medium.jpg",
+    link: "https://www.gutenberg.org/ebooks/2027"
+  },
+  {
+    title: "The Secret of Success",
+    author: "William Walker Atkinson",
+    cover: "https://www.gutenberg.org/cache/epub/1366/pg1366.cover.medium.jpg",
+    link: "https://www.gutenberg.org/ebooks/1366"
+  },
+  {
+    title: "The Will to Believe",
+    author: "William James",
+    cover: "https://www.gutenberg.org/cache/epub/26659/pg26659.cover.medium.jpg",
+    link: "https://www.gutenberg.org/ebooks/26659"
+  },
+  {
+    title: "Self-Help",
+    author: "Samuel Smiles",
+    cover: "https://www.gutenberg.org/cache/epub/935/pg935.cover.medium.jpg",
+    link: "https://www.gutenberg.org/ebooks/935"
+  }
 ];
- const booksGrid = document.getElementById('booksGrid');
-  books.forEach(book => {
-    const card = document.createElement('div');
-    card.className = 'book-card';
-    card.innerHTML = `
-      <img src="${book.cover}" alt="${book.title}">
-      <div class="book-info">
-        <h3>${book.title}</h3>
-        <p>${book.author}</p>
-        <a href="${book.link}" target="_blank">Read</a>
-      </div>
-    `;
-    booksGrid.appendChild(card);
-  });
-});
-</script>
-</body>
-</html>
+
+      const booksGrid = document.getElementById("booksGrid");
+      books.forEach(book => {
+        const card = document.createElement("div");
+        card.className = "book-card";
+        card.innerHTML = `
+          <img src="${book.cover}" alt="${book.title}"   loading="lazy">
+          <div class="book-info">
+            <h3>${book.title}</h3>
+            <p>${book.author}</p>
+            <a href="${book.link}" target="_blank" rel="noopener noreferrer">Read</a>
+          </div>
+        `;
+        booksGrid.appendChild(card);
+      });
+    });
   </script>
 </body>
 </html>
-

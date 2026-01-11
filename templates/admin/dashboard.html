@@ -1,0 +1,300 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Theramind · Admin Dashboard</title>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<style>
+:root{
+  --bg:#020617;
+  --panel:#071428;
+  --card:#0b1220;
+  --border:rgba(255,255,255,.08);
+  --text:#e5e7eb;
+  --muted:#94a3b8;
+  --accent:#7c3aed;
+  --success:#22c55e;
+}
+
+*{box-sizing:border-box;margin:0;padding:0;font-family:system-ui,-apple-system}
+body{background:var(--bg);color:var(--text);min-height:100vh}
+
+.app{display:grid;grid-template-columns:260px 1fr;min-height:100vh}
+
+/* Sidebar */
+.sidebar{
+  background:var(--panel);
+  border-right:1px solid var(--border);
+  padding:22px;
+  display:flex;
+  flex-direction:column;
+}
+.brand{font-size:18px;font-weight:700}
+.meta{font-size:12px;color:var(--muted);margin:6px 0 24px}
+
+.nav button{
+  width:100%;
+  text-align:left;
+  padding:10px 12px;
+  border-radius:10px;
+  color:var(--muted);
+  background:none;
+  border:none;
+  font-size:14px;
+  margin-bottom:6px;
+  cursor:pointer;
+}
+.nav button.active{
+  background:linear-gradient(90deg,var(--accent),#5b21b6);
+  color:white;
+}
+.nav button:hover{background:rgba(255,255,255,.05);color:white}
+
+.sidebar-footer{
+  margin-top:auto;
+  padding-top:14px;
+  border-top:1px solid var(--border);
+}
+.sidebar-footer a{
+  display:block;text-align:center;padding:8px;border-radius:8px;
+  background:rgba(255,255,255,.04);
+  border:1px solid var(--border);
+  color:var(--text);text-decoration:none;font-size:13px;
+}
+
+/* Topbar */
+.topbar{
+  display:flex;justify-content:space-between;align-items:center;
+  padding:18px 24px;border-bottom:1px solid var(--border);
+  background:rgba(255,255,255,.02);
+}
+.top-title{font-size:16px;font-weight:600}
+.top-sub{font-size:12px;color:var(--muted)}
+.btn{padding:7px 12px;border-radius:8px;border:1px solid var(--border);
+background:rgba(255,255,255,.05);color:var(--text);font-size:12px;cursor:pointer}
+
+/* Content */
+.content{padding:24px}
+section{animation:fade .25s ease}
+@keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1}}
+
+.grid{display:grid;grid-template-columns:repeat(12,1fr);gap:18px}
+
+.card{
+  grid-column:span 4;
+  background:linear-gradient(180deg,rgba(255,255,255,.04),rgba(255,255,255,.01));
+  border:1px solid var(--border);
+  border-radius:16px;
+  padding:18px;
+}
+.card.large{grid-column:span 8}
+.card h3{font-size:13px;margin-bottom:6px}
+.stat{font-size:28px;font-weight:700}
+.muted{font-size:12px;color:var(--muted)}
+
+.status{
+  display:flex;align-items:center;gap:8px;margin-top:6px;font-size:13px
+}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--success)}
+
+/* Tables */
+table{width:100%;border-collapse:collapse;font-size:13px}
+th{font-size:12px;color:var(--muted);padding:10px;border-bottom:1px solid var(--border)}
+td{padding:10px;border-bottom:1px dashed rgba(255,255,255,.06)}
+td.small{max-width:360px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
+/* Responsive */
+@media(max-width:900px){
+  .app{grid-template-columns:1fr}
+  .sidebar{display:none}
+  .card,.card.large{grid-column:span 12}
+}
+</style>
+</head>
+
+<body>
+<div class="app">
+
+<aside class="sidebar">
+  <div class="brand">Theramind</div>
+  <div class="meta">Admin Dashboard</div>
+
+  <nav class="nav">
+    <button class="active" onclick="show('overview',this)">Overview</button>
+    <button onclick="show('users',this)">Users</button>
+    <button onclick="show('journals',this)">Journals</button>
+    <button onclick="show('moods',this)">Mood Logs</button>
+  </nav>
+
+  <div class="sidebar-footer">
+    <a href="/admin/logout">Sign out</a>
+  </div>
+</aside>
+
+<main>
+<div class="topbar">
+  <div>
+    <div class="top-title">Admin · Overview</div>
+    <div class="top-sub">Live platform insights</div>
+  </div>
+  <button class="btn" onclick="loadAll()">Refresh</button>
+</div>
+
+<div class="content">
+
+<section id="overview">
+<div class="grid">
+
+<div class="card">
+<h3>Total Users</h3>
+<div id="stat-users" class="stat">—</div>
+<div class="muted">Registered accounts</div>
+</div>
+
+<div class="card">
+<h3>Journal Entries</h3>
+<div id="stat-journals" class="stat">—</div>
+<div class="muted">Total reflections</div>
+</div>
+
+<div class="card">
+<h3>Mood Logs</h3>
+<div id="stat-moods" class="stat">—</div>
+<div class="muted">Emotional check-ins</div>
+</div>
+
+<div class="card">
+<h3>System Health</h3>
+<div class="status"><span class="dot"></span> API operational</div>
+<div class="status"><span class="dot"></span> Database connected</div>
+</div>
+
+<div class="card large">
+<h3>Journal Activity (Last 7)</h3>
+<canvas id="journalChart" height="160"></canvas>
+</div>
+
+<div class="card large">
+<h3>Mood Activity (Last 7)</h3>
+<canvas id="moodChart" height="160"></canvas>
+</div>
+
+</div>
+</section>
+
+<section id="users" style="display:none">
+<div class="card large">
+<h3>User Accounts</h3>
+<div id="users-table"></div>
+</div>
+</section>
+
+<section id="journals" style="display:none">
+<div class="card large">
+<h3>Journal Entries</h3>
+<div id="journals-table"></div>
+</div>
+</section>
+
+<section id="moods" style="display:none">
+<div class="card large">
+<h3>Mood Logs</h3>
+<div id="moods-table"></div>
+</div>
+</section>
+
+</div>
+</main>
+</div>
+
+<script>
+let journalChart, moodChart, _journals=[], _moods=[];
+
+/* ===== XSS SAFE ESCAPE ===== */
+function escapeHTML(str=""){
+  return str.replace(/[&<>"']/g,m=>(
+    {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]
+  ));
+}
+
+function show(id, el){
+  document.querySelectorAll("section").forEach(s=>s.style.display="none");
+  document.getElementById(id).style.display="block";
+  document.querySelectorAll(".nav button").forEach(b=>b.classList.remove("active"));
+  el.classList.add("active");
+}
+
+async function loadAll(){
+  await Promise.all([stats(),users(),journals(),moods()]);
+  charts();
+}
+
+async function stats(){
+  const d=await (await fetch("/admin/stats")).json();
+  stat("users",d.users);
+  stat("journals",d.journals);
+  stat("moods",d.mood_logs);
+}
+function stat(k,v){document.getElementById("stat-"+k).textContent=v}
+
+async function users(){
+  const rows=await (await fetch("/admin/users")).json();
+  document.getElementById("users-table").innerHTML=
+  `<table><thead><tr><th>Username</th><th>Email</th><th>Admin</th></tr></thead>
+   <tbody>${rows.map(u=>`
+   <tr><td>${escapeHTML(u.username)}</td><td>${escapeHTML(u.email)}</td><td>${u.is_admin?"Yes":"No"}</td></tr>`).join("")}
+   </tbody></table>`;
+}
+
+async function journals(){
+  _journals=await (await fetch("/admin/journals_json")).json();
+  document.getElementById("journals-table").innerHTML=
+  `<table><thead><tr><th>Date</th><th>Content</th></tr></thead>
+   <tbody>${_journals.map(j=>`
+   <tr><td>${j.date}</td><td class="small">${escapeHTML(j.content)}</td></tr>`).join("")}
+   </tbody></table>`;
+}
+
+async function moods(){
+  _moods=await (await fetch("/admin/mood_json")).json();
+  document.getElementById("moods-table").innerHTML=
+  `<table><thead><tr><th>Date</th><th>Mood</th><th>Note</th></tr></thead>
+   <tbody>${_moods.map(m=>`
+   <tr><td>${m.date}</td><td>${escapeHTML(m.mood)}</td><td class="small">${escapeHTML(m.message||"")}</td></tr>`).join("")}
+   </tbody></table>`;
+}
+
+function charts(){
+  const j=_journals.slice(0,7).reverse();
+  const m=_moods.slice(0,7).reverse();
+
+  journalChart?.destroy();
+  moodChart?.destroy();
+
+  journalChart=new Chart(journalChartEl(),{
+    type:"line",
+    data:{labels:j.map(x=>x.date),
+    datasets:[{data:j.map(()=>1),borderColor:"#7c3aed",tension:.4}]},
+    options:{plugins:{legend:{display:false}}}
+  });
+
+  moodChart=new Chart(moodChartEl(),{
+    type:"bar",
+    data:{labels:m.map(x=>x.date),
+    datasets:[{data:m.map(()=>1),backgroundColor:"#6366f1"}]},
+    options:{plugins:{legend:{display:false}}}
+  });
+}
+
+const journalChartEl=()=>document.getElementById("journalChart");
+const moodChartEl=()=>document.getElementById("moodChart");
+
+loadAll();
+setInterval(loadAll,15000);
+</script>
+
+</body>
+</html>

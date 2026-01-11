@@ -1,0 +1,320 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Your Space — Theramind</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<link rel="icon" type="image/png" href="{{ url_for('static', filename='brain.png') }}">
+
+<script>
+  const theme = localStorage.getItem("theme");
+  if (theme === "dark") document.documentElement.classList.add("dark");
+</script>
+
+<style>
+:root {
+  --bg1:#eef2ff;
+  --bg2:#f8fafc;
+  --card:rgba(255,255,255,.7);
+  --border:rgba(255,255,255,.4);
+  --text:#1e1e2f;
+  --muted:#6b7280;
+  --accent:#4f6df5;
+  --accent-soft:rgba(79,109,245,.15);
+  --shadow:0 25px 50px rgba(0,0,0,.12);
+}
+
+.dark {
+  --bg1:#0b0c1a;
+  --bg2:#0f1224;
+  --card:rgba(20,20,35,.8);
+  --border:rgba(255,255,255,.08);
+  --text:#ffffff;
+  --muted:#9ca3af;
+  --accent:#7f8cff;
+  --accent-soft:rgba(127,140,255,.2);
+  --shadow:0 30px 60px rgba(0,0,0,.6);
+}
+
+* { box-sizing:border-box }
+
+body {
+  margin:0;
+  font-family:system-ui,-apple-system,Segoe UI,Roboto;
+  background:
+    radial-gradient(circle at top,#c7d2fe,transparent 55%),
+    linear-gradient(180deg,var(--bg1),var(--bg2));
+  color:var(--text);
+  padding:20px 14px;
+}
+
+.container {
+  max-width:1000px;
+  margin:auto;
+  display:grid;
+  gap:20px;
+}
+
+/* ---------- CARDS ---------- */
+.card {
+  background:var(--card);
+  backdrop-filter:blur(18px);
+  border:1px solid var(--border);
+  border-radius:26px;
+  padding:24px;
+  box-shadow:var(--shadow);
+}
+
+/* ---------- FLASH ---------- */
+.flash-wrap {
+  position:fixed;
+  top:16px;
+  left:50%;
+  transform:translateX(-50%);
+  z-index:999;
+}
+
+.flash {
+  padding:12px 16px;
+  border-radius:14px;
+  font-size:14px;
+  margin-bottom:8px;
+}
+
+.flash.success { background:#ecfdf5; color:#065f46 }
+.flash.danger { background:#fff1f2; color:#b91c1c }
+.flash.warning { background:#fff7ed; color:#92400e }
+
+/* ---------- HEADER ---------- */
+.profile-header {
+  display:flex;
+  align-items:center;
+  gap:18px;
+  flex-wrap:wrap;
+}
+
+.avatar {
+  width:82px;
+  height:82px;
+  border-radius:50%;
+  background:linear-gradient(135deg,var(--accent),#9aa4ff);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:32px;
+  font-weight:700;
+  color:white;
+}
+
+.header-text h1 {
+  margin:0;
+  font-size:22px;
+}
+
+.header-text p {
+  margin:4px 0 0;
+  color:var(--muted);
+  font-size:14px;
+}
+
+/* ---------- STATS ---------- */
+.stats {
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(140px,1fr));
+  gap:14px;
+}
+
+.stat {
+  background:rgba(255,255,255,.08);
+  border-radius:18px;
+  padding:16px;
+  text-align:center;
+}
+
+.stat strong {
+  font-size:22px;
+  display:block;
+}
+
+/* ---------- SECTIONS ---------- */
+.section-title {
+  font-size:18px;
+  margin-bottom:6px;
+}
+
+.section-sub {
+  font-size:14px;
+  color:var(--muted);
+  margin-bottom:14px;
+}
+
+/* ---------- INPUTS ---------- */
+textarea, input {
+  width:100%;
+  padding:14px;
+  border-radius:16px;
+  border:1px solid rgba(255,255,255,.18);
+  background:transparent;
+  color:var(--text);
+  margin-top:10px;
+  font-size:14px;
+}
+
+textarea { resize:vertical }
+
+textarea:focus, input:focus {
+  outline:none;
+  border-color:var(--accent);
+  box-shadow:0 0 0 3px var(--accent-soft);
+}
+
+/* PASSWORD */
+.pass-wrap {
+  position:relative;
+}
+
+.pass-toggle {
+  position:absolute;
+  right:14px;
+  top:50%;
+  transform:translateY(-50%);
+  font-size:13px;
+  color:var(--accent);
+  cursor:pointer;
+}
+
+/* ---------- BUTTONS ---------- */
+button {
+  margin-top:16px;
+  padding:13px 18px;
+  border-radius:999px;
+  border:none;
+  background:linear-gradient(135deg,#4f6df5,#7f87f3);
+  color:white;
+  font-weight:600;
+  font-size:14px;
+  cursor:pointer;
+}
+
+button.secondary {
+  background:transparent;
+  color:var(--accent);
+}
+
+button.danger { background:#dc2626 }
+
+.actions {
+  display:flex;
+  flex-wrap:wrap;
+  gap:12px;
+}
+
+/* ---------- RESPONSIVE ---------- */
+@media (max-width:600px) {
+  .profile-header {
+    flex-direction:column;
+    text-align:center;
+  }
+}
+</style>
+</head>
+
+<body>
+
+<!-- FLASH -->
+<div class="flash-wrap">
+{% with messages = get_flashed_messages(with_categories=true) %}
+  {% for category, msg in messages %}
+    <div class="flash {{ category }}">{{ msg }}</div>
+  {% endfor %}
+{% endwith %}
+</div>
+
+<div class="container">
+
+  <!-- IDENTITY -->
+  <div class="card profile-header">
+    <div class="avatar">
+      {{ (display_name or user.username or 'U')[0]|upper }}
+    </div>
+    <div class="header-text">
+      <h1>Hello, {{ display_name or user.username }}</h1>
+      <p>{{ user.email }} • With Theramind since {{ user.created_at[:10] }}</p>
+    </div>
+  </div>
+
+  <!-- JOURNEY -->
+  <div class="card">
+    <div class="section-title">Your journey so far</div>
+    <div class="section-sub">Small steps still count.</div>
+    <div class="stats">
+      <div class="stat"><strong>{{ stats.conversations }}</strong>Conversations</div>
+      <div class="stat"><strong>{{ stats.journals }}</strong>Reflections</div>
+      <div class="stat"><strong>{{ stats.moods }}</strong>Check-ins</div>
+    </div>
+  </div>
+
+  <!-- WELLNESS FOCUS -->
+  <div class="card">
+    <div class="section-title">🌱 Your wellness focus</div>
+    <div class="section-sub">
+      A gentle note to yourself. This helps Theramind support you better.
+    </div>
+
+    <form method="post">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <textarea name="goals" rows="4"
+        placeholder="For example: feeling calmer, building routine, understanding my emotions…">{{ goals }}</textarea>
+      <button>Save focus</button>
+    </form>
+  </div>
+
+  <!-- ACCOUNT -->
+  <div class="card">
+    <div class="section-title">🔐 Account & security</div>
+    <div class="section-sub">You stay in full control of your data.</div>
+
+    <form method="post">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+      <div class="pass-wrap">
+        <input type="password" name="current_password" placeholder="Current password" required>
+        <span class="pass-toggle" onclick="togglePass(this)">Show</span>
+      </div>
+
+      <div class="pass-wrap">
+        <input type="password" name="new_password" placeholder="New password" required>
+        <span class="pass-toggle" onclick="togglePass(this)">Show</span>
+      </div>
+
+      <button>Update password</button>
+    </form>
+
+    <div class="actions">
+      <a href="{{ url_for('export_journal') }}"><button type="button" class="secondary">Export journal</button></a>
+      <a href="{{ url_for('export_chat') }}"><button type="button" class="secondary">Export chats</button></a>
+      <a href="{{ url_for('user_logout') }}"><button type="button" class="danger">Log out</button></a>
+    </div>
+  </div>
+
+</div>
+
+<script>
+function togglePass(el){
+  const input = el.previousElementSibling;
+  input.type = input.type === "password" ? "text" : "password";
+  el.textContent = input.type === "password" ? "Show" : "Hide";
+}
+
+/* auto-dismiss flash */
+setTimeout(() => {
+  document.querySelectorAll('.flash').forEach(f => {
+    f.style.opacity = '0';
+    setTimeout(() => f.remove(), 400);
+  });
+}, 3500);
+</script>
+
+</body>
+</html>

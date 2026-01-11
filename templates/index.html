@@ -7,12 +7,12 @@
   <title>Theramind Chat</title>
 
   <!-- Favicon + Icons -->
- <link rel="icon" href="https://img.icons8.com/fluency/48/chat.png" type="image/png" />
- <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <link rel="icon" type="image/png" href="{{ url_for('static', filename='chat.png') }}">
+
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 
   <!-- Styles -->
   <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}" />
-
 
   <!-- tsParticles -->
   <script src="https://cdn.jsdelivr.net/npm/tsparticles@2.12.0/tsparticles.bundle.min.js"></script>
@@ -23,20 +23,25 @@
 
   <!-- Top Navbar -->
   <header class="tm-nav">
-    <button id="sidebarToggle" class="icon-btn" aria-label="Toggle sidebar">
+    <button
+  id="sidebarToggle"
+  class="icon-btn"
+  aria-label="Toggle sidebar"
+  aria-expanded="false"
+>
+
       <i class="fas fa-bars"></i>
     </button>
-    <a class="tm-brand" href="#">
+
+    <a class="tm-brand" href="/">
       <img src="https://img.icons8.com/fluency/48/brain.png" alt="Theramind Logo" class="brand-mark">
       <span>Theramind</span>
     </a>
-    <!-- Hamburger for mobile -->
-    <div class="tm-hamburger" onclick="document.querySelector('.tm-nav').classList.toggle('show-links')">
-        ☰
-    </div>
+
+    <!-- Desktop-only navigation -->
     <nav class="tm-navlinks">
       <a href="/">🏠 Home</a>
-      <a href="/chat" class="active">💬 Chat</a>
+      <a href="/index" class="active">💬 Chat</a>
       <a href="/journaling">📓 Journal</a>
       <a href="/breathing">🫁 Breathing</a>
       <a href="/pick-a-peace">📃 Pick-a-Peace</a>
@@ -44,24 +49,30 @@
       <a href="/ebooks">📚 E-Books</a>
       <a href="/history">🕰️ History</a>
     </nav>
-    <!-- Theme Toggle (consistent with Journal Page) -->
-   <div class="theme-toggle" data-sync-key="theme">
-  <input type="radio" id="theme-light" name="theme" value="light" />
-  <label for="theme-light">
-    <span>☀️</span>
-  </label>
 
-  <input type="radio" id="theme-dark" name="theme" value="dark" />
-  <label for="theme-dark">
-    <span>🌙</span>
-  </label>
-</div>
+    <!-- Theme Toggle (Unified with other pages) -->
+<div class="theme-toggle" id="themeToggle">🌙 Theme</div>
+
   </header>
 
   <!-- Main Layout -->
   <div class="main-layout">
     <!-- Sidebar -->
-    <aside id="sidebar" class="tm-sidebar hidden" aria-label="Saved Chats Sidebar">
+    <aside id="sidebar" class="tm-sidebar hidden" aria-label="Sidebar Navigation">
+
+      <!-- Mobile Page Navigation -->
+      <nav class="sidebar-nav mobile-only">
+        <a href="/">🏠 Home</a>
+        <a href="/index" class="active">💬 Chat</a>
+        <a href="/journaling">📓 Journal</a>
+        <a href="/breathing">🫁 Breathing</a>
+        <a href="/pick-a-peace">📃 Pick-a-Peace</a>
+        <a href="/calm-corner">🧘 Calm Corner</a>
+        <a href="/ebooks">📚 E-Books</a>
+        <a href="/history">🕰️ History</a>
+      </nav>
+
+      <!-- Chat Actions -->
       <div class="sidebar-section">
         <h3 class="sidebar-title">💬 Saved Chats</h3>
         <button class="sidebar-btn" id="new-chat">➕ New Chat</button>
@@ -71,6 +82,7 @@
         <button class="sidebar-btn" id="export-chat">📤 Export Chat</button>
         <button class="sidebar-btn" id="export-chat-pdf">📄 Download PDF</button>
       </div>
+
       <div class="sidebar-section">
         <h3 class="sidebar-title">📝 Companion</h3>
         <button class="sidebar-btn" id="rename-companion">✏️ Rename Companion</button>
@@ -80,9 +92,10 @@
     <!-- Chat Container -->
     <main class="main">
       <div id="chat-box" class="chat-surface" aria-live="polite" role="log"></div>
-      <div id="voice-indicator" class="voice-indicator hidden">🎤 Listening...</div>
+      <div id="voice-indicator" class="voice-indicator hidden" role="status"  aria-live="assertive">🎤 Listening...</div>
+
       <div class="chat-inputbar">
-        <textarea id="user-input" placeholder="Type your message..." aria-label="Type your message"></textarea>
+        <textarea id="user-input" placeholder="Type your message..." aria-label="Type your message" rows="1"></textarea>
         <button id="send" class="btn-primary" aria-label="Send Message">Send</button>
         <button id="speak" class="speak-btn" aria-label="Speak Message">🎙️ Speak</button>
       </div>
@@ -124,9 +137,14 @@
     </div>
   </div>
 
-    <!-- Scripts -->
-    <!-- jsPDF for PDF export -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <script src="{{ url_for('static', filename='main.js') }}"></script>
-  </body>
-  </html>
+ <script>
+    window.THERAMIND_USER = {
+      name: {{ user_name|tojson }}
+    };
+  </script>
+
+  <!-- Scripts -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="{{ url_for('static', filename='main.js') }}"></script>
+</body>
+</html>
