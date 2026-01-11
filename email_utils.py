@@ -1,55 +1,31 @@
 # email_utils.py
 import os
-import resend
+import smtplib
+from email.message import EmailMessage
 
-# ======================================================
-# CONFIG
-# ======================================================
+SMTP_HOST = os.getenv("SMTP_HOST")
+SMTP_PORT = int(os.getenv("SMTP_PORT", "587"))
+SMTP_USER = os.getenv("SMTP_USER")
+SMTP_PASS = os.getenv("SMTP_PASS")
+EMAIL_FROM = os.getenv("EMAIL_FROM")
 
-RESEND_API_KEY = os.getenv("RESEND_API_KEY")
-EMAIL_FROM = os.getenv("EMAIL_FROM", "Theramind <onboarding@resend.dev>")
+def send_email(to_email, subject, body):
+    if not all([SMTP_HOST, SMTP_USER, SMTP_PASS, EMAIL_FROM]):
+        raise RuntimeError("SMTP not configured")
 
-if not RESEND_API_KEY:
-    raise RuntimeError("RESEND_API_KEY is not set")
+    msg = EmailMessage()
+    msg["From"] = EMAIL_FROM
+    msg["To"] = to_email
+    msg["Subject"] = subject
+    msg.set_content(body)
 
-resend.api_key = RESEND_API_KEY
+    with smtplib.SMTP(SMTP_HOST, SMTP_PORT, timeout=20) as server:
+        server.starttls()
+        server.login(SMTP_USER, SMTP_PASS)
+        server.send_message(msg)
 
-
-# ======================================================
-# GENERIC EMAIL SENDER (future-proof)
-# ======================================================
-
-def send_email(to_email: str, subject: str, text: str):
-    """
-    Sends a plain-text email using Resend.
-    Works reliably on mobile + desktop.
-    """
-
-    resend.Emails.send({
-        "from": EMAIL_FROM,
-        "to": to_email,
-        "subject": subject,
-        "text": text
-    })
-
-
-# ======================================================
-# OTP EMAIL (LOGIN / SIGNUP / VERIFY)
-# ======================================================
-
-def send_otp_email(to_email: str, otp: str, purpose: str = "verify"):
-    """
-    Sends a 6-digit OTP.
-    Guaranteed delivery on:
-    - Gmail mobile
-    - Gmail desktop
-    - Outlook
-    - Yahoo
-    """
-
-    subject = "Your Theramind verification code"
-
-    text = f"""
+def send_otp_email(to_email, otp, purpose="verify"):
+    body = f"""
 Your Theramind verification code is:
 
 {otp}
@@ -63,6 +39,6 @@ If you did not request this, you can safely ignore this email.
 
     send_email(
         to_email=to_email,
-        subject=subject,
-        text=text
+        subject="Your Theramind verification code",
+        body=body
     )

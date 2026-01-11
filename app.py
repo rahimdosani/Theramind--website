@@ -1181,6 +1181,9 @@ def auth_google():
 @app.route("/auth/google/callback")
 @csrf.exempt
 def auth_google_callback():
+    # 🔑 CRITICAL for mobile + Render
+    session.modified = True
+
     try:
         token = oauth.google.authorize_access_token()
         user_info = oauth.google.get("userinfo").json()
@@ -1212,6 +1215,7 @@ def auth_google_callback():
     }
 
     return redirect(url_for("oauth_confirm"))
+
 
 
 @app.route("/auth/confirm", methods=["GET", "POST"])
@@ -1330,7 +1334,6 @@ def verify_signup_otp():
 
 
 @app.route("/signup", methods=["GET", "POST"])
-@csrf.exempt
 @limiter.limit("5 per minute")
 def signup():
     if request.method == "POST":
@@ -1379,7 +1382,7 @@ def signup():
             ))
             conn.commit()
 
-        # Send OTP
+        # Generate OTP
         otp = generate_otp()
         expires_at = int(time.time()) + 600
 
@@ -1390,9 +1393,16 @@ def signup():
         )
         conn.commit()
 
-        send_otp_email(email, otp)
+        # Send OTP safely
+        try:
+            send_otp_email(email, otp)
+        except Exception as e:
+            print("OTP email failed:", e)
+            flash("Could not send verification email. Please try again.", "danger")
+            return redirect(url_for("signup"))
 
-        session.clear()
+        # 🔑 DO NOT CLEAR ENTIRE SESSION
+        session.pop("pending_otp_email", None)
         session["pending_otp_email"] = email
 
         flash("We’ve sent a verification code to your email.", "success")
