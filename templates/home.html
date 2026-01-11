@@ -197,6 +197,45 @@
     border-color: rgba(255,255,255,0.12);
   }
 
+  @media (max-width: 768px) {
+  header {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+  }
+
+  .logo {
+    justify-content: center;
+    text-align: center;
+  }
+
+  .header-actions {
+    width: 100%;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .header-actions a,
+  .profile-btn,
+  .theme-toggle {
+    flex: 1 1 auto;
+    min-width: 90px;
+    text-align: center;
+  }
+}
+
+@media (max-width: 420px) {
+  .header-actions a,
+  .profile-btn,
+  .theme-toggle {
+    font-size: 0.8rem;
+    padding: 6px 10px;
+  }
+button, a {
+  touch-action: manipulation;
+}
+
   /* ---------------- HERO ---------------- */
   .hero {
     text-align: center;
@@ -496,7 +535,7 @@
       <a href="/signup" class="primary">Sign Up</a>
 
       <!-- Profile (future-ready) -->
-      <button class="profile-btn" aria-label="Profile">
+      <button class="profile-btn" aria-label="Profile" style="display:none>
         <span>👤</span>
         <span>Profile</span>
       </button>
