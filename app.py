@@ -66,6 +66,7 @@ CORS(app, supports_credentials=True)
 # CSRF & rate limiter
 csrf = CSRFProtect()
 csrf.init_app(app)
+app.config["WTF_CSRF_CHECK_DEFAULT"] = False
 
 # Generous defaults for smooth chatting
 limiter = Limiter(
@@ -1179,7 +1180,7 @@ def auth_google():
 
 
 @app.route("/auth/google/callback")
-@csrf.exempt
+@csrf.exempt   
 def auth_google_callback():
     # 🔑 CRITICAL for mobile + Render
     session.modified = True
@@ -1334,6 +1335,7 @@ def verify_signup_otp():
 
 
 @app.route("/signup", methods=["GET", "POST"])
+@csrf.exempt
 @limiter.limit("5 per minute")
 def signup():
     if request.method == "POST":
