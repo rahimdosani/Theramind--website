@@ -1,4 +1,5 @@
 # app.py — Theramind (merged: original core + admin/auth scaffolding + admin API)
+from werkzeug.middleware.proxy_fix import ProxyFix
 import os
 import re
 import json
@@ -37,6 +38,13 @@ ADMIN_PASSWORD = os.getenv("ADMIN_PASSWORD")  # MUST be set in production
 
 # -------------------- App --------------------
 app = Flask(__name__, template_folder="templates", static_folder="static")
+app.wsgi_app = ProxyFix(
+    app.wsgi_app,
+    x_for=1,
+    x_proto=1,
+    x_host=1,
+    x_port=1
+)
 app.secret_key = FLASK_SECRET_KEY
 oauth = OAuth(app)
 
@@ -56,10 +64,11 @@ oauth.register(
 # Session & cookie security (enable Secure=True in production)
 app.config.update(
     SESSION_COOKIE_HTTPONLY=True,
-    SESSION_COOKIE_SAMESITE="Lax",
-    SESSION_COOKIE_SECURE=False,          # set True behind HTTPS in production
-    PERMANENT_SESSION_LIFETIME=60 * 60 * 24 * 7,  # 7 days
+    SESSION_COOKIE_SAMESITE="None",   # REQUIRED for Google
+    SESSION_COOKIE_SECURE=True,       # REQUIRED (HTTPS on Render)
+    PERMANENT_SESSION_LIFETIME=60 * 60 * 24 * 7,
 )
+
 
 CORS(app, supports_credentials=True)
 
@@ -1138,7 +1147,7 @@ def generate_reply_with_context(chat_history, conv_id=None, allow_remote_process
 # =========================
 @app.route("/login", methods=["GET", "POST"])
 @csrf.exempt
-@limiter.limit("10 per minute")
+@limiter.limit("50 per hour")
 def user_login():
     if request.method == "POST":
         email_or_username = request.form.get("email", "").strip()
@@ -1175,8 +1184,9 @@ def user_login():
 @app.route("/auth/google")
 def auth_google():
     return oauth.google.authorize_redirect(
-        url_for("auth_google_callback", _external=True)
+        "https://theramind.onrender.com/auth/google/callback"
     )
+
 
 
 @app.route("/auth/google/callback")
@@ -1188,9 +1198,12 @@ def auth_google_callback():
     try:
         token = oauth.google.authorize_access_token()
         user_info = oauth.google.get("userinfo").json()
-    except Exception:
-        flash("Google authentication failed.", "danger")
-        return redirect(url_for("user_login"))
+    except Exception as e:
+       session.clear()
+       print("Google OAuth error:", e)
+       flash("Google authentication failed. Please try again.", "danger")
+       return redirect(url_for("user_login"))
+
 
     email = user_info.get("email")
     name = user_info.get("name") or email.split("@")[0]
@@ -1283,7 +1296,6 @@ def oauth_confirm():
 
 @app.route("/auth/verify-otp", methods=["GET", "POST"])
 @csrf.exempt
-@limiter.limit("5 per minute")
 def verify_signup_otp():
     email = session.get("pending_otp_email")
 
@@ -1336,7 +1348,7 @@ def verify_signup_otp():
 
 @app.route("/signup", methods=["GET", "POST"])
 @csrf.exempt
-@limiter.limit("5 per minute")
+@limiter.limit("20 per hour")
 def signup():
     if request.method == "POST":
         display_name = request.form.get("display_name", "").strip()
