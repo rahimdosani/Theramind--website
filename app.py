@@ -62,13 +62,13 @@ oauth.register(
 )
 
 # Session & cookie security (enable Secure=True in production)
+IS_PROD = os.getenv("FLASK_ENV") == "production"
+
 app.config.update(
     SESSION_COOKIE_HTTPONLY=True,
-    SESSION_COOKIE_SAMESITE="None",   # REQUIRED for Google
-    SESSION_COOKIE_SECURE=True,       # REQUIRED (HTTPS on Render)
-    PERMANENT_SESSION_LIFETIME=60 * 60 * 24 * 7,
+    SESSION_COOKIE_SAMESITE="None" if IS_PROD else "Lax",
+    SESSION_COOKIE_SECURE=IS_PROD,
 )
-
 
 CORS(app, supports_credentials=True)
 
@@ -1183,9 +1183,12 @@ def user_login():
 
 @app.route("/auth/google")
 def auth_google():
-    return oauth.google.authorize_redirect(
-        "https://theramind.onrender.com/auth/google/callback"
+    redirect_uri = url_for(
+        "auth_google_callback",
+        _external=True,
+        _scheme="https"
     )
+    return oauth.google.authorize_redirect(redirect_uri)
 
 
 
@@ -1411,8 +1414,11 @@ def signup():
         try:
             send_otp_email(email, otp)
         except Exception as e:
-            print("OTP email failed:", e)
-            flash("Could not send verification email. Please try again.", "danger")
+            logger.exception("OTP email failed")
+            c.execute("DELETE FROM email_otps WHERE email = ?", (email,))
+            conn.commit()
+            
+            flash("Email service is temporarily unavailable. Please try again.", "danger")
             return redirect(url_for("signup"))
 
         # 🔑 DO NOT CLEAR ENTIRE SESSION

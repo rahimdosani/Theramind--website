@@ -1,14 +1,18 @@
 # email_utils.py
 import os
 import smtplib
+import logging
 from email.message import EmailMessage
 
+logger = logging.getLogger("theramind.email")
+
 # --------------------------------------------------
-# Optional Resend support (SAFE)
+# Config
 # --------------------------------------------------
-RESEND_API_KEY = os.getenv("RESEND_API_KEY")
 EMAIL_FROM = os.getenv("EMAIL_FROM", "Theramind <no-reply@theramind.app>")
 
+# ---- Resend ----
+RESEND_API_KEY = os.getenv("RESEND_API_KEY")
 USE_RESEND = False
 resend = None
 
@@ -17,13 +21,11 @@ if RESEND_API_KEY:
         import resend
         resend.api_key = RESEND_API_KEY
         USE_RESEND = True
-        print("✅ Resend email enabled")
-    except Exception as e:
-        print("⚠️ Resend import failed, falling back to SMTP:", e)
+        logger.info("Resend email enabled")
+    except Exception:
+        logger.exception("Resend import failed")
 
-# --------------------------------------------------
-# SMTP fallback (REQUIRED on Render if no Resend)
-# --------------------------------------------------
+# ---- SMTP ----
 SMTP_HOST = os.getenv("SMTP_HOST")
 SMTP_PORT = int(os.getenv("SMTP_PORT", "587"))
 SMTP_USER = os.getenv("SMTP_USER")
@@ -32,23 +34,28 @@ SMTP_PASS = os.getenv("SMTP_PASS")
 USE_SMTP = all([SMTP_HOST, SMTP_USER, SMTP_PASS])
 
 # --------------------------------------------------
-# Core email sender (NEVER CRASHES)
+# Core email sender (STRICT)
 # --------------------------------------------------
-def send_email(to_email, subject, body):
-    # ---- Try Resend first ----
+def send_email(to_email: str, subject: str, body: str) -> None:
+    """
+    Sends an email or raises RuntimeError.
+    NO silent fallbacks in production.
+    """
+
+    # ---- Resend ----
     if USE_RESEND:
         try:
             resend.Emails.send({
                 "from": EMAIL_FROM,
                 "to": to_email,
                 "subject": subject,
-                "text": body
+                "text": body,
             })
-            return True
-        except Exception as e:
-            print("❌ Resend failed:", e)
+            return
+        except Exception:
+            logger.exception("Resend failed")
 
-    # ---- Fallback to SMTP ----
+    # ---- SMTP ----
     if USE_SMTP:
         try:
             msg = EmailMessage()
@@ -62,24 +69,17 @@ def send_email(to_email, subject, body):
                 server.login(SMTP_USER, SMTP_PASS)
                 server.send_message(msg)
 
-            return True
-        except Exception as e:
-            print("❌ SMTP failed:", e)
+            return
+        except Exception:
+            logger.exception("SMTP failed")
 
-    # ---- Dev / last-resort fallback ----
-    print("📧 EMAIL (DEV MODE)")
-    print("To:", to_email)
-    print("Subject:", subject)
-    print(body)
-    print("────────────────────")
-
-    return False
-
+    # ---- HARD FAIL ----
+    raise RuntimeError("No email provider available")
 
 # --------------------------------------------------
 # OTP email
 # --------------------------------------------------
-def send_otp_email(to_email, otp, purpose="verify"):
+def send_otp_email(to_email: str, otp: str) -> None:
     body = f"""
 Your Theramind verification code is:
 
@@ -92,11 +92,8 @@ If you did not request this, you can safely ignore this email.
 — Theramind
 """.strip()
 
-    ok = send_email(
+    send_email(
         to_email=to_email,
         subject="Your Theramind verification code",
-        body=body
+        body=body,
     )
-
-    if not ok:
-        raise RuntimeError("Email delivery failed")
