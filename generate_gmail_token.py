@@ -1,5 +1,4 @@
 from google_auth_oauthlib.flow import InstalledAppFlow
-import pickle
 
 SCOPES = ["https://www.googleapis.com/auth/gmail.send"]
 
@@ -10,7 +9,8 @@ flow = InstalledAppFlow.from_client_secrets_file(
 
 creds = flow.run_local_server(port=0)
 
-with open("gmail_token.pickle", "wb") as f:
-    pickle.dump(creds, f)
+# ✅ SAVE AS JSON (NOT PICKLE)
+with open("token.json", "w") as f:
+    f.write(creds.to_json())
 
-print("Gmail token generated successfully")
+print("Gmail token generated successfully (token.json)")

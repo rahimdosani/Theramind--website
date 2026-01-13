@@ -1244,7 +1244,7 @@ def auth_google_callback():
 
 
 
-@app.route("/auth/confirm", methods=["GET", "POST"])
+@app.route("/auth/confirm", methods=["GET"])
 @csrf.exempt
 def oauth_confirm():
     temp = session.get("oauth_temp_user")
@@ -1253,56 +1253,53 @@ def oauth_confirm():
         flash("Authentication session expired. Please try again.", "danger")
         return redirect(url_for("user_login"))
 
-    if request.method == "POST":
-        conn = get_db(USER_DB)
-        conn.row_factory = sqlite3.Row
-        c = conn.cursor()
+    conn = get_db(USER_DB)
+    conn.row_factory = sqlite3.Row
+    c = conn.cursor()
 
-        # 🔎 SAFETY: Check if user already exists (email may exist from normal signup)
-        c.execute("SELECT * FROM users WHERE email = ?", (temp["email"],))
-        existing = c.fetchone()
+    # 🔎 Check if user already exists
+    c.execute("SELECT * FROM users WHERE email = ?", (temp["email"],))
+    existing = c.fetchone()
 
-        if existing:
-            # ✅ Existing user → just log them in
-            login_user(existing)
-            session.pop("oauth_temp_user", None)
-            flash("Welcome back ✨", "success")
-            return redirect(url_for("home"))
-
-        # 🆕 New Google user → create account
-        pw_hash = generate_password_hash(os.urandom(16).hex())
-
-        c.execute(
-            """
-            INSERT INTO users (
-                username,
-                email,
-                password_hash,
-                email_verified,
-                created_at
-            )
-            VALUES (?, ?, ?, 1, ?)
-            """,
-            (
-                temp["username"],
-                temp["email"],
-                pw_hash,
-                now()
-            )
-        )
-        conn.commit()
-
-        # Log in newly created user
-        c.execute("SELECT * FROM users WHERE email = ?", (temp["email"],))
-        user = c.fetchone()
-        login_user(user)
-
+    if existing:
+        # ✅ Existing user → log in
+        login_user(existing)
         session.pop("oauth_temp_user", None)
+        flash("Welcome back ✨", "success")
+        return redirect(url_for("home"))
 
-        flash("Your account has been created successfully ✨", "success")
-        return redirect(url_for("home"))  # ✅ FINAL DESTINATION
+    # 🆕 New Google user → create account
+    pw_hash = generate_password_hash(os.urandom(16).hex())
 
-    return render_template("auth_confirm.html", user=temp)
+    c.execute(
+        """
+        INSERT INTO users (
+            username,
+            email,
+            password_hash,
+            email_verified,
+            created_at
+        )
+        VALUES (?, ?, ?, 1, ?)
+        """,
+        (
+            temp["username"],
+            temp["email"],
+            pw_hash,
+            now()
+        )
+    )
+    conn.commit()
+
+    # Log in newly created user
+    c.execute("SELECT * FROM users WHERE email = ?", (temp["email"],))
+    user = c.fetchone()
+    login_user(user)
+
+    session.pop("oauth_temp_user", None)
+    flash("Your account has been created successfully ✨", "success")
+    return redirect(url_for("home"))
+
 
 
 
