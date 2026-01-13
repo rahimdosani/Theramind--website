@@ -1180,32 +1180,44 @@ def user_login():
 
 
 
+from secrets import token_urlsafe
+
 @app.route("/auth/google")
 def auth_google():
+    nonce = token_urlsafe(16)
+    session["google_nonce"] = nonce
+
     redirect_uri = url_for(
         "auth_google_callback",
         _external=True,
         _scheme="https"
     )
-    return oauth.google.authorize_redirect(redirect_uri)
+
+    return oauth.google.authorize_redirect(
+        redirect_uri=redirect_uri,
+        nonce=nonce
+    )
+
 
 
 
 @app.route("/auth/google/callback")
-@csrf.exempt   
+@csrf.exempt
 def auth_google_callback():
-    # 🔑 CRITICAL for mobile + Render
     session.modified = True
 
     try:
         token = oauth.google.authorize_access_token()
-        user_info = oauth.google.parse_id_token(token)
-    except Exception as e:
-       session.clear()
-       print("Google OAuth error:", e)
-       flash("Google authentication failed. Please try again.", "danger")
-       return redirect(url_for("user_login"))
 
+        user_info = token.get("userinfo")
+        if not user_info:
+            raise Exception("No userinfo returned by Google")
+
+    except Exception as e:
+        session.clear()
+        print("Google OAuth error:", e)
+        flash("Google authentication failed. Please try again.", "danger")
+        return redirect(url_for("user_login"))
 
     email = user_info.get("email")
     name = user_info.get("name") or email.split("@")[0]
@@ -1214,23 +1226,21 @@ def auth_google_callback():
     conn.row_factory = sqlite3.Row
     c = conn.cursor()
 
-    # 🔎 Check if user already exists
     c.execute("SELECT * FROM users WHERE email = ?", (email,))
     user = c.fetchone()
 
-    # ✅ Existing user → login immediately
     if user:
         login_user(user)
         flash("Welcome back ✨", "success")
         return redirect(url_for("home"))
 
-    # 🆕 New Google user → require confirmation
     session["oauth_temp_user"] = {
         "username": name,
         "email": email
     }
 
     return redirect(url_for("oauth_confirm"))
+
 
 
 

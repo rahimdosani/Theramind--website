@@ -1,63 +1,50 @@
-# email_utils.py — SMTP ONLY (NO RESEND)
+# email_utils.py
+import base64
+import pickle
 import os
-import smtplib
-import logging
 from email.message import EmailMessage
+from googleapiclient.discovery import build
+from google.auth.transport.requests import Request
 
-logger = logging.getLogger("theramind.email")
+EMAIL_FROM = "Theramind <theramind12@gmail.com>"
+TOKEN_PATH = "gmail_token.pickle"
+SCOPES = ["https://www.googleapis.com/auth/gmail.send"]
 
-# --------------------------------------------------
-# SMTP Config (REQUIRED)
-# --------------------------------------------------
-SMTP_HOST = os.getenv("SMTP_HOST")
-SMTP_PORT = int(os.getenv("SMTP_PORT", "587"))
-SMTP_USER = os.getenv("SMTP_USER")
-SMTP_PASS = os.getenv("SMTP_PASS")
-EMAIL_FROM = os.getenv(
-    "EMAIL_FROM",
-    "Theramind <theramind12@gmail.com>"
-)
+def _get_gmail_service():
+    if not os.path.exists(TOKEN_PATH):
+        raise RuntimeError("Gmail token not found")
 
-# Validate config early
-if not all([SMTP_HOST, SMTP_USER, SMTP_PASS]):
-    raise RuntimeError("SMTP is not fully configured")
+    with open(TOKEN_PATH, "rb") as f:
+        creds = pickle.load(f)
 
-# --------------------------------------------------
-# Core email sender (STRICT)
-# --------------------------------------------------
-def send_email(to_email: str, subject: str, body: str) -> None:
-    """
-    Sends an email via SMTP or raises RuntimeError.
-    No silent fallbacks. No third-party providers.
-    """
-    try:
-        msg = EmailMessage()
-        msg["From"] = EMAIL_FROM
-        msg["To"] = to_email
-        msg["Subject"] = subject
-        msg.set_content(body)
+    if creds.expired and creds.refresh_token:
+        creds.refresh(Request())
 
-        with smtplib.SMTP(SMTP_HOST, SMTP_PORT, timeout=20) as server:
-            server.starttls()
-            server.login(SMTP_USER, SMTP_PASS)
-            server.send_message(msg)
+    return build("gmail", "v1", credentials=creds)
 
-    except Exception:
-        logger.exception("SMTP email failed")
-        raise RuntimeError("Email delivery failed")
+def send_email(to_email: str, subject: str, body: str):
+    service = _get_gmail_service()
 
-# --------------------------------------------------
-# OTP email
-# --------------------------------------------------
-def send_otp_email(to_email: str, otp: str) -> None:
+    msg = EmailMessage()
+    msg["From"] = EMAIL_FROM
+    msg["To"] = to_email
+    msg["Subject"] = subject
+    msg.set_content(body)
+
+    encoded = base64.urlsafe_b64encode(msg.as_bytes()).decode()
+
+    service.users().messages().send(
+        userId="me",
+        body={"raw": encoded}
+    ).execute()
+
+def send_otp_email(to_email: str, otp: str):
     body = f"""
 Your Theramind verification code is:
 
 {otp}
 
 This code will expire in 10 minutes.
-
-If you did not request this, you can safely ignore this email.
 
 — Theramind
 """.strip()

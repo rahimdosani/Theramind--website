@@ -16,3 +16,6 @@ venv/
 
 # VS Code settings
 .vscode/
+
+gmail_credentials.json
+gmail_token.pickle
