@@ -1,24 +1,24 @@
-# email_utils.py
-import base64
-import pickle
 import os
+import base64
+import json
 from email.message import EmailMessage
+from google.oauth2.credentials import Credentials
 from googleapiclient.discovery import build
-from google.auth.transport.requests import Request
 
 EMAIL_FROM = "Theramind <theramind12@gmail.com>"
-TOKEN_PATH = "gmail_token.pickle"
 SCOPES = ["https://www.googleapis.com/auth/gmail.send"]
 
 def _get_gmail_service():
-    if not os.path.exists(TOKEN_PATH):
-        raise RuntimeError("Gmail token not found")
+    token_b64 = os.getenv("GMAIL_TOKEN_BASE64")
+    if not token_b64:
+        raise RuntimeError("GMAIL_TOKEN_BASE64 not set")
 
-    with open(TOKEN_PATH, "rb") as f:
-        creds = pickle.load(f)
+    token_json = base64.b64decode(token_b64).decode("utf-8")
 
-    if creds.expired and creds.refresh_token:
-        creds.refresh(Request())
+    creds = Credentials.from_authorized_user_info(
+        json.loads(token_json),
+        SCOPES
+    )
 
     return build("gmail", "v1", credentials=creds)
 
@@ -31,7 +31,9 @@ def send_email(to_email: str, subject: str, body: str):
     msg["Subject"] = subject
     msg.set_content(body)
 
-    encoded = base64.urlsafe_b64encode(msg.as_bytes()).decode()
+    encoded = base64.urlsafe_b64encode(
+        msg.as_bytes()
+    ).decode("utf-8")
 
     service.users().messages().send(
         userId="me",
