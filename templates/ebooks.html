@@ -82,6 +82,10 @@
       position: relative;
       transition: color 0.3s;
     }
+    .tm-navlinks.show-links {
+    display: flex;
+}
+
 
     .tm-navlinks a:hover { color: var(--accent); }
 
@@ -288,6 +292,12 @@
         padding: 4px 10px;
       }
     }
+    @media (max-width: 480px) {
+    .container {
+    margin-top: 70px;
+  }
+}
+
   </style>
 </head>
 <body>
@@ -344,8 +354,9 @@
       // Active nav link
       const currentPath = window.location.pathname;
       document.querySelectorAll(".tm-navlinks a").forEach(link => {
-        if (currentPath === link.getAttribute("href")) {
-          link.classList.add("active");
+        if (currentPath.startsWith(link.getAttribute("href"))) {
+         link.classList.add("active");
+
         }
       });
 
@@ -365,7 +376,7 @@
 
       // Hamburger menu
       const hamburger = document.querySelector(".tm-hamburger");
-      const nav = document.querySelector(".tm-nav");
+      const nav = document.querySelector(".tm-navlinks");
 
       function updateHamburgerVisibility() {
         if (window.innerWidth <= 768) {

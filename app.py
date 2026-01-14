@@ -1187,17 +1187,12 @@ def auth_google():
     nonce = token_urlsafe(16)
     session["google_nonce"] = nonce
 
-    redirect_uri = url_for(
-        "auth_google_callback",
-        _external=True,
-        _scheme="https"
-    )
+    redirect_uri = "https://theramind.onrender.com/auth/google/callback"
 
     return oauth.google.authorize_redirect(
         redirect_uri=redirect_uri,
         nonce=nonce
     )
-
 
 
 

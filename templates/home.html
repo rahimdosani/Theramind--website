@@ -9,7 +9,6 @@
 
       <!-- Favicon -->
      <link rel="icon" type="image/png" href="{{ url_for('static', filename='brain.png') }}">
-
       <!-- Fonts -->
       <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet" />
 
@@ -119,11 +118,14 @@
 
   /* ---------------- HEADER ---------------- */
   header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 18px 40px;
-  }
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 18px 20px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
 
   .logo {
     display: flex;
@@ -206,8 +208,10 @@
     font-size: 0.8rem;
     padding: 6px 10px;
   }
-button, a {
-  touch-action: manipulation;
+
+  button, a {
+    touch-action: manipulation;
+  }
 }
 
   /* ---------------- HERO ---------------- */
@@ -232,6 +236,14 @@ button, a {
     opacity: 0.5;
     z-index: -1;
   }
+  @media (min-width: 1024px) {
+  .hero::before {
+    width: 520px;
+    height: 520px;
+    filter: blur(120px);
+  }
+}
+
 
   .hero h1 {
     font-size: 3.4rem;
@@ -359,6 +371,18 @@ button, a {
     background: rgba(3,6,29,0.96);
     border: 1px solid rgba(255,255,255,0.12);
   }
+.theme-toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 36px;
+  min-height: 36px;
+  line-height: 1;
+}
+
+#themeIcon {
+  font-size: 1.1rem;
+}
 
   /* ---------------- FOOTER ---------------- */
   footer {
@@ -573,7 +597,7 @@ header {
       <a href="/signup" class="primary">Sign Up</a>
 
       <!-- Profile (future-ready) -->
-      <button class="profile-btn" aria-label="Profile" style="display:none>
+      <button class="profile-btn" aria-label="Profile">
         <span>👤</span>
         <span>Profile</span>
       </button>

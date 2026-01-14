@@ -1,0 +1,79 @@
+/* ==================================================
+   GLOBAL EMERGENCY RESPONSIVE STABILIZATION
+   (Demo-safe, override-only)
+   ================================================== */
+
+/* Global reset */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+/* Prevent horizontal overflow */
+html, body {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: hidden;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+/* Media safety */
+img, video {
+  max-width: 100%;
+  height: auto;
+  display: block;
+}
+
+/* Layout containers */
+main, section, .container {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 1rem;
+}
+
+/* ==================================================
+   NAVBAR STABILIZATION
+   ================================================== */
+
+.navbar {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.75rem 1rem;
+  position: relative;
+}
+
+.navbar-menu {
+  display: flex;
+  gap: 1rem;
+}
+
+/* Mobile navbar */
+@media (max-width: 768px) {
+  .navbar-menu {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    flex-direction: column;
+    align-items: center;
+    background: inherit;
+    display: none;
+    padding: 1rem 0;
+    z-index: 999;
+  }
+
+  .navbar-menu.active {
+    display: flex;
+  }
+
+  .navbar-toggle {
+    display: block;
+    cursor: pointer;
+  }
+}

@@ -30,13 +30,13 @@ body.dark-theme {
 body {
   margin: 0;
   font-family: 'Poppins', sans-serif;
-  background: transparent; /* particles layer shows through, real bg via body::before */
+  background: transparent;
   color: var(--foreground);
-  height: 100vh;
+  min-height: 100dvh;
   overflow-x: hidden;
-  overflow-y: auto;
   transition: background 0.3s, color 0.3s;
 }
+
 
 /* Solid background behind particles */
 body::before {
@@ -139,10 +139,10 @@ body::before {
 /* ===================== Layout ===================== */
 .main-layout {
   display: flex;
-  height: calc(100vh - 75px);
+  flex: 1;
+  min-height: calc(100dvh - 75px);
   overflow: hidden;
-  transition: margin-left 0.35s ease-in-out;
-  min-width: 0; /* important so children can shrink */
+  min-width: 0;
 }
 
 /* ===================== Sidebar ===================== */
@@ -288,14 +288,15 @@ body::before {
 
 /* ===================== Chat ===================== */
 .main {
-  flex: 1 1 auto;
+  flex: 1;
   display: flex;
   flex-direction: column;
   overflow: hidden;
   position: relative;
   min-width: 0;
-  min-height: 0; /* for scrolling child */
+  min-height: 0;
 }
+
 
 .chat-surface {
   flex: 1 1 auto;
@@ -381,15 +382,15 @@ body::before {
 .chat-inputbar {
   display: flex;
   gap: 0.5rem;
-  padding: 0.8rem 1rem;
+  padding: 0.6rem 0.8rem;
   border-top: 1px solid rgba(0,0,0,0.08);
   background: var(--sidebar-bg);
   backdrop-filter: var(--glass-blur);
   position: sticky;
   bottom: 0;
-  z-index: 50;
-  border-radius: 0 0 12px 12px;
+  z-index: 100;
 }
+
 
 .chat-inputbar textarea {
   flex: 1;
@@ -646,7 +647,7 @@ body::before {
     position: fixed;
     top: 75px;
     left: 0;
-    height: calc(100vh - 75px);
+    height: calc(100dvh - 75px);
     transform: translateX(-100%);
     z-index: 200;
     width: 260px;
@@ -784,4 +785,11 @@ body::before {
     padding: 0.3rem 0.5rem;
   }
 }
+
+@supports (height: 100dvh) {
+  body {
+    min-height: 100dvh;
+  }
+}
+
 

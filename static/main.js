@@ -179,7 +179,10 @@ function appendMessage(role, content, timestamp = null) {
   `.trim();
 
   chatBox.appendChild(div);
+  requestAnimationFrame(() => {
   chatBox.scrollTop = chatBox.scrollHeight;
+});
+
 }
 
 function showTyping() {
@@ -774,4 +777,11 @@ initParticles(
   // Core wiring
   bindCoreEvents();
   setupSidebarAndNav();
+
+  // Initial welcome message
+  const chatBox = document.getElementById("chat-box");
+  if (chatBox && chatBox.children.length === 0) {
+    appendMessage("bot", getPersonalizedGreeting());
+  }
+
 })();

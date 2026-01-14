@@ -5,7 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Theramind – Breathe</title>
   <link rel="icon" type="image/png" href="{{ url_for('static', filename='download.png') }}">
-
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet"/>
   <script src="https://cdn.jsdelivr.net/npm/tsparticles@3/tsparticles.bundle.min.js"></script>
 <style>
@@ -126,6 +125,20 @@ header.tm-nav{
   width:100%; height:3px;
   background:var(--primary);
   border-radius:4px;
+}
+/* ===================== MOBILE NAV FIX ===================== */
+@media (max-width: 768px) {
+  .tm-navlinks {
+    display: none;
+    width: 100%;
+    flex-direction: column;
+    gap: 0.6rem;
+    margin-top: 0.75rem;
+  }
+
+  header.tm-nav.show-links .tm-navlinks {
+    display: flex;
+  }
 }
 
 .theme-toggle{
@@ -367,6 +380,10 @@ input[type="range"]{width:200px}
   #instruction{font-size:.85rem}
   .chip{font-size:.65rem; padding:4px 6px}
 }
+body.nav-open {
+  overflow: hidden;
+}
+
 </style>
 
 </head>
@@ -553,16 +570,30 @@ input[type="range"]{width:200px}
   };
 
   /* ================= HAMBURGER ================= */
-  const hamburger = document.querySelector(".tm-hamburger");
-  const nav = document.querySelector(".tm-nav");
+ const hamburger = document.querySelector(".tm-hamburger");
+const nav = document.querySelector(".tm-nav");
 
-  function updateHamburger() {
-    hamburger.style.display = window.innerWidth <= 768 ? "block" : "none";
+function updateHamburger() {
+  if (window.innerWidth <= 768) {
+    hamburger.style.display = "block";
+  } else {
+    hamburger.style.display = "none";
     nav.classList.remove("show-links");
   }
-  hamburger.onclick = () => nav.classList.toggle("show-links");
-  window.addEventListener("resize", updateHamburger);
-  updateHamburger();
+}
+
+hamburger.addEventListener("click", () => {
+  nav.classList.toggle("show-links");
+});
+
+window.addEventListener("resize", updateHamburger);
+updateHamburger();
+document.querySelectorAll(".tm-navlinks a").forEach(link => {
+  link.addEventListener("click", () => {
+    nav.classList.remove("show-links");
+  });
+});
+
 
   /* ================= PARTICLES ================= */
   tsParticles.load("tsparticles", {

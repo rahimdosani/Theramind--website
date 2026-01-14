@@ -278,6 +278,75 @@
     background-color: #0f1225;
     color: #f5f7ff;
   }
+  .icon-btn {
+  background: linear-gradient(135deg, var(--primary), var(--accent));
+  border: none;
+  color: white;
+  padding: 8px 12px;
+  border-radius: 10px;
+  font-size: 1.2rem;
+  cursor: pointer;
+}
+
+.mobile-only {
+  display: none;
+}
+
+@media (max-width: 1024px) {
+  .mobile-only {
+    display: inline-flex;
+  }
+}
+.mobile-nav {
+  position: fixed;
+  top: 75px;
+  left: 0;
+  width: 260px;
+  height: calc(100vh - 75px);
+  background: var(--sidebar-bg);
+  backdrop-filter: var(--glass-blur);
+  padding: 1.2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  z-index: 200;
+  transform: translateX(-100%);
+  transition: transform 0.3s ease;
+}
+
+.mobile-nav a {
+  text-decoration: none;
+  font-weight: 600;
+  color: var(--foreground);
+  padding: 0.6rem 0.8rem;
+  border-radius: 8px;
+}
+
+.mobile-nav a.active {
+  background: linear-gradient(135deg, var(--primary), var(--accent));
+  color: #fff;
+}
+
+.mobile-nav.show {
+  transform: translateX(0);
+}
+.hidden {
+  display: none;
+}
+body.nav-open {
+  overflow: hidden;
+}
+.nav-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.35);
+  z-index: 150;
+  display: none;
+}
+
+.nav-backdrop.show {
+  display: block;
+}
 
   /* =====================
      Responsive
@@ -303,6 +372,32 @@
       font-size: 1.2rem;
     }
   }
+  @media (max-width: 1024px) {
+  .tm-navlinks {
+    display: none;
+  }
+}
+@media (max-width: 768px) {
+  .journal-container {
+    margin-top: 80px;
+  }
+}
+/* =====================
+   Modal Visibility Fix
+   ===================== */
+.modal {
+  position: fixed;
+  inset: 0;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0,0,0,0.45);
+  z-index: 300;
+}
+
+.modal.active {
+  display: flex;
+}
 </style>
 
 </head>
@@ -326,7 +421,30 @@
       <a href="/history">🕰️ History</a>
     </nav>
     <div class="theme-toggle" id="themeToggle">🌓 Theme</div>
+
+    <button
+    class="icon-btn mobile-only"
+    id="navToggle"
+    aria-expanded="false"
+    aria-label="Open navigation menu"
+  >
+    ☰
+   </button>
   </header>
+  <!-- Mobile Navigation Drawer -->
+<aside id="mobileNav" class="mobile-nav hidden">
+  <a href="/">🏠 Home</a>
+  <a href="/index">💬 Chat</a>
+  <a href="/journaling" class="active">📓 Journal</a>
+  <a href="/breathing">🫁 Breathing</a>
+  <a href="/pick-a-peace">📃 Pick-a-Peace</a>
+  <a href="/calm-corner">🧘 Calm Corner</a>
+  <a href="/ebooks">📚 E-Books</a>
+  <a href="/history">🕰️ History</a>
+</aside>
+<div id="navBackdrop" class="nav-backdrop"></div>
+
+
 
   <!-- Journal Container -->
   <div class="journal-container">
@@ -548,6 +666,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 });
+
 
   const themeToggle = document.getElementById("themeToggle");
   const prefersDark = localStorage.getItem("theme") === "dark";
@@ -907,6 +1026,34 @@ async function exportAll() {
   }
 }
 
+const navToggle = document.getElementById("navToggle");
+const mobileNav = document.getElementById("mobileNav");
+const navBackdrop = document.getElementById("navBackdrop");
+
+if (navToggle && mobileNav && navBackdrop) {
+  navToggle.addEventListener("click", () => {
+    const isOpen = mobileNav.classList.toggle("show");
+    navBackdrop.classList.toggle("show", isOpen);
+    document.body.classList.toggle("nav-open", isOpen);
+    navToggle.setAttribute("aria-expanded", isOpen);
+  });
+
+  navBackdrop.addEventListener("click", () => {
+    mobileNav.classList.remove("show");
+    navBackdrop.classList.remove("show");
+    document.body.classList.remove("nav-open");
+    navToggle.setAttribute("aria-expanded", "false");
+  });
+
+  mobileNav.querySelectorAll("a").forEach(link => {
+    link.addEventListener("click", () => {
+      mobileNav.classList.remove("show");
+      navBackdrop.classList.remove("show");
+      document.body.classList.remove("nav-open");
+      navToggle.setAttribute("aria-expanded", "false");
+    });
+  });
+}
 </script>
 </body>
 </html>

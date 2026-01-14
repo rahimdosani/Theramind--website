@@ -191,6 +191,11 @@ body.dark-theme .affirm-text{
 #waves { height:100%; min-height:400px; }
 .wave { height:100%; }
 
+@media(max-width:360px){
+  .wave{opacity:0.25;}
+}
+
+
 </style>
 
 
@@ -397,10 +402,12 @@ function speak(text){
 }
 // =================== Navbar & Theme ===================
 document.addEventListener("DOMContentLoaded", ()=>{
-  const currentPath=window.location.pathname;
-  document.querySelectorAll(".tm-navlinks a").forEach(link=>{
-    if(currentPath.includes(link.getAttribute("href"))) link.classList.add("active");
-  });
+    document.querySelectorAll(".tm-navlinks a").forEach(link=>{
+  if(link.getAttribute("href") === window.location.pathname){
+    link.classList.add("active");
+  }
+});
+
 
   // Theme toggle
   const themeToggle=document.getElementById("themeToggle");
@@ -423,6 +430,7 @@ document.addEventListener("DOMContentLoaded", ()=>{
   // Initialize first tab
   switchTab('nature',document.querySelector('.tab-button.active'));
 });
+
 </script>
 
 </body>
