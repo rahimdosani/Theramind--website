@@ -420,7 +420,7 @@ def logout_user():
     for k in ("user_id", "username", "is_admin"):
         session.pop(k, None)
 
-def get_current_user():
+def current_user():
     uid = session.get("user_id")
     if not uid:
         return None
@@ -1445,12 +1445,17 @@ def user_logout():
 @app.route("/dashboard")
 @login_required
 def user_dashboard():
-    return render_template("dashboard.html", user=get_current_user())
+    return render_template("dashboard.html", user=current_user())
 
 @app.route("/profile", methods=["GET", "POST"])
 @login_required
 def profile():
-    user = get_current_user()
+    user = current_user()
+    if not user:
+        logout_user()
+        flash("Your session expired. Please log in again.", "warning")
+        return redirect(url_for("user_login"))
+
     display_name = get_display_name(user)
 
     conn_users = get_db(USER_DB)
@@ -1547,7 +1552,6 @@ def profile():
         last_mood=last_mood,
         goals=goals_row["goals"] if goals_row else ""
     )
-
 
 @app.before_request
 def ensure_session_and_conv():
@@ -1712,7 +1716,7 @@ def admin_create_user():
 @admin_required
 def admin_delete_user(user_id):
     """Delete a user by id (admin only). Protect from deleting currently logged-in admin."""
-    cur_user = get_current_user()
+    cur_user = current_user()
     if cur_user and cur_user["id"] == user_id:
         return jsonify({"status": "failed", "message": "Cannot delete your own account"}), 400
 
@@ -1733,7 +1737,7 @@ def admin_delete_user(user_id):
 @admin_required
 def admin_toggle_admin(user_id):
     """Promote or demote a user as admin. Returns the new is_admin value."""
-    cur_user = get_current_user()
+    cur_user = current_user()
     if cur_user and cur_user["id"] == user_id:
         return jsonify({"status": "failed", "message": "Cannot change your own admin status"}), 400
 
@@ -2291,7 +2295,7 @@ def api_history_journals():
 @login_required
 def api_history_moods():
     db = get_db(MOOD_DB)
-    user_id = get_current_user()["id"]
+    user_id = current_user()["id"]
 
     rows = db.execute(
         """
@@ -2314,7 +2318,7 @@ def api_history_moods():
 @app.route("/api/history/summary")
 @login_required
 def api_history_summary():
-    user_id = get_current_user()["id"]
+    user_id = current_user()["id"]
 
     db_journal = get_db(JOURNAL_DB)
     db_conv = get_db(CONV_DB)
