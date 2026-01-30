@@ -82,9 +82,7 @@
       position: relative;
       transition: color 0.3s;
     }
-    .tm-navlinks.show-links {
-    display: flex;
-}
+   
 
 
     .tm-navlinks a:hover { color: var(--accent); }
@@ -112,12 +110,7 @@
 
     .theme-toggle:hover { opacity: 0.85; }
 
-    .tm-hamburger {
-      display: none;
-      font-size: 1.5rem;
-      cursor: pointer;
-      margin-top: 0.5rem;
-    }
+    
 
     /* ===================== Particles ===================== */
     #tsparticles {
@@ -225,35 +218,7 @@
     }
 
     @media (max-width: 768px) {
-      .tm-nav {
-        flex-direction: column;
-        align-items: flex-start;
-        height: auto;
-        padding: 1rem;
-      }
-
-      .tm-navlinks {
-        flex-direction: column;
-        align-items: flex-start;
-        width: 100%;
-        gap: 0.6rem;
-        margin-top: 0.5rem;
-        display: none;
-      }
-
-      .tm-nav.show-links .tm-navlinks {
-        display: flex;
-      }
-
-      .theme-toggle {
-        align-self: flex-start;
-        margin-top: 0.5rem;
-      }
-
-      .tm-hamburger {
-        display: block;
-      }
-
+   
       .books-grid {
         grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
         gap: 16px;
@@ -297,6 +262,82 @@
     margin-top: 70px;
   }
 }
+/* ===================== Mobile Sidebar ===================== */
+.tm-sidebar {
+  background: var(--sidebar-bg);
+  backdrop-filter: var(--glass-blur);
+  width: 260px;
+  padding: 1.5rem 1.2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  box-shadow: 4px 0 20px rgba(0,0,0,0.2);
+  border-radius: 0 14px 14px 0;
+
+  transform: translateX(-100%);
+}
+
+.sidebar-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.sidebar-nav a {
+  text-decoration: none;
+  font-weight: 600;
+  padding: 0.6rem 0.9rem;
+  border-radius: 10px;
+  color: var(--foreground);
+}
+
+.sidebar-nav a.active {
+  background: linear-gradient(135deg, var(--primary), var(--accent));
+  color: #fff;
+}
+
+.icon-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.2rem;
+  background: linear-gradient(135deg, var(--primary), var(--accent));
+  color: var(--button-color);
+  border: none;
+  border-radius: 12px;
+  padding: 0.5rem 0.7rem;
+  cursor: pointer;
+}
+
+.mobile-only { display: none; }
+
+@media (max-width: 1024px) {
+  .mobile-only { display: inline-flex; }
+  .tm-navlinks { display: none !important; }
+
+  .tm-sidebar {
+    position: fixed;
+    top: 75px;
+    left: 0;
+    height: calc(100dvh - 75px);
+    transform: translateX(-100%);
+    z-index: 200;
+  }
+
+  .tm-sidebar.show {
+    transform: translateX(0);
+  }
+
+  body.sidebar-open {
+    overflow: hidden;
+  }
+}
+
+@media (min-width: 1025px) {
+  .tm-sidebar {
+    display: none !important;
+  }
+}
 
   </style>
 </head>
@@ -308,7 +349,6 @@
       <img src="https://img.icons8.com/fluency/48/brain.png" alt="Theramind Logo">
       <span>Theramind</span>
     </a>
-    <div class="tm-hamburger">☰</div>
     <nav class="tm-navlinks">
       <a href="/">🏠 Home</a>
       <a href="/index">💬 Chat</a>
@@ -320,7 +360,27 @@
       <a href="/history">🕰️ History</a>
     </nav>
     <div class="theme-toggle" id="themeToggle">🌙 Theme</div>
+    <button
+  id="sidebarToggle"
+  class="icon-btn mobile-only"
+  aria-label="Toggle sidebar"
+  aria-expanded="false"
+>
+  ☰
+</button>
   </header>
+  <aside id="sidebar" class="tm-sidebar" aria-label="Sidebar Navigation">
+  <nav class="sidebar-nav mobile-only">
+    <a href="/">🏠 Home</a>
+    <a href="/index">💬 Chat</a>
+    <a href="/journaling">📓 Journal</a>
+    <a href="/breathing">🫁 Breathing</a>
+    <a href="/pick-a-peace">📃 Pick-a-Peace</a>
+    <a href="/calm-corner">🧘 Calm Corner</a>
+    <a href="/ebooks" class="active">📚 E-Books</a>
+    <a href="/history">🕰️ History</a>
+  </nav>
+</aside>
 
   <div class="container">
     <h1 class="page-title">E-Books Library</h1>
@@ -374,25 +434,7 @@
         themeBtn.textContent = isDark ? "☀️ Theme" : "🌙 Theme";
       });
 
-      // Hamburger menu
-      const hamburger = document.querySelector(".tm-hamburger");
-      const nav = document.querySelector(".tm-navlinks");
-
-      function updateHamburgerVisibility() {
-        if (window.innerWidth <= 768) {
-          hamburger.style.display = "block";
-        } else {
-          hamburger.style.display = "none";
-          nav.classList.remove("show-links");
-        }
-      }
-
-      hamburger.addEventListener("click", () => {
-        nav.classList.toggle("show-links");
-      });
-
-      updateHamburgerVisibility();
-      window.addEventListener("resize", updateHamburgerVisibility);
+     
 
       // E-books data (same as your original list)
     const books = [
@@ -719,6 +761,26 @@
         booksGrid.appendChild(card);
       });
     });
+    const sidebar = document.getElementById("sidebar");
+const sidebarToggle = document.getElementById("sidebarToggle");
+
+sidebarToggle?.addEventListener("click", () => {
+  sidebar.classList.toggle("show");
+  document.body.classList.toggle("sidebar-open");
+
+  sidebarToggle.setAttribute(
+    "aria-expanded",
+    sidebar.classList.contains("show")
+  );
+});
+
+sidebar?.querySelectorAll("a").forEach(link => {
+  link.addEventListener("click", () => {
+    sidebar.classList.remove("show");
+    document.body.classList.remove("sidebar-open");
+    sidebarToggle.setAttribute("aria-expanded", "false");
+  });
+});
   </script>
 </body>
 </html>

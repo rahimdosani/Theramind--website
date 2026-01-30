@@ -95,7 +95,6 @@ body{
   background:var(--primary);
 }
 
-.tm-hamburger{display:none;font-size:1.5rem;cursor:pointer}
 
 .theme-toggle{
   cursor:pointer;
@@ -370,15 +369,70 @@ body.dark-theme .saved-item{
   10%,85%{opacity:1}
   100%{opacity:0}
 }
+.tm-sidebar {
+  background: var(--sidebar-bg);
+  backdrop-filter: var(--glass-blur);
+  width: 260px;
+  padding: 1.5rem 1.2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  box-shadow: 4px 0 20px rgba(0,0,0,0.2);
+  border-radius: 0 14px 14px 0;
+}
+
+@media (max-width: 1024px) {
+  .tm-sidebar {
+    position: fixed;
+    top: 75px;
+    left: 0;
+    height: calc(100dvh - 75px);
+    transform: translateX(-100%);
+    z-index: 200;
+  }
+
+  .tm-sidebar.show {
+    transform: translateX(0);
+  }
+
+  body.sidebar-open {
+    overflow: hidden;
+  }
+
+  .tm-navlinks {
+    display: none !important;
+  }
+
+  .mobile-only {
+    display: inline-flex;
+  }
+}
+
+@media (min-width: 1025px) {
+  .tm-sidebar {
+    display: none !important;
+  }
+}
+
+.icon-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.2rem;
+  background: linear-gradient(135deg, var(--primary), var(--accent));
+  color: #fff;
+  border: none;
+  border-radius: 12px;
+  padding: 0.5rem 0.7rem;
+  cursor: pointer;
+}
+
+.mobile-only {
+  display: none;
+}
+
 
 /* ===================== Responsive ===================== */
-@media(max-width:768px){
-  .tm-hamburger{display:block}
-  .tm-nav{flex-direction:column;align-items:flex-start;padding:1rem}
-  .tm-navlinks{display:none;flex-direction:column;width:100%;gap:.6rem}
-  .tm-navlinks.show-links{display:flex}
-  .shuffle-btn,.saved-btn{width:100%}
-}
 
 @media(max-width:480px){
   h1{font-size:1.6rem}
@@ -412,7 +466,6 @@ body.dark-theme .saved-item{
     <span>Theramind</span>
   </a>
 
-  <div class="tm-hamburger" aria-label="Toggle navigation">☰</div>
 
   <nav class="tm-navlinks">
     <a href="/">🏠 Home</a>
@@ -428,7 +481,29 @@ body.dark-theme .saved-item{
   <div class="theme-toggle" id="themeToggle" role="button" aria-label="Toggle theme">
     🌓 Theme
   </div>
+
+<button
+  id="sidebarToggle"
+  class="icon-btn mobile-only"
+  aria-label="Toggle sidebar"
+  aria-expanded="false"
+>
+  ☰
+</button>
 </header>
+<aside id="sidebar" class="tm-sidebar" aria-label="Sidebar Navigation">
+  <nav class="sidebar-nav mobile-only">
+    <a href="/">🏠 Home</a>
+    <a href="/index">💬 Chat</a>
+    <a href="/journaling">📓 Journal</a>
+    <a href="/breathing">🫁 Breathing</a>
+    <a href="/pick-a-peace" class="active">📃 Pick-a-Peace</a>
+    <a href="/calm-corner">🧘 Calm Corner</a>
+    <a href="/ebooks">📚 E-Books</a>
+    <a href="/history">🕰️ History</a>
+  </nav>
+</aside>
+
 
 <!-- Particles Background -->
 <div id="particles-js" aria-hidden="true"></div>
@@ -517,13 +592,6 @@ themeToggle.onclick = () => {
   themeToggle.textContent = isDark ? "☀️ Theme" : "🌙 Theme";
 };
 
-/* ===================== Hamburger ===================== */
-const hamburger = document.querySelector(".tm-hamburger");
-const nav = document.querySelector(".tm-navlinks");
-hamburger.onclick = () => nav.classList.toggle("show-links");
-window.addEventListener("resize", () => {
-  if (window.innerWidth > 768) nav.classList.remove("show-links");
-});
 
 /* ===================== Toast ===================== */
 function showToast(msg) {
@@ -807,6 +875,27 @@ function toggleLegend() {
 }
 /* ===================== INIT ===================== */
 window.onload = createChits;
+const sidebar = document.getElementById("sidebar");
+const sidebarToggle = document.getElementById("sidebarToggle");
+
+sidebarToggle?.addEventListener("click", () => {
+  sidebar.classList.toggle("show");
+  document.body.classList.toggle("sidebar-open");
+
+  sidebarToggle.setAttribute(
+    "aria-expanded",
+    sidebar.classList.contains("show")
+  );
+});
+
+sidebar?.querySelectorAll("a").forEach(link => {
+  link.addEventListener("click", () => {
+    sidebar.classList.remove("show");
+    document.body.classList.remove("sidebar-open");
+    sidebarToggle.setAttribute("aria-expanded", "false");
+  });
+});
+
 </script>
 
 </body>

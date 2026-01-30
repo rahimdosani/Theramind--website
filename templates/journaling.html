@@ -126,6 +126,38 @@
   .theme-toggle:hover {
     opacity: 0.85;
   }
+  /* =====================
+   Chat-style Mobile Sidebar
+===================== */
+.tm-sidebar {
+  background: var(--sidebar-bg);
+  backdrop-filter: var(--glass-blur);
+  width: 260px;
+  padding: 1.5rem 1.2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  box-shadow: 4px 0 20px rgba(0,0,0,0.2);
+  border-radius: 0 14px 14px 0;
+}
+
+.tm-sidebar.hidden {
+  display: none;
+}
+
+.sidebar-nav a {
+  text-decoration: none;
+  font-weight: 600;
+  padding: 0.6rem 0.8rem;
+  border-radius: 10px;
+  color: var(--foreground);
+}
+
+.sidebar-nav a.active {
+  background: linear-gradient(135deg, var(--primary), var(--accent));
+  color: #fff;
+}
+
 
   /* =====================
      Journal Layout
@@ -297,56 +329,7 @@
     display: inline-flex;
   }
 }
-.mobile-nav {
-  position: fixed;
-  top: 75px;
-  left: 0;
-  width: 260px;
-  height: calc(100vh - 75px);
-  background: var(--sidebar-bg);
-  backdrop-filter: var(--glass-blur);
-  padding: 1.2rem;
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-  z-index: 200;
-  transform: translateX(-100%);
-  transition: transform 0.3s ease;
-}
 
-.mobile-nav a {
-  text-decoration: none;
-  font-weight: 600;
-  color: var(--foreground);
-  padding: 0.6rem 0.8rem;
-  border-radius: 8px;
-}
-
-.mobile-nav a.active {
-  background: linear-gradient(135deg, var(--primary), var(--accent));
-  color: #fff;
-}
-
-.mobile-nav.show {
-  transform: translateX(0);
-}
-.hidden {
-  display: none;
-}
-body.nav-open {
-  overflow: hidden;
-}
-.nav-backdrop {
-  position: fixed;
-  inset: 0;
-  background: rgba(0,0,0,0.35);
-  z-index: 150;
-  display: none;
-}
-
-.nav-backdrop.show {
-  display: block;
-}
 
   /* =====================
      Responsive
@@ -398,6 +381,35 @@ body.nav-open {
 .modal.active {
   display: flex;
 }
+@media (max-width: 1024px) {
+  .tm-navlinks {
+    display: none !important;
+  }
+
+  .tm-sidebar {
+    position: fixed;
+    top: 75px;
+    left: 0;
+    height: calc(100dvh - 75px);
+    transform: translateX(-100%);
+    z-index: 200;
+  }
+
+  .tm-sidebar.show {
+    transform: translateX(0);
+  }
+
+  body.sidebar-open {
+    overflow: hidden;
+  }
+}
+@media (min-width: 1025px) {
+  .tm-sidebar {
+    display: none !important;
+  }
+}
+
+
 </style>
 
 </head>
@@ -421,30 +433,32 @@ body.nav-open {
       <a href="/history">🕰️ History</a>
     </nav>
     <div class="theme-toggle" id="themeToggle">🌓 Theme</div>
-
     <button
-    class="icon-btn mobile-only"
-    id="navToggle"
-    aria-expanded="false"
-    aria-label="Open navigation menu"
-  >
-    ☰
-   </button>
+  id="sidebarToggle"
+  class="icon-btn mobile-only"
+  aria-label="Toggle sidebar"
+  aria-expanded="false"
+>
+  ☰
+</button>
+
+
+    
   </header>
-  <!-- Mobile Navigation Drawer -->
-<aside id="mobileNav" class="mobile-nav hidden">
-  <a href="/">🏠 Home</a>
-  <a href="/index">💬 Chat</a>
-  <a href="/journaling" class="active">📓 Journal</a>
-  <a href="/breathing">🫁 Breathing</a>
-  <a href="/pick-a-peace">📃 Pick-a-Peace</a>
-  <a href="/calm-corner">🧘 Calm Corner</a>
-  <a href="/ebooks">📚 E-Books</a>
-  <a href="/history">🕰️ History</a>
+  <aside id="sidebar" class="tm-sidebar hidden" aria-label="Sidebar Navigation">
+
+  <nav class="sidebar-nav mobile-only">
+    <a href="/">🏠 Home</a>
+    <a href="/index">💬 Chat</a>
+    <a href="/journaling" class="active">📓 Journal</a>
+    <a href="/breathing">🫁 Breathing</a>
+    <a href="/pick-a-peace">📃 Pick-a-Peace</a>
+    <a href="/calm-corner">🧘 Calm Corner</a>
+    <a href="/ebooks">📚 E-Books</a>
+    <a href="/history">🕰️ History</a>
+  </nav>
+
 </aside>
-<div id="navBackdrop" class="nav-backdrop"></div>
-
-
 
   <!-- Journal Container -->
   <div class="journal-container">
@@ -1026,34 +1040,29 @@ async function exportAll() {
   }
 }
 
-const navToggle = document.getElementById("navToggle");
-const mobileNav = document.getElementById("mobileNav");
-const navBackdrop = document.getElementById("navBackdrop");
 
-if (navToggle && mobileNav && navBackdrop) {
-  navToggle.addEventListener("click", () => {
-    const isOpen = mobileNav.classList.toggle("show");
-    navBackdrop.classList.toggle("show", isOpen);
-    document.body.classList.toggle("nav-open", isOpen);
-    navToggle.setAttribute("aria-expanded", isOpen);
-  });
+const sidebar = document.getElementById("sidebar");
+const sidebarToggle = document.getElementById("sidebarToggle");
 
-  navBackdrop.addEventListener("click", () => {
-    mobileNav.classList.remove("show");
-    navBackdrop.classList.remove("show");
-    document.body.classList.remove("nav-open");
-    navToggle.setAttribute("aria-expanded", "false");
-  });
+sidebarToggle?.addEventListener("click", () => {
+  sidebar.classList.toggle("show");
+  document.body.classList.toggle("sidebar-open");
 
-  mobileNav.querySelectorAll("a").forEach(link => {
-    link.addEventListener("click", () => {
-      mobileNav.classList.remove("show");
-      navBackdrop.classList.remove("show");
-      document.body.classList.remove("nav-open");
-      navToggle.setAttribute("aria-expanded", "false");
-    });
+  sidebarToggle.setAttribute(
+    "aria-expanded",
+    sidebar.classList.contains("show")
+  );
+});
+
+// Close sidebar on link click (mobile UX)
+sidebar?.querySelectorAll("a").forEach(link => {
+  link.addEventListener("click", () => {
+    sidebar.classList.remove("show");
+    document.body.classList.remove("sidebar-open");
+    sidebarToggle.setAttribute("aria-expanded", "false");
   });
-}
+});
+
 </script>
 </body>
 </html>

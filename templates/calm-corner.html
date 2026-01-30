@@ -6,198 +6,338 @@
 <link rel="icon" type="image/png" href="{{ url_for('static', filename='meditation.png') }}">
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
 <style>
-/* ===================== Theme Variables ===================== */
+/* =========================================================
+   THEME VARIABLES
+========================================================= */
 :root {
   --background: #ffffff;
   --foreground: #111111;
   --primary: #4f46e5;
   --accent: #06b6d4;
-  --sidebar-bg: rgba(255,255,255,0.55);
+
+  --sidebar-bg: rgba(255, 255, 255, 0.55);
   --glass-blur: blur(16px) saturate(180%);
   --button-color: #111;
 }
+
 body.dark-theme {
   --background: #0d0d0f;
   --foreground: #f0f0f0;
   --primary: #6366f1;
   --accent: #67e8f9;
-  --sidebar-bg: rgba(30,30,30,0.55);
+
+  --sidebar-bg: rgba(30, 30, 30, 0.55);
   --button-color: #fff;
 }
 
-/* General */
-*{margin:0;padding:0;box-sizing:border-box;}
-body{
-  font-family:'Poppins',sans-serif;
-  background:var(--background);
-  color:var(--foreground);
-  min-height:100vh;
-  overflow-x:hidden;
-  transition: background 0.3s, color 0.3s;
+/* =========================================================
+   GLOBAL RESET & BASE
+========================================================= */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
 }
 
-/* ===================== Navbar ===================== */
+body {
+  font-family: "Poppins", sans-serif;
+  background: var(--background);
+  color: var(--foreground);
+  min-height: 100vh;
+  overflow-x: hidden;
+  transition: background 0.3s ease, color 0.3s ease;
+}
+
+/* =========================================================
+   NAVBAR
+========================================================= */
 .tm-nav {
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  height:75px;
-  padding:0 2rem;
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+
+  height: 75px;
+  padding: 0 2rem;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
   background: var(--sidebar-bg);
   backdrop-filter: var(--glass-blur);
-  box-shadow: 0 6px 25px rgba(0,0,0,0.15);
-  position: sticky;
-  top:0;
-  z-index:1000;
+  box-shadow: 0 6px 25px rgba(0, 0, 0, 0.15);
 }
+
 .tm-brand {
-  display:flex;
-  align-items:center;
-  gap:0.75rem;
-  font-weight:700;
-  font-size:1.4rem;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+
+  font-size: 1.4rem;
+  font-weight: 700;
+  text-decoration: none;
   color: var(--foreground);
-  text-decoration:none;
 }
-.tm-brand img { height:36px; }
+
+.tm-brand img {
+  height: 36px;
+}
+
 .tm-navlinks {
-  display:flex;
-  gap:1.5rem;
-  align-items:center;
-  flex-wrap:wrap;
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  flex-wrap: wrap;
 }
+
 .tm-navlinks a {
-  text-decoration:none;
-  font-weight:600;
-  color: var(--primary);
   position: relative;
-  transition: color 0.3s;
+  text-decoration: none;
+  font-weight: 600;
+  color: var(--primary);
+  transition: color 0.3s ease;
 }
-.tm-navlinks a:hover { color: var(--accent); }
+
+.tm-navlinks a:hover {
+  color: var(--accent);
+}
+
 .tm-navlinks a.active::after {
-  content:''; position:absolute; bottom:-6px; left:0; width:100%; height:3px;
-  background: var(--primary); border-radius:4px;
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: -6px;
+  width: 100%;
+  height: 3px;
+  border-radius: 4px;
+  background: var(--primary);
 }
+
 .theme-toggle {
-  cursor:pointer;
-  font-size:0.9rem;
-  background: linear-gradient(135deg,var(--primary),var(--accent));
-  padding:6px 10px;
-  border-radius:6px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  padding: 6px 10px;
+  border-radius: 6px;
   color: var(--button-color);
-  transition:0.3s;
-}
-.theme-toggle:hover { opacity:0.85; }
-.tm-hamburger { display:none; font-size:1.5rem; cursor:pointer; margin-top:0.5rem; }
-
-/* ===================== Waves Background ===================== */
-#waves{position:fixed;bottom:0;left:0;width:100%;height:100%;z-index:-1;overflow:hidden;}
-.wave{position:absolute;width:200%;height:100%;background-repeat:repeat-x;opacity:.4;}
-.wave1{background-image:url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 320"><path fill="%234f6df5" fill-opacity="0.4" d="M0,64L40,90.7C80,117,160,171,240,197.3C320,224,400,224,480,186.7C560,149,640,75,720,80C800,85,880,171,960,202.7C1040,235,1120,213,1200,181.3C1280,149,1360,107,1400,85.3L1440,64L1440,320L0,320Z"/></svg>');animation:waveMove 30s linear infinite;bottom:0;}
-.wave2{background-image:url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 320"><path fill="%23a0c4ff" fill-opacity="0.3" d="M0,96L48,112C96,128,192,160,288,154.7C384,149,480,107,576,112C672,117,768,171,864,197.3C960,224,1056,224,1152,197.3C1248,171,1344,117,1392,90.7L1440,64L1440,320L0,320Z"/></svg>');animation:waveMove 35s linear infinite;bottom:10px;}
-@keyframes waveMove{0%{transform:translateX(0);}100%{transform:translateX(-50%);}}
-
-/* ===================== Layout ===================== */
-main{
-  max-width:1200px;
-  margin:auto;
-  padding:40px 20px;
-  text-align:center;
-  transition:color 0.3s;
-}
-h1{font-size:2.4rem;margin-bottom:10px;}
-.subtitle{margin-bottom:30px;color:#555;}
-.tabs{display:flex;justify-content:center;gap:16px;margin-bottom:30px;flex-wrap:wrap;}
-.tab-button{padding:10px 18px;border:none;border-radius:8px;cursor:pointer;font-size:1rem;background:#e0e7ff;transition:all .3s;}
-.tab-button.active{background:var(--primary);color:#fff;font-weight:600;}
-.audio-section{display:none;flex-wrap:wrap;gap:24px;justify-content:center;}
-.audio-section.active{display:flex;}
-.audio-card{
-  background:rgba(255,255,255,.35);
-  border-radius:16px;
-  padding:20px;
-  width:280px;
-  backdrop-filter:var(--glass-blur);
-  box-shadow:0 6px 20px rgba(0,0,0,.15);
-  transition:transform .3s;
-}
-body.dark-theme .audio-card{background:rgba(30,30,30,.35);}
-.audio-card:hover{transform:translateY(-4px);}
-.audio-card h3{margin-bottom:8px;font-size:1.05rem;}
-audio{width:100%;margin-bottom:6px;}
-.badge{font-size:.75rem;opacity:.8;}
-.download-link{text-decoration:none;font-size:.9rem;color:var(--primary);}
-.compat{font-size:.8rem;opacity:.75;margin-top:6px;}
-.affirm-card{
-  border-radius:18px;padding:20px;width:280px;text-align:center;
-  box-shadow:0 6px 20px rgba(0,0,0,.15);cursor:pointer;transition:transform .3s;
-  display:flex;flex-direction:column;align-items:center;gap:12px;
-}
-.affirm-card:hover{transform:translateY(-6px);}
-.reveal-btn,.hear-btn{
-  padding:8px 14px;border:none;border-radius:8px;cursor:pointer;font-weight:600;transition:all .3s;
-}
-.reveal-btn{background:#f1f5f9;color:#111;}
-.reveal-btn:hover{background:#e0e7ff;}
-.hear-btn{background:var(--primary);color:#fff;}
-.hear-btn:hover{filter:brightness(.9);}
-.affirm-text{
-  display:none;font-size:1.05rem;font-weight:600;line-height:1.45;
-  padding:12px 14px;border-radius:12px;
-  background:rgba(255,255,255,.7);color:#111;
-  text-shadow:0 1px 2px rgba(0,0,0,.15);animation:fadeInUp .8s ease;
-}
-body.dark-theme .affirm-text{
-  background:rgba(0,0,0,.55);color:#fff;
-  text-shadow:0 2px 6px rgba(0,0,0,.5);
-}
-@keyframes fadeInUp{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:translateY(0);}}
-
-/* ===================== Responsive ===================== */
-@media (max-width:768px){
-  .tm-nav { flex-direction:column; align-items:flex-start; height:auto; padding:1rem; }
-  .tm-navlinks { flex-direction:column; align-items:flex-start; width:100%; display:none; margin-top:0.5rem; gap:0.6rem; }
-  .tm-navlinks.show-links { display:flex; }
-  .theme-toggle { align-self:flex-start; margin-top:0.5rem; }
-  .tm-hamburger { display:block; }
-  .tabs { flex-direction:column; gap:12px; }
-  .tab-button { width:100%; text-align:center; }
-  .audio-section, .audio-card, .affirm-card { width:100%; max-width:100%; margin:0 auto; }
-  .audio-card, .affirm-card { padding:16px; }
-  .affirm-text { font-size:0.95rem; }
-  .tm-navlinks a { width:100%; padding:6px 0; }
+  background: linear-gradient(135deg, var(--primary), var(--accent));
+  transition: opacity 0.3s ease;
 }
 
-@media (max-width:480px){
-  h1 { font-size:1.6rem; }
-  .subtitle { font-size:0.9rem; margin-bottom:20px; }
-  .tab-button { font-size:0.95rem; padding:8px 12px; }
-  .audio-card h3 { font-size:0.95rem; }
-  .audio-card, .affirm-card { padding:12px; width:95%; }
-  .reveal-btn, .hear-btn { font-size:0.85rem; padding:6px 12px; }
-  .affirm-text { font-size:0.9rem; padding:10px 12px; }
+.theme-toggle:hover {
+  opacity: 0.85;
 }
 
-@media (max-width:360px){
-  h1 { font-size:1.45rem; }
-  .subtitle { font-size:0.85rem; }
-  .tab-button { font-size:0.85rem; padding:6px 10px; }
-  .audio-card, .affirm-card { width:100%; padding:10px; }
-  .reveal-btn, .hear-btn { font-size:0.8rem; padding:5px 10px; }
-  .affirm-text { font-size:0.85rem; padding:8px 10px; }
+/* =========================================================
+   WAVES BACKGROUND
+========================================================= */
+#waves {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  overflow: hidden;
 }
 
-/* Waves scaling */
-#waves { height:100%; min-height:400px; }
-.wave { height:100%; }
-
-@media(max-width:360px){
-  .wave{opacity:0.25;}
+.wave {
+  position: absolute;
+  width: 200%;
+  height: 100%;
+  opacity: 0.4;
+  background-repeat: repeat-x;
 }
 
+.wave1 {
+  bottom: 0;
+  animation: waveMove 30s linear infinite;
+  background-image: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1440 320'><path fill='%234f6df5' fill-opacity='0.4' d='M0,64L40,90.7C80,117,160,171,240,197.3C320,224,400,224,480,186.7C560,149,640,75,720,80C800,85,880,171,960,202.7C1040,235,1120,213,1200,181.3C1280,149,1360,107,1400,85.3L1440,64L1440,320L0,320Z'/></svg>");
+}
 
+.wave2 {
+  bottom: 10px;
+  animation: waveMove 35s linear infinite;
+  background-image: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1440 320'><path fill='%23a0c4ff' fill-opacity='0.3' d='M0,96L48,112C96,128,192,160,288,154.7C384,149,480,107,576,112C672,117,768,171,864,197.3C960,224,1056,224,1152,197.3C1248,171,1344,117,1392,90.7L1440,64L1440,320L0,320Z'/></svg>");
+}
+
+@keyframes waveMove {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-50%); }
+}
+
+/* =========================================================
+   MAIN CONTENT
+========================================================= */
+main {
+  max-width: 1200px;
+  margin: auto;
+  padding: 40px 20px;
+  text-align: center;
+}
+
+h1 {
+  font-size: 2.4rem;
+  margin-bottom: 10px;
+}
+
+.subtitle {
+  margin-bottom: 30px;
+  color: #555;
+}
+
+/* =========================================================
+   TABS
+========================================================= */
+.tabs {
+  display: flex;
+  justify-content: center;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-bottom: 30px;
+}
+
+.tab-button {
+  padding: 10px 18px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 1rem;
+  background: #e0e7ff;
+  transition: all 0.3s ease;
+}
+
+.tab-button.active {
+  background: var(--primary);
+  color: #fff;
+  font-weight: 600;
+}
+
+/* =========================================================
+   AUDIO & AFFIRMATION CARDS
+========================================================= */
+.audio-section {
+  display: none;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 24px;
+}
+
+.audio-section.active {
+  display: flex;
+}
+
+.audio-card,
+.affirm-card {
+  width: 280px;
+  padding: 20px;
+  border-radius: 16px;
+  backdrop-filter: var(--glass-blur);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+  transition: transform 0.3s ease;
+}
+
+.audio-card {
+  background: rgba(255, 255, 255, 0.35);
+}
+
+body.dark-theme .audio-card {
+  background: rgba(30, 30, 30, 0.35);
+}
+
+.audio-card:hover,
+.affirm-card:hover {
+  transform: translateY(-6px);
+}
+
+/* =========================================================
+   MOBILE SIDEBAR
+========================================================= */
+.tm-sidebar {
+  width: 260px;
+  padding: 1.5rem 1.2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+
+  background: var(--sidebar-bg);
+  backdrop-filter: var(--glass-blur);
+  box-shadow: 4px 0 20px rgba(0, 0, 0, 0.2);
+  border-radius: 0 14px 14px 0;
+}
+
+.sidebar-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.sidebar-nav a {
+  padding: 0.6rem 0.9rem;
+  border-radius: 10px;
+  text-decoration: none;
+  font-weight: 600;
+  color: var(--foreground);
+}
+
+.sidebar-nav a.active {
+  background: linear-gradient(135deg, var(--primary), var(--accent));
+  color: #fff;
+}
+
+.icon-btn {
+  padding: 0.5rem 0.7rem;
+  font-size: 1.2rem;
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+  color: var(--button-color);
+  background: linear-gradient(135deg, var(--primary), var(--accent));
+}
+
+.mobile-only {
+  display: none;
+}
+
+/* =========================================================
+   RESPONSIVE BEHAVIOR
+========================================================= */
+@media (max-width: 1024px) {
+  .mobile-only { display: inline-flex; }
+  .tm-navlinks { display: none !important; }
+
+  .tm-sidebar {
+    position: fixed;
+    top: 75px;
+    left: 0;
+    height: calc(100dvh - 75px);
+    transform: translateX(-100%);
+    z-index: 200;
+  }
+
+  .tm-sidebar.show {
+    transform: translateX(0);
+  }
+
+  body.sidebar-open {
+    overflow: hidden;
+  }
+}
+
+@media (min-width: 1025px) {
+  .tm-sidebar {
+    display: none !important;
+  }
+}
+
+/* =========================================================
+   SMALL SCREENS
+========================================================= */
+@media (max-width: 480px) {
+  h1 { font-size: 1.6rem; }
+  .subtitle { font-size: 0.9rem; }
+}
+
+@media (max-width: 360px) {
+  .wave { opacity: 0.25; }
+}
 </style>
-
 
 </head>
 <body>
@@ -212,8 +352,7 @@ body.dark-theme .affirm-text{
     <img src="https://img.icons8.com/fluency/48/brain.png" alt="Theramind Logo">
     <span>Theramind</span>
   </a>
-  <!-- Hamburger for mobile -->
-  <div class="tm-hamburger">☰</div>
+  
   <nav class="tm-navlinks">
     <a href="/">🏠 Home</a>
     <a href="/index">💬 Chat</a>
@@ -225,7 +364,27 @@ body.dark-theme .affirm-text{
     <a href="/history">🕰️ History</a>
   </nav>
   <div class="theme-toggle" id="themeToggle">🌙 Theme</div>
+  <button
+  id="sidebarToggle"
+  class="icon-btn mobile-only"
+  aria-label="Toggle sidebar"
+  aria-expanded="false"
+>
+  ☰
+</button>
 </header>
+<aside id="sidebar" class="tm-sidebar" aria-label="Sidebar Navigation">
+  <nav class="sidebar-nav mobile-only">
+    <a href="/">🏠 Home</a>
+    <a href="/index">💬 Chat</a>
+    <a href="/journaling">📓 Journal</a>
+    <a href="/breathing">🫁 Breathing</a>
+    <a href="/pick-a-peace">📃 Pick-a-Peace</a>
+    <a href="/calm-corner" class="active">🧘 Calm Corner</a>
+    <a href="/ebooks">📚 E-Books</a>
+    <a href="/history">🕰️ History</a>
+  </nav>
+</aside>
 
 <main>
   <h1>Find Your Calm</h1>
@@ -421,14 +580,29 @@ document.addEventListener("DOMContentLoaded", ()=>{
     themeToggle.textContent=isDark?"☀️ Theme":"🌙 Theme";
   });
 
-  // Hamburger menu
-  const hamburger=document.querySelector('.tm-hamburger');
-  const nav=document.querySelector('.tm-navlinks');
-  hamburger.addEventListener('click',()=>{ nav.classList.toggle('show-links'); });
-  window.addEventListener('resize',()=>{ if(window.innerWidth>768) nav.classList.remove('show-links'); });
 
   // Initialize first tab
   switchTab('nature',document.querySelector('.tab-button.active'));
+});
+const sidebar = document.getElementById("sidebar");
+const sidebarToggle = document.getElementById("sidebarToggle");
+
+sidebarToggle?.addEventListener("click", () => {
+  sidebar.classList.toggle("show");
+  document.body.classList.toggle("sidebar-open");
+
+  sidebarToggle.setAttribute(
+    "aria-expanded",
+    sidebar.classList.contains("show")
+  );
+});
+
+sidebar?.querySelectorAll("a").forEach(link => {
+  link.addEventListener("click", () => {
+    sidebar.classList.remove("show");
+    document.body.classList.remove("sidebar-open");
+    sidebarToggle.setAttribute("aria-expanded", "false");
+  });
 });
 
 </script>

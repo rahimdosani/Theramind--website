@@ -1,405 +1,496 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Theramind – Breathe</title>
-  <link rel="icon" type="image/png" href="{{ url_for('static', filename='download.png') }}">
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet"/>
-  <script src="https://cdn.jsdelivr.net/npm/tsparticles@3/tsparticles.bundle.min.js"></script>
-<style>
-/* ===================== THEME VARIABLES ===================== */
-:root{
-  --accent:#4f6df5;
-  --accent-dark:#3e53cc;
-  --ok:#10b981;
-  --warn:#f59e0b;
-  --danger:#ef4444;
+  <!DOCTYPE html>
+  <html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Theramind – Breathe</title>
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='download.png') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet"/>
+    <script src="https://cdn.jsdelivr.net/npm/tsparticles@3/tsparticles.bundle.min.js"></script>
+  <style>
+  /* ===================== THEME VARIABLES ===================== */
+  :root{
+    --accent:#4f6df5;
+    --accent-dark:#3e53cc;
+    --ok:#10b981;
+    --warn:#f59e0b;
+    --danger:#ef4444;
 
-  --background:#ffffff;
-  --foreground:#111111;
+    --background:#ffffff;
+    --foreground:#111111;
 
-  --primary:#4f46e5;
-  --accent2:#06b6d4;
+    --primary:#4f46e5;
+    --accent2:#06b6d4;
 
-  --sidebar-bg:rgba(255,255,255,0.85);
-  --glass-light:rgba(255,255,255,0.55);
-  --glass-dark:rgba(20,20,40,0.65);
+    --sidebar-bg:rgba(255,255,255,0.85);
+    --glass-light:rgba(255,255,255,0.55);
+    --glass-dark:rgba(20,20,40,0.65);
 
-  --card-light:rgba(255,255,255,0.12);
-  --card-dark:rgba(44,44,62,0.88);
+    --card-light:rgba(255,255,255,0.12);
+    --card-dark:rgba(44,44,62,0.88);
 
-  --glass-blur:blur(16px) saturate(180%);
-  --button-color:#ffffff;
-}
+    --glass-blur:blur(16px) saturate(180%);
+    --button-color:#ffffff;
+  }
 
-/* Dark theme */
-body.dark-theme{
-  --background:#0d0d0f;
-  --foreground:#f0f0f0;
-  --primary:#6366f1;
-  --accent2:#67e8f9;
-  --sidebar-bg:rgba(30,30,30,0.85);
-}
+  /* Dark theme */
+  body.dark-theme{
+    --background:#0d0d0f;
+    --foreground:#f0f0f0;
+    --primary:#6366f1;
+    --accent2:#67e8f9;
+    --sidebar-bg:rgba(30,30,30,0.85);
+  }
 
-/* ===================== BASE ===================== */
-*{box-sizing:border-box}
-html,body{height:100%}
+  /* ===================== BASE ===================== */
+  *{box-sizing:border-box}
+  html,body{height:100%}
 
-body{
-  margin:0;
-  font-family:'Poppins',sans-serif;
-  background:var(--bg-gradient);
-  background-size:cover;
-  background-attachment:fixed;
-  color:var(--foreground);
-  transition:background .4s,color .3s;
-  overflow-x:hidden;
-}
+  body{
+    margin:0;
+    font-family:'Poppins',sans-serif;
+    background:var(--bg-gradient);
+    background-size:cover;
+    background-attachment:fixed;
+    color:var(--foreground);
+    transition:background .4s,color .3s;
+    overflow-x:hidden;
+  }
 
-body.light{
-  --bg-gradient:
-    linear-gradient(180deg,rgba(238,241,255,.9),rgba(200,210,255,.55)),
-    url("https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=1600&q=60")
-    no-repeat center/cover;
-}
+  body.light{
+    --bg-gradient:
+      linear-gradient(180deg,rgba(238,241,255,.9),rgba(200,210,255,.55)),
+      url("https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=1600&q=60")
+      no-repeat center/cover;
+  }
 
-body.dark-theme{
-  --bg-gradient:
-    linear-gradient(180deg,rgba(0,0,0,.65),rgba(10,10,18,.85)),
-    url("https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=1600&q=60")
-    no-repeat center/cover;
-}
+  body.dark-theme{
+    --bg-gradient:
+      linear-gradient(180deg,rgba(0,0,0,.65),rgba(10,10,18,.85)),
+      url("https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=1600&q=60")
+      no-repeat center/cover;
+  }
 
-#tsparticles{
-  position:fixed;
-  inset:0;
-  z-index:0;
-  pointer-events:none;
-}
+  #tsparticles{
+    position:fixed;
+    inset:0;
+    z-index:0;
+    pointer-events:none;
+  }
 
-/* ===================== NAVBAR ===================== */
-header.tm-nav{
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  height:72px;
-  padding:0 2rem;
-  background:var(--sidebar-bg);
-  backdrop-filter:var(--glass-blur);
-  box-shadow:0 6px 25px rgba(0,0,0,.15);
-  position:sticky;
-  top:0;
-  z-index:100;
-}
+  /* ===================== NAVBAR ===================== */
+  header.tm-nav{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    height:72px;
+    padding:0 2rem;
+    background:var(--sidebar-bg);
+    backdrop-filter:var(--glass-blur);
+    box-shadow:0 6px 25px rgba(0,0,0,.15);
+    position:sticky;
+    top:0;
+    z-index:100;
+  }
 
-.tm-brand{
-  display:flex;
-  align-items:center;
-  gap:.75rem;
-  font-weight:700;
-  font-size:1.35rem;
-  color:var(--foreground);
-  text-decoration:none;
-}
-.tm-brand img{height:36px}
+  .tm-brand{
+    display:flex;
+    align-items:center;
+    gap:.75rem;
+    font-weight:700;
+    font-size:1.35rem;
+    color:var(--foreground);
+    text-decoration:none;
+  }
+  .tm-brand img{height:36px}
 
-.tm-navlinks{
-  display:flex;
-  gap:1.4rem;
-  align-items:center;
-  flex-wrap:wrap;
-}
+  .tm-navlinks{
+    display:flex;
+    gap:1.4rem;
+    align-items:center;
+    flex-wrap:wrap;
+  }
 
-.tm-navlinks a{
-  text-decoration:none;
-  font-weight:600;
-  color:var(--primary);
-  position:relative;
-}
-.tm-navlinks a:hover{color:var(--accent2)}
-.tm-navlinks a.active::after{
-  content:"";
-  position:absolute;
-  left:0; bottom:-6px;
-  width:100%; height:3px;
-  background:var(--primary);
-  border-radius:4px;
-}
-/* ===================== MOBILE NAV FIX ===================== */
-@media (max-width: 768px) {
-  .tm-navlinks {
+  .tm-navlinks a{
+    text-decoration:none;
+    font-weight:600;
+    color:var(--primary);
+    position:relative;
+  }
+  .tm-navlinks a:hover{color:var(--accent2)}
+  .tm-navlinks a.active::after{
+    content:"";
+    position:absolute;
+    left:0; bottom:-6px;
+    width:100%; height:3px;
+    background:var(--primary);
+    border-radius:4px;
+  }
+  .theme-toggle{
+    cursor:pointer;
+    font-size:.9rem;
+    padding:6px 10px;
+    border-radius:6px;
+    background:linear-gradient(135deg,var(--primary),var(--accent2));
+    color:var(--button-color);
+  }
+
+  /* ===================== MAIN CARD ===================== */
+  .breathe-container{
+    max-width:900px;
+    margin:60px auto 80px;
+    padding:28px;
+    border-radius:24px;
+    background:var(--card-light);
+    backdrop-filter:blur(18px);
+    box-shadow:0 12px 45px rgba(0,0,0,.25);
+    position:relative;
+    z-index:1;
+
+    min-height:calc(100vh - 120px);
+    display:flex;
+    flex-direction:column;
+    justify-content:space-between;
+  }
+
+  body.dark-theme .breathe-container{background:var(--card-dark)}
+
+  .breathe-header{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    flex-wrap:wrap;
+    gap:12px;
+  }
+  .breathe-header h2{margin:0;font-size:1.8rem}
+
+  .badge{font-size:.85rem; opacity:.85}
+  .kbd{
+    padding:2px 6px;
+    border-radius:6px;
+    background:rgba(0,0,0,.15);
+    font-weight:600;
+  }
+
+  /* ===================== VISUAL STAGE ===================== */
+  .stage{
+    display:grid;
+    place-items:center;
+    margin:18px auto;
+    width:100%;
+    min-height:260px;
+    border-radius:20px;
+    position:relative;
+    overflow:hidden;
+  }
+
+  .orb{
+    width:200px;
+    height:200px;
+    border-radius:50%;
+    background:
+      radial-gradient(circle at 30% 30%,
+        #a8b4ff,
+        #6f8cfa 40%,
+        #4757d6 70%,
+        #2f2fa2 100%);
+    box-shadow:
+      0 0 40px rgba(79,109,245,.6),
+      inset 0 0 40px rgba(255,255,255,.25);
+    transform:scale(1);
+    transition:transform 1s ease;
+  }
+
+  .lotus-wrap{width:240px;height:240px}
+  .lotus svg{width:100%;height:100%}
+
+  .waves{
+    position:relative;
+    width:240px;
+    height:240px;
+  }
+  .wave{
+    position:absolute;
+    inset:0;
+    border-radius:50%;
+    border:2px solid rgba(79,109,245,.35);
+    opacity:.45;
+    transform:scale(1);
+    transition:transform 1s ease,opacity 1s ease;
+  }
+  .wave:nth-child(2){inset:14px}
+  .wave:nth-child(3){inset:28px}
+
+  /* ===================== PANEL ===================== */
+  .panel{
+    display:grid;
+    grid-template-columns:1fr auto auto auto;
+    gap:10px;
+    align-items:center;
+    margin-top:8px;
+  }
+
+  #instruction{
+    font-size:1.25rem;
+    font-weight:600;
+  }
+
+  .chip{
+    padding:8px 12px;
+    border-radius:999px;
+    background:rgba(79,109,245,.12);
+    font-weight:600;
+    min-width:110px;
+    text-align:center;
+  }
+
+  /* ===================== CONTROLS ===================== */
+  .controls{
+    display:flex;
+    flex-wrap:wrap;
+    gap:10px;
+    margin-top:16px;
+  }
+
+  .btn,.select{
+    appearance:none;
+    border:none;
+    border-radius:12px;
+    padding:12px 16px;
+    font-weight:600;
+    cursor:pointer;
+    background:var(--accent);
+    color:#fff;
+    transition:transform .06s ease,background .2s ease;
+  }
+
+  .btn:active{transform:translateY(1px)}
+  .btn.secondary{background:rgba(79,109,245,.25); color:inherit}
+  .btn.warn{background:var(--warn); color:#000}
+  .btn.ok{background:var(--ok); color:#000}
+  .btn.ghost{background:rgba(0,0,0,.12); color:inherit}
+
+  .select{
+    background:#fff;
+    color:#1e1e2f;
+    padding-right:36px; /* space for caret */
+  }
+  body.dark-theme .select{
+    background:#27273a;
+    color:#f0f0f0;
+  }
+
+  input[type="range"]{width:200px}
+
+  /* ===== Dropdown caret affordance ===== */
+  .select-wrap{
+    position:relative;
+    display:inline-flex;
+    align-items:center;
+  }
+  .select-wrap .caret{
+    position:absolute;
+    right:12px;
+    pointer-events:none;
+    font-size:.85rem;
+    opacity:.7;
+    transition:opacity .2s ease, transform .2s ease;
+  }
+  .select-wrap:hover .caret,
+  .select-wrap .select:focus + .caret{
+    opacity:1;
+    transform:translateY(1px);
+  }
+
+  /* ===================== QUOTE + TOAST ===================== */
+  #quote{
+    margin-top:18px;
+    font-style:italic;
+    opacity:.9;
+  }
+
+  .toast{
+    position:fixed;
+    left:50%;
+    bottom:22px;
+    transform:translateX(-50%) translateY(20px);
+    background:#1f2937;
+    color:#fff;
+    padding:12px 18px;
+    border-radius:12px;
+    box-shadow:0 6px 18px rgba(0,0,0,.25);
+    opacity:0;
+    pointer-events:none;
+    transition:.28s ease;
+    z-index:9999;
+    font-weight:600;
+  }
+  .toast.show{
+    opacity:1;
+    transform:translateX(-50%) translateY(0);
+  }
+  .tm-sidebar {
+    background: var(--sidebar-bg);
+    backdrop-filter: var(--glass-blur);
+    width: 260px;
+    padding: 1.5rem 1.2rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    box-shadow: 4px 0 20px rgba(0,0,0,0.2);
+    border-radius: 0 14px 14px 0;
+  }
+
+  @media (max-width: 1024px) {
+    .tm-sidebar {
+      position: fixed;
+      top: 72px;
+      left: 0;
+      height: calc(100dvh - 72px);
+      transform: translateX(-100%);
+      z-index: 200;
+    }
+
+    .tm-sidebar.show {
+      transform: translateX(0);
+    }
+
+    body.sidebar-open {
+      overflow: hidden;
+    }
+  }
+
+  @media (min-width: 1025px) {
+    .tm-sidebar {
+      display: none !important;
+    }
+  }
+  .icon-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+    background: linear-gradient(135deg, var(--primary), var(--accent2));
+    color: var(--button-color);
+    border: none;
+    border-radius: 12px;
+    padding: 0.5rem 0.7rem;
+    cursor: pointer;
+  }
+
+  .mobile-only {
     display: none;
-    width: 100%;
+  }
+
+  @media (max-width: 1024px) {
+    .mobile-only {
+      display: inline-flex;
+    }
+
+    .tm-navlinks {
+      display: none !important;
+    }
+  }
+  .sidebar-nav {
+    display: flex;
     flex-direction: column;
     gap: 0.6rem;
-    margin-top: 0.75rem;
   }
 
-  header.tm-nav.show-links .tm-navlinks {
-    display: flex;
+  .sidebar-nav a {
+    text-decoration: none;
+    font-weight: 600;
+    padding: 0.6rem 0.9rem;
+    border-radius: 10px;
+    color: var(--foreground);
+    transition: background 0.2s, transform 0.15s;
+  }
+
+  .sidebar-nav a:hover {
+    background: rgba(0,0,0,0.08);
+    transform: translateX(2px);
+  }
+
+  .sidebar-nav a.active {
+    background: linear-gradient(135deg, var(--primary), var(--accent2));
+    color: #fff;
+  }
+
+
+  /* ===================== RESPONSIVE ===================== */
+  @media (max-width: 1024px) {
+  header.tm-nav {
+    flex-direction: row;
+    align-items: center;
+    height: 72px;
+  }
+
+  .panel {
+    grid-template-columns: 1fr;
+    gap: 6px;
+  }
+
+  .controls {
+    flex-direction: column;
   }
 }
 
-.theme-toggle{
-  cursor:pointer;
-  font-size:.9rem;
-  padding:6px 10px;
-  border-radius:6px;
-  background:linear-gradient(135deg,var(--primary),var(--accent2));
-  color:var(--button-color);
-}
 
-.tm-hamburger{display:none; font-size:1.4rem; cursor:pointer}
-
-/* ===================== MAIN CARD ===================== */
-.breathe-container{
-  max-width:900px;
-  margin:60px auto 80px;
-  padding:28px;
-  border-radius:24px;
-  background:var(--card-light);
-  backdrop-filter:blur(18px);
-  box-shadow:0 12px 45px rgba(0,0,0,.25);
-  position:relative;
-  z-index:1;
-
-  min-height:calc(100vh - 120px);
-  display:flex;
-  flex-direction:column;
-  justify-content:space-between;
-}
-
-body.dark-theme .breathe-container{background:var(--card-dark)}
-
-.breathe-header{
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  flex-wrap:wrap;
-  gap:12px;
-}
-.breathe-header h2{margin:0;font-size:1.8rem}
-
-.badge{font-size:.85rem; opacity:.85}
-.kbd{
-  padding:2px 6px;
-  border-radius:6px;
-  background:rgba(0,0,0,.15);
-  font-weight:600;
-}
-
-/* ===================== VISUAL STAGE ===================== */
-.stage{
-  display:grid;
-  place-items:center;
-  margin:18px auto;
-  width:100%;
-  min-height:260px;
-  border-radius:20px;
-  position:relative;
-  overflow:hidden;
-}
-
-.orb{
-  width:200px;
-  height:200px;
-  border-radius:50%;
-  background:
-    radial-gradient(circle at 30% 30%,
-      #a8b4ff,
-      #6f8cfa 40%,
-      #4757d6 70%,
-      #2f2fa2 100%);
-  box-shadow:
-    0 0 40px rgba(79,109,245,.6),
-    inset 0 0 40px rgba(255,255,255,.25);
-  transform:scale(1);
-  transition:transform 1s ease;
-}
-
-.lotus-wrap{width:240px;height:240px}
-.lotus svg{width:100%;height:100%}
-
-.waves{
-  position:relative;
-  width:240px;
-  height:240px;
-}
-.wave{
-  position:absolute;
-  inset:0;
-  border-radius:50%;
-  border:2px solid rgba(79,109,245,.35);
-  opacity:.45;
-  transform:scale(1);
-  transition:transform 1s ease,opacity 1s ease;
-}
-.wave:nth-child(2){inset:14px}
-.wave:nth-child(3){inset:28px}
-
-/* ===================== PANEL ===================== */
-.panel{
-  display:grid;
-  grid-template-columns:1fr auto auto auto;
-  gap:10px;
-  align-items:center;
-  margin-top:8px;
-}
-
-#instruction{
-  font-size:1.25rem;
-  font-weight:600;
-}
-
-.chip{
-  padding:8px 12px;
-  border-radius:999px;
-  background:rgba(79,109,245,.12);
-  font-weight:600;
-  min-width:110px;
-  text-align:center;
-}
-
-/* ===================== CONTROLS ===================== */
-.controls{
-  display:flex;
-  flex-wrap:wrap;
-  gap:10px;
-  margin-top:16px;
-}
-
-.btn,.select{
-  appearance:none;
-  border:none;
-  border-radius:12px;
-  padding:12px 16px;
-  font-weight:600;
-  cursor:pointer;
-  background:var(--accent);
-  color:#fff;
-  transition:transform .06s ease,background .2s ease;
-}
-
-.btn:active{transform:translateY(1px)}
-.btn.secondary{background:rgba(79,109,245,.25); color:inherit}
-.btn.warn{background:var(--warn); color:#000}
-.btn.ok{background:var(--ok); color:#000}
-.btn.ghost{background:rgba(0,0,0,.12); color:inherit}
-
-.select{
-  background:#fff;
-  color:#1e1e2f;
-  padding-right:36px; /* space for caret */
-}
-body.dark-theme .select{
-  background:#27273a;
-  color:#f0f0f0;
-}
-
-input[type="range"]{width:200px}
-
-/* ===== Dropdown caret affordance ===== */
-.select-wrap{
-  position:relative;
-  display:inline-flex;
-  align-items:center;
-}
-.select-wrap .caret{
-  position:absolute;
-  right:12px;
-  pointer-events:none;
-  font-size:.85rem;
-  opacity:.7;
-  transition:opacity .2s ease, transform .2s ease;
-}
-.select-wrap:hover .caret,
-.select-wrap .select:focus + .caret{
-  opacity:1;
-  transform:translateY(1px);
-}
-
-/* ===================== QUOTE + TOAST ===================== */
-#quote{
-  margin-top:18px;
-  font-style:italic;
-  opacity:.9;
-}
-
-.toast{
-  position:fixed;
-  left:50%;
-  bottom:22px;
-  transform:translateX(-50%) translateY(20px);
-  background:#1f2937;
-  color:#fff;
-  padding:12px 18px;
-  border-radius:12px;
-  box-shadow:0 6px 18px rgba(0,0,0,.25);
-  opacity:0;
-  pointer-events:none;
-  transition:.28s ease;
-  z-index:9999;
-  font-weight:600;
-}
-.toast.show{
-  opacity:1;
-  transform:translateX(-50%) translateY(0);
-}
-
-/* ===================== RESPONSIVE ===================== */
-@media(max-width:768px){
-  header.tm-nav{
-    flex-direction:column;
-    align-items:flex-start;
-    height:auto;
-    padding:1rem;
+  @media(max-width:480px){
+    .orb,.lotus-wrap,.waves{width:130px;height:130px}
+    #instruction{font-size:.95rem}
+    .chip{font-size:.75rem; min-width:80px}
+    .btn,.select{font-size:.85rem; padding:8px 12px}
   }
-  .tm-navlinks{
-    flex-direction:column;
-    gap:.6rem;
-    width:100%;
-    margin-top:.5rem;
+
+  @media(max-width:360px){
+    .orb,.lotus-wrap,.waves{width:110px;height:110px}
+    #instruction{font-size:.85rem}
+    .chip{font-size:.65rem; padding:4px 6px}
   }
-  .theme-toggle{margin-top:.5rem}
-  .tm-hamburger{display:block}
+  body.nav-open {
+    overflow: hidden;
+  }
 
-  .panel{grid-template-columns:1fr; gap:6px}
-  .controls{flex-direction:column}
-}
+  </style>
 
-@media(max-width:480px){
-  .orb,.lotus-wrap,.waves{width:130px;height:130px}
-  #instruction{font-size:.95rem}
-  .chip{font-size:.75rem; min-width:80px}
-  .btn,.select{font-size:.85rem; padding:8px 12px}
-}
+  </head>
+  <body class="light">
+    <div id="tsparticles"></div>
 
-@media(max-width:360px){
-  .orb,.lotus-wrap,.waves{width:110px;height:110px}
-  #instruction{font-size:.85rem}
-  .chip{font-size:.65rem; padding:4px 6px}
-}
-body.nav-open {
-  overflow: hidden;
-}
+    <!-- NAVBAR -->
+    <header class="tm-nav">
+      <a class="tm-brand" href="/">
+        <img src="https://img.icons8.com/fluency/48/brain.png" alt="Theramind Logo" class="brand-mark">
+        <span>Theramind</span>
+      </a>
 
-</style>
 
-</head>
-<body class="light">
-  <div id="tsparticles"></div>
+      <nav class="tm-navlinks">
+        <a href="/">🏠 Home</a>
+        <a href="/index">💬 Chat</a>
+        <a href="/journaling">📓 Journal</a>
+        <a href="/breathing" class="active">🫁 Breathing</a>
+        <a href="/pick-a-peace">📃 Pick-a-Peace</a>
+        <a href="/calm-corner">🧘 Calm Corner</a>
+        <a href="/ebooks">📚 E-Books</a>
+        <a href="/history">🕰️ History</a>
+      </nav>
 
-  <!-- NAVBAR -->
-  <header class="tm-nav">
-    <a class="tm-brand" href="/">
-      <img src="https://img.icons8.com/fluency/48/brain.png" alt="Theramind Logo" class="brand-mark">
-      <span>Theramind</span>
-    </a>
+      <div class="theme-toggle" id="themeToggle">🌓 Theme</div>
+      <button
+    id="sidebarToggle"
+    class="icon-btn mobile-only"
+    aria-label="Toggle sidebar"
+    aria-expanded="false"
+  >
+    ☰
+  </button>
 
-    <div class="tm-hamburger">☰</div>
+    </header>
 
-    <nav class="tm-navlinks">
+    <aside id="sidebar" class="tm-sidebar hidden" aria-label="Sidebar Navigation">
+    <nav class="sidebar-nav mobile-only">
       <a href="/">🏠 Home</a>
       <a href="/index">💬 Chat</a>
       <a href="/journaling">📓 Journal</a>
@@ -409,385 +500,381 @@ body.nav-open {
       <a href="/ebooks">📚 E-Books</a>
       <a href="/history">🕰️ History</a>
     </nav>
+  </aside>
 
-    <div class="theme-toggle" id="themeToggle">🌓 Theme</div>
-  </header>
 
-  <!-- MAIN CARD -->
-  <main class="breathe-container">
-    <div class="breathe-header">
-      <h2>Relax and Breathe</h2>
-      <div class="badge">
-        Shortcuts:
-        <span class="kbd">Space</span> Start / Pause ·
-        <span class="kbd">R</span> Reset
-      </div>
-    </div>
-
-    <!-- VISUAL STAGE -->
-    <div class="stage">
-      <div class="orb visual" id="visual-orb" aria-hidden="true"></div>
-
-      <div class="lotus-wrap visual" id="visual-lotus" style="display:none" aria-hidden="true">
-        <svg viewBox="0 0 260 260" class="lotus" role="img" aria-label="Lotus breathing visual">
-          <g id="petals">
-            <defs>
-              <path id="petalPath" d="M130 35 C115 80, 115 120, 130 150 C145 120,145 80,130 35 Z" />
-              <radialGradient id="petalGrad" cx="50%" cy="35%">
-                <stop offset="0%" stop-color="#ffffff" stop-opacity="0.9"/>
-                <stop offset="45%" stop-color="#a7c0ff" stop-opacity="0.9"/>
-                <stop offset="100%" stop-color="#6f8cfa" stop-opacity="1"/>
-              </radialGradient>
-            </defs>
-
-            <use href="#petalPath" class="petal" fill="url(#petalGrad)" transform="rotate(0 130 130)"/>
-            <use href="#petalPath" class="petal" fill="url(#petalGrad)" transform="rotate(45 130 130)"/>
-            <use href="#petalPath" class="petal" fill="url(#petalGrad)" transform="rotate(90 130 130)"/>
-            <use href="#petalPath" class="petal" fill="url(#petalGrad)" transform="rotate(135 130 130)"/>
-            <use href="#petalPath" class="petal" fill="url(#petalGrad)" transform="rotate(180 130 130)"/>
-            <use href="#petalPath" class="petal" fill="url(#petalGrad)" transform="rotate(225 130 130)"/>
-            <use href="#petalPath" class="petal" fill="url(#petalGrad)" transform="rotate(270 130 130)"/>
-            <use href="#petalPath" class="petal" fill="url(#petalGrad)" transform="rotate(315 130 130)"/>
-          </g>
-          <circle class="center" cx="130" cy="130" r="22"
-                  fill="#cfe0ff" stroke="#7e9bff" stroke-width="3"/>
-        </svg>
+    <!-- MAIN CARD -->
+    <main class="breathe-container">
+      <div class="breathe-header">
+        <h2>Relax and Breathe</h2>
+        <div class="badge">
+          Shortcuts:
+          <span class="kbd">Space</span> Start / Pause ·
+          <span class="kbd">R</span> Reset
+        </div>
       </div>
 
-      <div class="waves visual" id="visual-waves" style="display:none" aria-hidden="true">
-        <div class="wave"></div>
-        <div class="wave"></div>
-        <div class="wave"></div>
-      </div>
-    </div>
+      <!-- VISUAL STAGE -->
+      <div class="stage">
+        <div class="orb visual" id="visual-orb" aria-hidden="true"></div>
 
-    <!-- SESSION PANEL -->
-    <div class="panel">
-      <div id="instruction" class="subtle">Click “Start” to begin.</div>
+        <div class="lotus-wrap visual" id="visual-lotus" style="display:none" aria-hidden="true">
+          <svg viewBox="0 0 260 260" class="lotus" role="img" aria-label="Lotus breathing visual">
+            <g id="petals">
+              <defs>
+                <path id="petalPath" d="M130 35 C115 80, 115 120, 130 150 C145 120,145 80,130 35 Z" />
+                <radialGradient id="petalGrad" cx="50%" cy="35%">
+                  <stop offset="0%" stop-color="#ffffff" stop-opacity="0.9"/>
+                  <stop offset="45%" stop-color="#a7c0ff" stop-opacity="0.9"/>
+                  <stop offset="100%" stop-color="#6f8cfa" stop-opacity="1"/>
+                </radialGradient>
+              </defs>
 
-      <div class="chip">
-        Breath
-        <span id="breath-count">0</span> /
-        <span id="breath-target">10</span>
-      </div>
+              <use href="#petalPath" class="petal" fill="url(#petalGrad)" transform="rotate(0 130 130)"/>
+              <use href="#petalPath" class="petal" fill="url(#petalGrad)" transform="rotate(45 130 130)"/>
+              <use href="#petalPath" class="petal" fill="url(#petalGrad)" transform="rotate(90 130 130)"/>
+              <use href="#petalPath" class="petal" fill="url(#petalGrad)" transform="rotate(135 130 130)"/>
+              <use href="#petalPath" class="petal" fill="url(#petalGrad)" transform="rotate(180 130 130)"/>
+              <use href="#petalPath" class="petal" fill="url(#petalGrad)" transform="rotate(225 130 130)"/>
+              <use href="#petalPath" class="petal" fill="url(#petalGrad)" transform="rotate(270 130 130)"/>
+              <use href="#petalPath" class="petal" fill="url(#petalGrad)" transform="rotate(315 130 130)"/>
+            </g>
+            <circle class="center" cx="130" cy="130" r="22"
+                    fill="#cfe0ff" stroke="#7e9bff" stroke-width="3"/>
+          </svg>
+        </div>
 
-      <div class="chip">
-        Round
-        <span id="round-count">1</span> /
-        <span id="round-target">1</span>
-      </div>
-
-      <div class="chip">
-        Mode: <span id="mode-label">Simple</span>
-      </div>
-    </div>
-
-    <!-- CONTROLS -->
-    <div class="controls" role="group" aria-label="Breathing controls">
-      <button class="btn ok" id="start-btn">Start</button>
-      <button class="btn warn" id="stop-btn">Pause</button>
-      <button class="btn secondary" id="reset-btn">Reset</button>
-
-      <!-- Mode -->
-      <div class="select-wrap">
-        <select class="select" id="mode-select" title="Breathing Mode">
-          <option value="simple">Simple (4–4)</option>
-          <option value="box">Box (4–4–4–4)</option>
-          <option value="478">4–7–8</option>
-        </select>
-        <span class="caret">▾</span>
+        <div class="waves visual" id="visual-waves" style="display:none" aria-hidden="true">
+          <div class="wave"></div>
+          <div class="wave"></div>
+          <div class="wave"></div>
+        </div>
       </div>
 
-      <!-- Breaths -->
-      <div class="select-wrap">
-        <select class="select" id="breaths-select" title="Breaths per round">
-          <option value="10">10 breaths</option>
-          <option value="15">15 breaths</option>
-          <option value="20">20 breaths</option>
-          <option value="25">25 breaths</option>
-          <option value="30">30 breaths</option>
-        </select>
-        <span class="caret">▾</span>
+      <!-- SESSION PANEL -->
+      <div class="panel">
+        <div id="instruction" class="subtle">Click “Start” to begin.</div>
+
+        <div class="chip">
+          Breath
+          <span id="breath-count">0</span> /
+          <span id="breath-target">10</span>
+        </div>
+
+        <div class="chip">
+          Round
+          <span id="round-count">1</span> /
+          <span id="round-target">1</span>
+        </div>
+
+        <div class="chip">
+          Mode: <span id="mode-label">Simple</span>
+        </div>
       </div>
 
-      <!-- Rounds -->
-      <div class="select-wrap">
-        <select class="select" id="rounds-select" title="Rounds">
-          <option value="1">1 round</option>
-          <option value="2">2 rounds</option>
-          <option value="3">3 rounds</option>
-        </select>
-        <span class="caret">▾</span>
+      <!-- CONTROLS -->
+      <div class="controls" role="group" aria-label="Breathing controls">
+        <button class="btn ok" id="start-btn">Start</button>
+        <button class="btn warn" id="stop-btn">Pause</button>
+        <button class="btn secondary" id="reset-btn">Reset</button>
+
+        <!-- Mode -->
+        <div class="select-wrap">
+          <select class="select" id="mode-select" title="Breathing Mode">
+            <option value="simple">Simple (4–4)</option>
+            <option value="box">Box (4–4–4–4)</option>
+            <option value="478">4–7–8</option>
+          </select>
+          <span class="caret">▾</span>
+        </div>
+
+        <!-- Breaths -->
+        <div class="select-wrap">
+          <select class="select" id="breaths-select" title="Breaths per round">
+            <option value="10">10 breaths</option>
+            <option value="15">15 breaths</option>
+            <option value="20">20 breaths</option>
+            <option value="25">25 breaths</option>
+            <option value="30">30 breaths</option>
+          </select>
+          <span class="caret">▾</span>
+        </div>
+
+        <!-- Rounds -->
+        <div class="select-wrap">
+          <select class="select" id="rounds-select" title="Rounds">
+            <option value="1">1 round</option>
+            <option value="2">2 rounds</option>
+            <option value="3">3 rounds</option>
+          </select>
+          <span class="caret">▾</span>
+        </div>
+
+        <!-- Visual -->
+        <div class="select-wrap">
+          <select class="select" id="visual-select" title="Visual Style">
+            <option value="orb">Orb</option>
+            <option value="waves">Waves</option>
+          </select>
+          <span class="caret">▾</span>
+        </div>
+
+        <label class="btn ghost" style="display:flex; align-items:center; gap:10px;">
+          Pace
+          <input type="range" id="pace" min="0.6" max="1.6" step="0.05" value="1"/>
+        </label>
+
+        <button class="btn" id="speech-btn">🔇 Speech</button>
+        <button class="btn" id="sound-btn">🔕 Chime</button>
       </div>
 
-      <!-- Visual -->
-      <div class="select-wrap">
-        <select class="select" id="visual-select" title="Visual Style">
-          <option value="orb">Orb</option>
-          <option value="waves">Waves</option>
-        </select>
-        <span class="caret">▾</span>
+      <div id="quote">
+        “Feelings come and go like clouds in a windy sky. Conscious breathing is my anchor.”
       </div>
+    </main>
 
-      <label class="btn ghost" style="display:flex; align-items:center; gap:10px;">
-        Pace
-        <input type="range" id="pace" min="0.6" max="1.6" step="0.05" value="1"/>
-      </label>
+    <div class="toast" id="toast"></div>
+    
+    <script>
+    document.addEventListener("DOMContentLoaded", () => {
 
-      <button class="btn" id="speech-btn">🔇 Speech</button>
-      <button class="btn" id="sound-btn">🔕 Chime</button>
-    </div>
+    /* ================= NAV ACTIVE ================= */
+    const currentPath = window.location.pathname;
+    document.querySelectorAll(".tm-navlinks a").forEach(link => {
+      if (link.getAttribute("href") === currentPath) link.classList.add("active");
+    });
 
-    <div id="quote">
-      “Feelings come and go like clouds in a windy sky. Conscious breathing is my anchor.”
-    </div>
-  </main>
+    /* ================= THEME ================= */
+    const themeBtn = document.getElementById("themeToggle");
+    const isDarkStored = localStorage.getItem("theme") === "dark";
 
-  <div class="toast" id="toast"></div>
-  
-  <script>
-  document.addEventListener("DOMContentLoaded", () => {
+    document.body.classList.toggle("dark-theme", isDarkStored);
+    document.body.classList.toggle("light", !isDarkStored);
+    themeBtn.textContent = isDarkStored ? "☀️ Theme" : "🌙 Theme";
 
-  /* ================= NAV ACTIVE ================= */
-  const currentPath = window.location.pathname;
-  document.querySelectorAll(".tm-navlinks a").forEach(link => {
-    if (link.getAttribute("href") === currentPath) link.classList.add("active");
-  });
-
-  /* ================= THEME ================= */
-  const themeBtn = document.getElementById("themeToggle");
-  const isDarkStored = localStorage.getItem("theme") === "dark";
-
-  document.body.classList.toggle("dark-theme", isDarkStored);
-  document.body.classList.toggle("light", !isDarkStored);
-  themeBtn.textContent = isDarkStored ? "☀️ Theme" : "🌙 Theme";
-
-  themeBtn.onclick = () => {
-    const isDark = document.body.classList.toggle("dark-theme");
-    document.body.classList.toggle("light", !isDark);
-    localStorage.setItem("theme", isDark ? "dark" : "light");
-    themeBtn.textContent = isDark ? "☀️ Theme" : "🌙 Theme";
-  };
-
-  /* ================= HAMBURGER ================= */
- const hamburger = document.querySelector(".tm-hamburger");
-const nav = document.querySelector(".tm-nav");
-
-function updateHamburger() {
-  if (window.innerWidth <= 768) {
-    hamburger.style.display = "block";
-  } else {
-    hamburger.style.display = "none";
-    nav.classList.remove("show-links");
-  }
-}
-
-hamburger.addEventListener("click", () => {
-  nav.classList.toggle("show-links");
-});
-
-window.addEventListener("resize", updateHamburger);
-updateHamburger();
-document.querySelectorAll(".tm-navlinks a").forEach(link => {
-  link.addEventListener("click", () => {
-    nav.classList.remove("show-links");
-  });
-});
+    themeBtn.onclick = () => {
+      const isDark = document.body.classList.toggle("dark-theme");
+      document.body.classList.toggle("light", !isDark);
+      localStorage.setItem("theme", isDark ? "dark" : "light");
+      themeBtn.textContent = isDark ? "☀️ Theme" : "🌙 Theme";
+    };
 
 
-  /* ================= PARTICLES ================= */
-  tsParticles.load("tsparticles", {
-    particles: {
-      number: { value: 60, density: { enable: true, area: 800 } },
-      color: { value: ["#4f6df5", "#67e8f9"] },
-      opacity: { value: 0.5 },
-      size: { value: 3 },
-      move: { enable: true, speed: 0.6 }
-    },
-    detectRetina: true
-  });
 
-  /* ================= TOAST ================= */
-  const toast = document.getElementById("toast");
-  function showToast(msg, t = 2200) {
-    toast.textContent = msg;
-    toast.classList.add("show");
-    setTimeout(() => toast.classList.remove("show"), t);
-  }
+    /* ================= PARTICLES ================= */
+    tsParticles.load("tsparticles", {
+      particles: {
+        number: { value: 60, density: { enable: true, area: 800 } },
+        color: { value: ["#4f6df5", "#67e8f9"] },
+        opacity: { value: 0.5 },
+        size: { value: 3 },
+        move: { enable: true, speed: 0.6 }
+      },
+      detectRetina: true
+    });
 
-  /* ================= ELEMENTS ================= */
-  const startBtn = document.getElementById("start-btn");
-  const stopBtn = document.getElementById("stop-btn");
-  const resetBtn = document.getElementById("reset-btn");
-
-  const modeSelect = document.getElementById("mode-select");
-  const visualSelect = document.getElementById("visual-select");
-  const breathsSelect = document.getElementById("breaths-select");
-  const roundsSelect = document.getElementById("rounds-select");
-  const paceRange = document.getElementById("pace");
-
-  const speechBtn = document.getElementById("speech-btn");
-  const soundBtn = document.getElementById("sound-btn");
-
-  const instruction = document.getElementById("instruction");
-  const breathCountEl = document.getElementById("breath-count");
-  const breathTargetEl = document.getElementById("breath-target");
-  const roundCountEl = document.getElementById("round-count");
-  const roundTargetEl = document.getElementById("round-target");
-  const modeLabelEl = document.getElementById("mode-label");
-
-  const orb = document.getElementById("visual-orb");
-  const waves = document.querySelectorAll(".wave");
-
-  /* ================= STATE ================= */
-  let breathCount = 0;
-  let currentRound = 1;
-  let intervalId = null;
-
-  let breathsTarget = parseInt(breathsSelect.value);
-  let totalRounds = parseInt(roundsSelect.value);
-  let pace = parseFloat(paceRange.value);
-
-  let visual = visualSelect.value;
-  let speechEnabled = false;
-  let chimeEnabled = false;
-
-  breathTargetEl.textContent = breathsTarget;
-  roundTargetEl.textContent = totalRounds;
-
-  /* ================= VISUAL ================= */
-  function updateVisual() {
-    document.getElementById("visual-orb").style.display = visual === "orb" ? "block" : "none";
-    document.getElementById("visual-waves").style.display = visual === "waves" ? "block" : "none";
-    document.getElementById("visual-lotus").style.display = visual === "lotus" ? "block" : "none";
-  }
-
-  function animateVisual() {
-    if (visual === "orb") {
-      orb.style.transform = "scale(1.3)";
-      setTimeout(() => orb.style.transform = "scale(1)", 1800 / pace);
+    /* ================= TOAST ================= */
+    const toast = document.getElementById("toast");
+    function showToast(msg, t = 2200) {
+      toast.textContent = msg;
+      toast.classList.add("show");
+      setTimeout(() => toast.classList.remove("show"), t);
     }
 
-    if (visual === "waves") {
-      waves.forEach((w, i) => {
-        w.style.transform = "scale(1.4)";
-        w.style.opacity = "0.25";
-        setTimeout(() => {
-          w.style.transform = "scale(1)";
-          w.style.opacity = "0.45";
-        }, (1800 + i * 200) / pace);
-      });
+    /* ================= ELEMENTS ================= */
+    const startBtn = document.getElementById("start-btn");
+    const stopBtn = document.getElementById("stop-btn");
+    const resetBtn = document.getElementById("reset-btn");
+
+    const modeSelect = document.getElementById("mode-select");
+    const visualSelect = document.getElementById("visual-select");
+    const breathsSelect = document.getElementById("breaths-select");
+    const roundsSelect = document.getElementById("rounds-select");
+    const paceRange = document.getElementById("pace");
+
+    const speechBtn = document.getElementById("speech-btn");
+    const soundBtn = document.getElementById("sound-btn");
+
+    const instruction = document.getElementById("instruction");
+    const breathCountEl = document.getElementById("breath-count");
+    const breathTargetEl = document.getElementById("breath-target");
+    const roundCountEl = document.getElementById("round-count");
+    const roundTargetEl = document.getElementById("round-target");
+    const modeLabelEl = document.getElementById("mode-label");
+
+    const orb = document.getElementById("visual-orb");
+    const waves = document.querySelectorAll(".wave");
+
+    /* ================= STATE ================= */
+    let breathCount = 0;
+    let currentRound = 1;
+    let intervalId = null;
+
+    let breathsTarget = parseInt(breathsSelect.value);
+    let totalRounds = parseInt(roundsSelect.value);
+    let pace = parseFloat(paceRange.value);
+
+    let visual = visualSelect.value;
+    let speechEnabled = false;
+    let chimeEnabled = false;
+
+    breathTargetEl.textContent = breathsTarget;
+    roundTargetEl.textContent = totalRounds;
+
+    /* ================= VISUAL ================= */
+    function updateVisual() {
+      document.getElementById("visual-orb").style.display = visual === "orb" ? "block" : "none";
+      document.getElementById("visual-waves").style.display = visual === "waves" ? "block" : "none";
+      document.getElementById("visual-lotus").style.display = visual === "lotus" ? "block" : "none";
     }
-  }
 
-  /* ================= BREATH CYCLE ================= */
-  function breatheCycle() {
-    breathCount++;
-    breathCountEl.textContent = breathCount;
+    function animateVisual() {
+      if (visual === "orb") {
+        orb.style.transform = "scale(1.3)";
+        setTimeout(() => orb.style.transform = "scale(1)", 1800 / pace);
+      }
 
-    instruction.textContent = `Round ${currentRound} · Breathe in… Breathe out…`;
-    animateVisual();
-
-    if (chimeEnabled) {
-      new Audio("https://actions.google.com/sounds/v1/alarms/beep_short.ogg").play();
-    }
-
-    if (speechEnabled && "speechSynthesis" in window) {
-      speechSynthesis.cancel();
-      speechSynthesis.speak(
-        new SpeechSynthesisUtterance("Breathe in. Breathe out.")
-      );
-    }
-
-    if (breathCount >= breathsTarget) {
-      clearInterval(intervalId);
-      intervalId = null;
-      breathCount = 0;
-
-      if (currentRound < totalRounds) {
-        currentRound++;
-        roundCountEl.textContent = currentRound;
-        showToast(`Round ${currentRound - 1} complete`);
-        setTimeout(startBreathing, 2200);
-      } else {
-        instruction.textContent = "Session complete 🌿";
-        showToast("Breathing session completed ✨", 3000);
+      if (visual === "waves") {
+        waves.forEach((w, i) => {
+          w.style.transform = "scale(1.4)";
+          w.style.opacity = "0.25";
+          setTimeout(() => {
+            w.style.transform = "scale(1)";
+            w.style.opacity = "0.45";
+          }, (1800 + i * 200) / pace);
+        });
       }
     }
-  }
 
-  /* ================= CONTROLS ================= */
-  function startBreathing() {
-    if (intervalId) return;
-    instruction.textContent = `Round ${currentRound} starting…`;
-    intervalId = setInterval(breatheCycle, 4000 / pace);
-  }
+    /* ================= BREATH CYCLE ================= */
+    function breatheCycle() {
+      breathCount++;
+      breathCountEl.textContent = breathCount;
 
-  function stopBreathing() {
-    clearInterval(intervalId);
-    intervalId = null;
-    instruction.textContent = "Paused. Click Start to continue.";
-  }
+      instruction.textContent = `Round ${currentRound} · Breathe in… Breathe out…`;
+      animateVisual();
 
-  function resetBreathing() {
-    stopBreathing();
-    breathCount = 0;
-    currentRound = 1;
-    breathCountEl.textContent = "0";
-    roundCountEl.textContent = "1";
-    instruction.textContent = "Click Start to begin.";
-    showToast("Session reset");
-  }
+      if (chimeEnabled) {
+        new Audio("https://actions.google.com/sounds/v1/alarms/beep_short.ogg").play();
+      }
 
-  /* ================= EVENTS ================= */
-  startBtn.onclick = startBreathing;
-  stopBtn.onclick = stopBreathing;
-  resetBtn.onclick = resetBreathing;
+      if (speechEnabled && "speechSynthesis" in window) {
+        speechSynthesis.cancel();
+        speechSynthesis.speak(
+          new SpeechSynthesisUtterance("Breathe in. Breathe out.")
+        );
+      }
 
-  modeSelect.onchange = e => {
-    modeLabelEl.textContent = e.target.selectedOptions[0].text;
-    showToast(`Mode: ${modeLabelEl.textContent}`);
-  };
+      if (breathCount >= breathsTarget) {
+        clearInterval(intervalId);
+        intervalId = null;
+        breathCount = 0;
 
-  visualSelect.onchange = e => {
-    visual = e.target.value;
+        if (currentRound < totalRounds) {
+          currentRound++;
+          roundCountEl.textContent = currentRound;
+          showToast(`Round ${currentRound - 1} complete`);
+          setTimeout(startBreathing, 2200);
+        } else {
+          instruction.textContent = "Session complete 🌿";
+          showToast("Breathing session completed ✨", 3000);
+        }
+      }
+    }
+
+    /* ================= CONTROLS ================= */
+    function startBreathing() {
+      if (intervalId) return;
+      instruction.textContent = `Round ${currentRound} starting…`;
+      intervalId = setInterval(breatheCycle, 4000 / pace);
+    }
+
+    function stopBreathing() {
+      clearInterval(intervalId);
+      intervalId = null;
+      instruction.textContent = "Paused. Click Start to continue.";
+    }
+
+    function resetBreathing() {
+      stopBreathing();
+      breathCount = 0;
+      currentRound = 1;
+      breathCountEl.textContent = "0";
+      roundCountEl.textContent = "1";
+      instruction.textContent = "Click Start to begin.";
+      showToast("Session reset");
+    }
+
+    /* ================= EVENTS ================= */
+    startBtn.onclick = startBreathing;
+    stopBtn.onclick = stopBreathing;
+    resetBtn.onclick = resetBreathing;
+
+    modeSelect.onchange = e => {
+      modeLabelEl.textContent = e.target.selectedOptions[0].text;
+      showToast(`Mode: ${modeLabelEl.textContent}`);
+    };
+
+    visualSelect.onchange = e => {
+      visual = e.target.value;
+      updateVisual();
+    };
+
+    breathsSelect.onchange = e => {
+      breathsTarget = parseInt(e.target.value);
+      breathTargetEl.textContent = breathsTarget;
+    };
+
+    roundsSelect.onchange = e => {
+      totalRounds = parseInt(e.target.value);
+      roundTargetEl.textContent = totalRounds;
+    };
+
+    paceRange.oninput = e => {
+      pace = parseFloat(e.target.value);
+      if (intervalId) { stopBreathing(); startBreathing(); }
+    };
+
+    speechBtn.onclick = () => {
+      speechEnabled = !speechEnabled;
+      speechBtn.textContent = speechEnabled ? "🔊 Speech" : "🔇 Speech";
+    };
+
+    soundBtn.onclick = () => {
+      chimeEnabled = !chimeEnabled;
+      soundBtn.textContent = chimeEnabled ? "🔔 Chime" : "🔕 Chime";
+    };
+
+    document.addEventListener("keydown", e => {
+      if (e.code === "Space") { e.preventDefault(); intervalId ? stopBreathing() : startBreathing(); }
+      if (e.code === "KeyR") { e.preventDefault(); resetBreathing(); }
+    });
+
     updateVisual();
-  };
+  });
+  const sidebar = document.getElementById("sidebar");
+  const sidebarToggle = document.getElementById("sidebarToggle");
 
-  breathsSelect.onchange = e => {
-    breathsTarget = parseInt(e.target.value);
-    breathTargetEl.textContent = breathsTarget;
-  };
+  sidebarToggle?.addEventListener("click", () => {
+    sidebar.classList.toggle("show");
+    document.body.classList.toggle("sidebar-open");
 
-  roundsSelect.onchange = e => {
-    totalRounds = parseInt(e.target.value);
-    roundTargetEl.textContent = totalRounds;
-  };
-
-  paceRange.oninput = e => {
-    pace = parseFloat(e.target.value);
-    if (intervalId) { stopBreathing(); startBreathing(); }
-  };
-
-  speechBtn.onclick = () => {
-    speechEnabled = !speechEnabled;
-    speechBtn.textContent = speechEnabled ? "🔊 Speech" : "🔇 Speech";
-  };
-
-  soundBtn.onclick = () => {
-    chimeEnabled = !chimeEnabled;
-    soundBtn.textContent = chimeEnabled ? "🔔 Chime" : "🔕 Chime";
-  };
-
-  document.addEventListener("keydown", e => {
-    if (e.code === "Space") { e.preventDefault(); intervalId ? stopBreathing() : startBreathing(); }
-    if (e.code === "KeyR") { e.preventDefault(); resetBreathing(); }
+    sidebarToggle.setAttribute(
+      "aria-expanded",
+      sidebar.classList.contains("show")
+    );
   });
 
-  updateVisual();
-});
-</script>
+  sidebar?.querySelectorAll("a").forEach(link => {
+    link.addEventListener("click", () => {
+      sidebar.classList.remove("show");
+      document.body.classList.remove("sidebar-open");
+      sidebarToggle.setAttribute("aria-expanded", "false");
+    });
+  });
+
+  </script>
 
 
-</body>
-</html>
+  </body>
+  </html>

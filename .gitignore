@@ -19,3 +19,4 @@ venv/
 
 gmail_credentials.json
 gmail_token.pickle
+token.json

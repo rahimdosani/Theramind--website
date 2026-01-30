@@ -385,25 +385,23 @@
 }
 
   /* ---------------- FOOTER ---------------- */
-  footer {
-    text-align: center;
-    padding: 40px 20px 28px;
-    font-size: 0.88rem;
-    color: gray;
-  }
+footer {
+  text-align: center;
+  padding: 40px 20px 28px;
+  font-size: 0.88rem;
+  color: gray;
 
-
-  body.dark footer { color: #a6a9d9; }
-
-  .flash-container {
-  position: fixed;
-  top: 20px;
-  left: 50%;
-  transform: translateX(-50%);
-  z-index: 9999;
-  width: 90%;
-  max-width: 420px;
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(10px);
+  border-top: 1px solid rgba(0,0,0,0.05);
 }
+
+body.dark footer {
+  background: rgba(6, 8, 30, 0.95);
+  color: #a6a9d9;
+  border-top: 1px solid rgba(255,255,255,0.08);
+}
+
 
 .flash {
   padding: 14px 18px;
@@ -569,8 +567,37 @@ header {
     font-size: 0.78rem;
   }
 }
+/* ===== MOBILE HEADER VISIBILITY FIX ===== */
+@media (max-width: 768px) {
+  header {
+    max-width: 100%;
+    padding: 12px 14px;
+  }
 
+  .header-actions {
+    gap: 6px;
+    flex-shrink: 0;
+  }
 
+  .header-actions a,
+  .profile-btn,
+  .theme-toggle {
+    padding: 6px 10px;
+    font-size: 0.78rem;
+  }
+}
+
+/* Ultra-small phones */
+@media (max-width: 360px) {
+  .header-actions a:not(.primary) {
+    display: none; /* hides Login, keeps Sign Up */
+  }
+}
+@media (max-width: 768px) {
+  .hero {
+    padding-top: 90px;
+  }
+}
 
 </style>
     </head>
