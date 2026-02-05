@@ -414,11 +414,10 @@
       // Active nav link
       const currentPath = window.location.pathname;
       document.querySelectorAll(".tm-navlinks a").forEach(link => {
-        if (currentPath.startsWith(link.getAttribute("href"))) {
+       if (link.getAttribute("href") === currentPath) {
          link.classList.add("active");
-
-        }
-      });
+  }
+});
 
       // Theme toggle
       const themeBtn = document.getElementById("themeToggle");

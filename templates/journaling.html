@@ -141,10 +141,6 @@
   border-radius: 0 14px 14px 0;
 }
 
-.tm-sidebar.hidden {
-  display: none;
-}
-
 .sidebar-nav a {
   text-decoration: none;
   font-weight: 600;
@@ -408,6 +404,10 @@
     display: none !important;
   }
 }
+.tm-sidebar {
+  transition: transform 0.3s ease;
+}
+
 
 
 </style>
@@ -445,7 +445,7 @@
 
     
   </header>
-  <aside id="sidebar" class="tm-sidebar hidden" aria-label="Sidebar Navigation">
+  <aside id="sidebar" class="tm-sidebar" aria-label="Sidebar Navigation">
 
   <nav class="sidebar-nav mobile-only">
     <a href="/">🏠 Home</a>
@@ -1048,21 +1048,14 @@ sidebarToggle?.addEventListener("click", () => {
   sidebar.classList.toggle("show");
   document.body.classList.toggle("sidebar-open");
 
-  sidebarToggle.setAttribute(
-    "aria-expanded",
-    sidebar.classList.contains("show")
-  );
-});
+  const isOpen = sidebar.classList.contains("show");
+  sidebarToggle.setAttribute("aria-expanded", isOpen);
 
-// Close sidebar on link click (mobile UX)
-sidebar?.querySelectorAll("a").forEach(link => {
-  link.addEventListener("click", () => {
-    sidebar.classList.remove("show");
-    document.body.classList.remove("sidebar-open");
-    sidebarToggle.setAttribute("aria-expanded", "false");
-  });
+  // Accessibility polish
+  if (isOpen) {
+    sidebar.querySelector("a")?.focus();
+  }
 });
-
 </script>
 </body>
 </html>

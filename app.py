@@ -65,9 +65,12 @@ IS_PROD = os.getenv("FLASK_ENV") == "production"
 
 app.config.update(
     SESSION_COOKIE_HTTPONLY=True,
-    SESSION_COOKIE_SAMESITE="None" if IS_PROD else "Lax",
+    SESSION_COOKIE_SAMESITE="Lax",
     SESSION_COOKIE_SECURE=IS_PROD,
+    PERMANENT_SESSION_LIFETIME=datetime.timedelta(days=30),
 )
+
+
 
 CORS(app, supports_credentials=True)
 
@@ -1209,7 +1212,10 @@ def auth_google_callback():
             raise Exception("No userinfo returned by Google")
 
     except Exception as e:
-        session.clear()
+        logout_user()
+        session.pop("google_nonce", None)
+        session.pop("oauth_temp_user", None)
+
         print("Google OAuth error:", e)
         flash("Google authentication failed. Please try again.", "danger")
         return redirect(url_for("user_login"))
@@ -1552,6 +1558,7 @@ def profile():
         last_mood=last_mood,
         goals=goals_row["goals"] if goals_row else ""
     )
+    
 
 @app.before_request
 def ensure_session_and_conv():
@@ -1566,7 +1573,8 @@ def ensure_session_and_conv():
     # -----------------------------
     # Always keep session permanent
     # -----------------------------
-    session.permanent = True
+    if "user_id" in session:
+     session.permanent = True
 
     # ---------------------------------
     # Default consent (can be changed)
@@ -1762,31 +1770,37 @@ def admin_toggle_admin(user_id):
 @app.route("/admin/stats")
 @admin_required
 def admin_stats():
-    """Return counts used by dashboard (users, conversations, journals, mood logs)."""
-    out = {"users": 0, "conversations": 0, "journals": 0, "mood_logs": 0}
+    """Return counts used by dashboard (users, conversations, journals, moods)."""
+    out = {
+        "users": 0,
+        "conversations": 0,
+        "journals": 0,
+        "moods": 0,
+    }
+
+    # ---- Users ----
     try:
         conn = get_db(USER_DB)
         if conn:
             c = conn.cursor()
-            c.execute(("""
-            SELECT COUNT(*) AS cnt
-            FROM conversations
-            WHERE title IS NOT NULL
-            AND title != '__current__'
-            """))
+            c.execute("SELECT COUNT(*) AS cnt FROM users")
             out["users"] = c.fetchone()["cnt"]
     except Exception:
         logger.exception("Failed to count users")
 
+    # ---- Conversations ----
     try:
         conn = get_db(CONV_DB)
         if conn:
             c = conn.cursor()
-            c.execute("SELECT COUNT(*) AS cnt FROM conversations WHERE title != '__current__'")
+            c.execute(
+                "SELECT COUNT(*) AS cnt FROM conversations WHERE title != '__current__'"
+            )
             out["conversations"] = c.fetchone()["cnt"]
     except Exception:
         logger.exception("Failed to count conversations")
 
+    # ---- Journals ----
     try:
         conn = get_db(JOURNAL_DB)
         if conn:
@@ -1796,15 +1810,16 @@ def admin_stats():
     except Exception:
         logger.exception("Failed to count journals")
 
+    # ---- Mood logs ----
     try:
         conn = get_db(MOOD_DB)
         if conn:
             c = conn.cursor()
             c.execute("SELECT COUNT(*) AS cnt FROM mood_logs")
-            out["mood_logs"] = c.fetchone()["cnt"]
+            out["moods"] = c.fetchone()["cnt"]
     except Exception:
         logger.exception("Failed to count mood logs")
-    out["moods"] = out.pop("mood_logs")
+
     return jsonify(out)
 
 

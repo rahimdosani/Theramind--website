@@ -14,7 +14,7 @@
   --foreground:#111111;
   --primary:#4f46e5;
   --accent:#06b6d4;
-  --sidebar-bg:rgba(255,255,255,0.55);
+  --sidebar-bg:rgba(255,255,255,0.9);
   --glass-blur:blur(16px) saturate(180%);
   --button-color:#111;
 
@@ -29,7 +29,7 @@ body.dark-theme {
   --foreground:#f0f0f0;
   --primary:#6366f1;
   --accent:#67e8f9;
-  --sidebar-bg:rgba(30,30,30,0.6);
+  --sidebar-bg:rgba(30,30,30,0.9);
   --button-color:#fff;
 }
 
@@ -148,8 +148,12 @@ h1{font-size:2.8rem;margin-bottom:8px}
   box-shadow:inset 0 8px 25px rgba(0,0,0,.15);
 
   /* 🔑 allow all chits to show */
-  overflow:visible;
+  overflow:hidden;
 }
+.chit:hover {
+  transform: translateY(-4px) rotate(0deg) scale(1.05);
+}
+
 
 
 .bowl-container.shake{
@@ -379,6 +383,7 @@ body.dark-theme .saved-item{
   gap: 1rem;
   box-shadow: 4px 0 20px rgba(0,0,0,0.2);
   border-radius: 0 14px 14px 0;
+  transition: transform 0.3s ease;
 }
 
 @media (max-width: 1024px) {
@@ -798,13 +803,14 @@ function createChits() {
       const popup = document.createElement("div");
       popup.className = "popup";
       popup.style.borderLeft = `5px solid var(--${mood})`;
-      popup.innerHTML = `
+       popup.innerHTML = `
         <span class="close-btn">&times;</span>
         <p>${text}</p>
         <button onclick="speak('${text.replace(/'/g,"\\'")}')">🔊 Hear it</button>
         <button onclick="saveQuote('${text.replace(/'/g,"\\'")}')">📌 Save</button>
       `;
 
+ 
       const close = () => { popup.remove(); overlay.remove(); };
       overlay.onclick = close;
       popup.querySelector(".close-btn").onclick = close;
@@ -838,12 +844,24 @@ function shuffleChits(btn) {
 function speak(text) {
   const synth = window.speechSynthesis;
   synth.cancel();
+
   const u = new SpeechSynthesisUtterance(text);
-  u.rate = 0.85;
-  u.pitch = 0.95;
-  u.volume = 0.95;
+
+  const voices = synth.getVoices();
+  const preferred =
+    voices.find(v => v.lang === "en-IN" && v.name.toLowerCase().includes("female")) ||
+    voices.find(v => v.lang.startsWith("en")) ||
+    voices[0];
+
+  if (preferred) u.voice = preferred;
+
+  u.rate = 0.9;
+  u.pitch = 1.0;
+  u.volume = 1;
+
   synth.speak(u);
 }
+
 
 /* ===================== SAVE ===================== */
 let savedQuotes = JSON.parse(localStorage.getItem("savedQuotes")) || [];
@@ -882,11 +900,14 @@ sidebarToggle?.addEventListener("click", () => {
   sidebar.classList.toggle("show");
   document.body.classList.toggle("sidebar-open");
 
-  sidebarToggle.setAttribute(
-    "aria-expanded",
-    sidebar.classList.contains("show")
-  );
+  const isOpen = sidebar.classList.contains("show");
+  sidebarToggle.setAttribute("aria-expanded", isOpen);
+
+  if (isOpen) {
+    sidebar.querySelector("a")?.focus();
+  }
 });
+
 
 sidebar?.querySelectorAll("a").forEach(link => {
   link.addEventListener("click", () => {

@@ -200,9 +200,7 @@
     transform:scale(1);
     transition:transform 1s ease;
   }
-
-  .lotus-wrap{width:240px;height:240px}
-  .lotus svg{width:100%;height:100%}
+  
 
   .waves{
     position:relative;
@@ -437,14 +435,14 @@
 
 
   @media(max-width:480px){
-    .orb,.lotus-wrap,.waves{width:130px;height:130px}
+    .orb,.waves{width:130px;height:130px}
     #instruction{font-size:.95rem}
     .chip{font-size:.75rem; min-width:80px}
     .btn,.select{font-size:.85rem; padding:8px 12px}
   }
 
   @media(max-width:360px){
-    .orb,.lotus-wrap,.waves{width:110px;height:110px}
+    .orb,.waves{width:110px;height:110px}
     #instruction{font-size:.85rem}
     .chip{font-size:.65rem; padding:4px 6px}
   }
@@ -518,31 +516,6 @@
       <div class="stage">
         <div class="orb visual" id="visual-orb" aria-hidden="true"></div>
 
-        <div class="lotus-wrap visual" id="visual-lotus" style="display:none" aria-hidden="true">
-          <svg viewBox="0 0 260 260" class="lotus" role="img" aria-label="Lotus breathing visual">
-            <g id="petals">
-              <defs>
-                <path id="petalPath" d="M130 35 C115 80, 115 120, 130 150 C145 120,145 80,130 35 Z" />
-                <radialGradient id="petalGrad" cx="50%" cy="35%">
-                  <stop offset="0%" stop-color="#ffffff" stop-opacity="0.9"/>
-                  <stop offset="45%" stop-color="#a7c0ff" stop-opacity="0.9"/>
-                  <stop offset="100%" stop-color="#6f8cfa" stop-opacity="1"/>
-                </radialGradient>
-              </defs>
-
-              <use href="#petalPath" class="petal" fill="url(#petalGrad)" transform="rotate(0 130 130)"/>
-              <use href="#petalPath" class="petal" fill="url(#petalGrad)" transform="rotate(45 130 130)"/>
-              <use href="#petalPath" class="petal" fill="url(#petalGrad)" transform="rotate(90 130 130)"/>
-              <use href="#petalPath" class="petal" fill="url(#petalGrad)" transform="rotate(135 130 130)"/>
-              <use href="#petalPath" class="petal" fill="url(#petalGrad)" transform="rotate(180 130 130)"/>
-              <use href="#petalPath" class="petal" fill="url(#petalGrad)" transform="rotate(225 130 130)"/>
-              <use href="#petalPath" class="petal" fill="url(#petalGrad)" transform="rotate(270 130 130)"/>
-              <use href="#petalPath" class="petal" fill="url(#petalGrad)" transform="rotate(315 130 130)"/>
-            </g>
-            <circle class="center" cx="130" cy="130" r="22"
-                    fill="#cfe0ff" stroke="#7e9bff" stroke-width="3"/>
-          </svg>
-        </div>
 
         <div class="waves visual" id="visual-waves" style="display:none" aria-hidden="true">
           <div class="wave"></div>
@@ -725,7 +698,6 @@
     function updateVisual() {
       document.getElementById("visual-orb").style.display = visual === "orb" ? "block" : "none";
       document.getElementById("visual-waves").style.display = visual === "waves" ? "block" : "none";
-      document.getElementById("visual-lotus").style.display = visual === "lotus" ? "block" : "none";
     }
 
     function animateVisual() {
@@ -853,28 +825,22 @@
     updateVisual();
   });
   const sidebar = document.getElementById("sidebar");
-  const sidebarToggle = document.getElementById("sidebarToggle");
+const sidebarToggle = document.getElementById("sidebarToggle");
 
-  sidebarToggle?.addEventListener("click", () => {
-    sidebar.classList.toggle("show");
-    document.body.classList.toggle("sidebar-open");
+sidebarToggle?.addEventListener("click", () => {
+  const isOpen = sidebar.classList.toggle("show");
+  document.body.classList.toggle("sidebar-open", isOpen);
+  sidebarToggle.setAttribute("aria-expanded", isOpen);
+});
 
-    sidebarToggle.setAttribute(
-      "aria-expanded",
-      sidebar.classList.contains("show")
-    );
+sidebar?.querySelectorAll("a").forEach(link => {
+  link.addEventListener("click", () => {
+    sidebar.classList.remove("show");
+    document.body.classList.remove("sidebar-open");
+    sidebarToggle.setAttribute("aria-expanded", "false");
   });
-
-  sidebar?.querySelectorAll("a").forEach(link => {
-    link.addEventListener("click", () => {
-      sidebar.classList.remove("show");
-      document.body.classList.remove("sidebar-open");
-      sidebarToggle.setAttribute("aria-expanded", "false");
-    });
-  });
+});
 
   </script>
-
-
   </body>
   </html>
