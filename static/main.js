@@ -96,7 +96,7 @@ function stopListening() {
 }
 
 /* ======================================================
-  🎙️ NATURAL HUMAN VOICE ENGINE (FINAL)
+  🎙️ NATURAL HUMAN VOICE ENGINE
 ====================================================== */
 
 let availableVoices = [];
@@ -112,6 +112,7 @@ function loadVoices() {
 speechSynthesis.onvoiceschanged = loadVoices;
 loadVoices();
 
+/* -------- Detect Hindi vs English -------- */
 function detectLanguage(text) {
   for (let ch of text) {
     const code = ch.charCodeAt(0);
@@ -119,9 +120,10 @@ function detectLanguage(text) {
       return "hi-IN";
     }
   }
-  return "en-GB";
+  return "en-US";
 }
 
+/* -------- Select Best Female Voice -------- */
 function selectBestVoice(lang) {
   if (!voicesLoaded) return null;
 
@@ -131,18 +133,26 @@ function selectBestVoice(lang) {
 
   if (!filtered.length) filtered = availableVoices;
 
-  // Strong female prioritization
-  const femaleVoice = filtered.find(v =>
-    v.name.toLowerCase().includes("female") ||
-    v.name.toLowerCase().includes("aria") ||
+  const preferred = filtered.find(v =>
+    v.name.toLowerCase().includes("google") ||
     v.name.toLowerCase().includes("zira") ||
     v.name.toLowerCase().includes("samantha") ||
-    v.name.toLowerCase().includes("google uk english female")
+    v.name.toLowerCase().includes("female")
   );
 
-  return femaleVoice || filtered[0] || null;
+  return preferred || filtered[0] || null;
 }
 
+/* -------- Add Natural Human Pauses -------- */
+function addNaturalPauses(text) {
+  return text
+    .replace(/\./g, "... ")
+    .replace(/,/g, ", ")
+    .replace(/\?/g, "? ")
+    .replace(/!/g, "! ");
+}
+
+/* -------- Main Speak Function -------- */
 function speakOut(text, btn = null) {
   if (!window.speechSynthesis) return;
 
@@ -153,8 +163,9 @@ function speakOut(text, btn = null) {
 
   const lang = detectLanguage(text);
   const selectedVoice = selectBestVoice(lang);
+  const processedText = addNaturalPauses(text);
 
-  const utterance = new SpeechSynthesisUtterance(text);
+  const utterance = new SpeechSynthesisUtterance(processedText);
 
   if (selectedVoice) {
     utterance.voice = selectedVoice;
@@ -163,14 +174,16 @@ function speakOut(text, btn = null) {
     utterance.lang = lang;
   }
 
-  // Human tone tuning
+  /* 🔥 Human Warmth Tuning */
   if (lang.startsWith("hi")) {
-    utterance.rate = 0.92;
-    utterance.pitch = 1.0;
+    utterance.rate = 0.90;
+    utterance.pitch = 1.05;
   } else {
-    utterance.rate = 0.94;
-    utterance.pitch = 1.03;
+    utterance.rate = 0.93;
+    utterance.pitch = 1.07;
   }
+
+  utterance.volume = 1;
 
   utterance.onend = () => {
     isSpeaking = false;
@@ -183,6 +196,7 @@ function speakOut(text, btn = null) {
   speechSynthesis.speak(utterance);
 }
 
+/* -------- Speak Button Toggle -------- */
 function speakOutButton(e) {
   const btn = e.target;
   const text = btn.getAttribute("data-text");
@@ -196,6 +210,7 @@ function speakOutButton(e) {
     speakOut(text, btn);
   }
 }
+
 
 /* ======================================================
   💬 CHAT MESSAGES
