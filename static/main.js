@@ -96,46 +96,91 @@ function stopListening() {
 }
 
 /* ======================================================
-  🎙️ VOICE OUTPUT
+  🎙️ NATURAL HUMAN VOICE ENGINE (FINAL)
 ====================================================== */
-function getPreferredVoice() {
-  const voices = speechSynthesis.getVoices();
-  return (
-    voices.find((v) => v.name.toLowerCase().includes("female")) ||
-    voices.find((v) => v.lang && v.lang.startsWith("en")) ||
-    voices[0] ||
-    null
+
+let availableVoices = [];
+let voicesLoaded = false;
+
+function loadVoices() {
+  availableVoices = speechSynthesis.getVoices();
+  if (availableVoices.length > 0) {
+    voicesLoaded = true;
+  }
+}
+
+speechSynthesis.onvoiceschanged = loadVoices;
+loadVoices();
+
+function detectLanguage(text) {
+  for (let ch of text) {
+    const code = ch.charCodeAt(0);
+    if (code >= 0x0900 && code <= 0x097F) {
+      return "hi-IN";
+    }
+  }
+  return "en-GB";
+}
+
+function selectBestVoice(lang) {
+  if (!voicesLoaded) return null;
+
+  let filtered = availableVoices.filter(v =>
+    v.lang.toLowerCase().includes(lang.split("-")[0].toLowerCase())
   );
+
+  if (!filtered.length) filtered = availableVoices;
+
+  // Strong female prioritization
+  const femaleVoice = filtered.find(v =>
+    v.name.toLowerCase().includes("female") ||
+    v.name.toLowerCase().includes("aria") ||
+    v.name.toLowerCase().includes("zira") ||
+    v.name.toLowerCase().includes("samantha") ||
+    v.name.toLowerCase().includes("google uk english female")
+  );
+
+  return femaleVoice || filtered[0] || null;
 }
 
 function speakOut(text, btn = null) {
   if (!window.speechSynthesis) return;
 
-  if (!preferredVoice) {
-    preferredVoice = getPreferredVoice();
-    if (!preferredVoice) {
-      // voices not loaded yet, try once more
-      setTimeout(() => speakOut(text, btn), 200);
-      return;
-    }
+  if (isSpeaking) {
+    speechSynthesis.cancel();
+    isSpeaking = false;
   }
 
-  if (isSpeaking) speechSynthesis.cancel();
+  const lang = detectLanguage(text);
+  const selectedVoice = selectBestVoice(lang);
 
-  currentUtterance = new SpeechSynthesisUtterance(text);
-  currentUtterance.voice = preferredVoice;
-  currentUtterance.lang = "en-GB";
-  currentUtterance.pitch = 1.05;
-  currentUtterance.rate = 0.95;
+  const utterance = new SpeechSynthesisUtterance(text);
 
-  currentUtterance.onend = () => {
+  if (selectedVoice) {
+    utterance.voice = selectedVoice;
+    utterance.lang = selectedVoice.lang;
+  } else {
+    utterance.lang = lang;
+  }
+
+  // Human tone tuning
+  if (lang.startsWith("hi")) {
+    utterance.rate = 0.92;
+    utterance.pitch = 1.0;
+  } else {
+    utterance.rate = 0.94;
+    utterance.pitch = 1.03;
+  }
+
+  utterance.onend = () => {
     isSpeaking = false;
     if (btn) btn.textContent = "🔊";
   };
 
   isSpeaking = true;
   if (btn) btn.textContent = "⏹️";
-  speechSynthesis.speak(currentUtterance);
+
+  speechSynthesis.speak(utterance);
 }
 
 function speakOutButton(e) {
