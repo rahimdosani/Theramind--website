@@ -212,29 +212,33 @@ h1 {
 /* =========================================================
    AUDIO & AFFIRMATION CARDS
 ========================================================= */
+
 .audio-section {
   display: none;
-  gap: 24px;
 }
 
 .audio-section.active {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
   gap: 24px;
-  align-items: stretch;
 }
 
-
+/* Cards */
 .audio-card,
 .affirm-card {
-  width: 280px;
+  width: 100%;
+  max-width: 100%;
   padding: 20px;
-  border-radius: 16px;
+  border-radius: 18px;
   backdrop-filter: var(--glass-blur);
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
-  transition: transform 0.3s ease;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
 }
 
+/* Audio card background */
 .audio-card {
   background: rgba(255, 255, 255, 0.35);
 }
@@ -243,10 +247,19 @@ body.dark-theme .audio-card {
   background: rgba(30, 30, 30, 0.35);
 }
 
+/* Hover effect */
 .audio-card:hover,
 .affirm-card:hover {
   transform: translateY(-6px);
+  box-shadow: 0 14px 34px rgba(0, 0, 0, 0.25);
 }
+
+/* Fix long text overflow */
+.audio-card h3,
+.affirm-card {
+  word-wrap: break-word;
+}
+
 /* =========================================================
    AFFIRMATION CARD STYLING
 ========================================================= */
