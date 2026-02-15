@@ -1,4 +1,3 @@
-# app.py — Theramind (merged: original core + admin/auth scaffolding + admin API)
 from werkzeug.middleware.proxy_fix import ProxyFix
 import os
 import re

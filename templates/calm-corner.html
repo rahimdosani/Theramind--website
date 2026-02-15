@@ -214,14 +214,16 @@ h1 {
 ========================================================= */
 .audio-section {
   display: none;
-  flex-wrap: wrap;
-  justify-content: center;
   gap: 24px;
 }
 
 .audio-section.active {
-  display: flex;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 24px;
+  align-items: stretch;
 }
+
 
 .audio-card,
 .affirm-card {
@@ -244,6 +246,68 @@ body.dark-theme .audio-card {
 .audio-card:hover,
 .affirm-card:hover {
   transform: translateY(-6px);
+}
+/* =========================================================
+   AFFIRMATION CARD STYLING
+========================================================= */
+
+.affirm-card {
+  padding: 22px;
+  border-radius: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  color: #111;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.12);
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+body.dark-theme .affirm-card {
+  color: #111;
+}
+
+.affirm-card:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 18px 40px rgba(0,0,0,0.2);
+}
+
+.affirm-text {
+  display: none;
+  font-weight: 600;
+  line-height: 1.6;
+  padding-top: 8px;
+}
+
+/* Button Container */
+.affirm-card button {
+  border: none;
+  padding: 8px 14px;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+/* Reveal Button */
+.reveal-btn {
+  background: rgba(255,255,255,0.85);
+  color: #333;
+}
+
+.reveal-btn:hover {
+  background: white;
+  transform: scale(1.05);
+}
+
+/* Hear Button */
+.hear-btn {
+  background: linear-gradient(135deg, var(--primary), var(--accent));
+  color: white;
+}
+
+.hear-btn:hover {
+  opacity: 0.9;
+  transform: scale(1.05);
 }
 
 /* =========================================================
