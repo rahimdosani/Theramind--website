@@ -228,6 +228,7 @@ h1 {
 .affirm-card {
   width: 100%;
   max-width: 100%;
+  min-width: 0;
   padding: 20px;
   border-radius: 18px;
   backdrop-filter: var(--glass-blur);
@@ -236,6 +237,12 @@ h1 {
   display: flex;
   flex-direction: column;
   gap: 12px;
+}
+
+.audio-card audio {
+  width: 100%;
+  max-width: 100%;
+  display: block;
 }
 
 /* Audio card background */
