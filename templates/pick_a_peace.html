@@ -385,9 +385,30 @@ body.dark-theme .saved-item{
   border-radius: 0 14px 14px 0;
   transition: transform 0.3s ease;
 }
+.sidebar-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
 
+.sidebar-nav a {
+  text-decoration: none;
+  font-weight: 600;
+  padding: 0.6rem 0.9rem;
+  border-radius: 10px;
+  color: var(--foreground);
+  transition: background 0.2s, transform 0.15s;
+}
 
+.sidebar-nav a:hover {
+  background: rgba(0,0,0,0.08);
+  transform: translateX(2px);
+}
 
+.sidebar-nav a.active {
+  background: linear-gradient(135deg, var(--primary), var(--accent));
+  color: #fff;
+}
 
 @media (min-width: 1025px) {
   .tm-sidebar {
@@ -411,7 +432,8 @@ body.dark-theme .saved-item{
   .theme-toggle{
     margin-left:auto;
     margin-right:.75rem;
-    white-space:nowrap;
+    font-size:.85rem;
+    padding:6px 10px;
   }
 
   .mobile-only{
