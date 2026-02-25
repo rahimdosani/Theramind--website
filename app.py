@@ -66,8 +66,11 @@ app.config.update(
     SESSION_COOKIE_HTTPONLY=True,
     SESSION_COOKIE_SAMESITE="Lax",
     SESSION_COOKIE_SECURE=IS_PROD,
-    PERMANENT_SESSION_LIFETIME=datetime.timedelta(days=30),
+    PERMANENT_SESSION_LIFETIME=datetime.timedelta(days=3650),
 )
+
+app.config["SESSION_REFRESH_EACH_REQUEST"] = True
+app.config["SESSION_COOKIE_MAX_AGE"] = 60 * 60 * 24 * 3650
 
 
 
@@ -114,7 +117,12 @@ def get_db(db_path):
     if not hasattr(g, key):
         conn = sqlite3.connect(db_path, check_same_thread=False)
         conn.row_factory = sqlite3.Row
+
+        # 🔹 Enable foreign key enforcement (required for ON DELETE CASCADE)
+        conn.execute("PRAGMA foreign_keys = ON")
+
         setattr(g, key, conn)
+
     return getattr(g, key, None)
 
 @app.teardown_appcontext
@@ -145,7 +153,8 @@ def setup_conversations_db():
                user_id INTEGER NOT NULL,
                title TEXT NOT NULL,
                history TEXT NOT NULL,
-               created_at TEXT NOT NULL
+               created_at TEXT NOT NULL,
+               FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
            )"""
     )
 
@@ -168,9 +177,11 @@ def setup_databases():
             user_id INTEGER NOT NULL,
             date TEXT,
             mood TEXT,
-            message TEXT
+            message TEXT,
+            FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
         )
     """)
+    c.execute("CREATE INDEX IF NOT EXISTS idx_mood_user ON mood_logs(user_id)")
     conn.commit()
     conn.close()
 
@@ -182,9 +193,11 @@ def setup_databases():
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             user_id INTEGER NOT NULL,
             date TEXT,
-            content TEXT
+            content TEXT,
+            FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
         )
     """)
+    c.execute("CREATE INDEX IF NOT EXISTS idx_journal_user ON journal_entries(user_id)")
     conn.commit()
     conn.close()
 
@@ -193,6 +206,22 @@ def setup_databases():
     setup_users_db()
     setup_user_profile()
     setup_otp_table()
+    
+    conn = connect_for_setup(USER_DB)
+    c = conn.cursor()
+    c.execute("""
+        CREATE TABLE IF NOT EXISTS admin_logs (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            admin_id INTEGER,
+            action TEXT,
+            target_user_id INTEGER,
+            timestamp TEXT
+             )
+    """)
+    conn.commit()
+    conn.close()
+    
+    
 
 
     # memories table for short summaries
@@ -203,7 +232,8 @@ def setup_databases():
                id INTEGER PRIMARY KEY AUTOINCREMENT,
                conv_id INTEGER NOT NULL,
                summary TEXT,
-               updated_at TEXT
+               updated_at TEXT,
+               FOREIGN KEY (conv_id) REFERENCES conversations(id) ON DELETE CASCADE
            )"""
     )
     conn.commit()
@@ -214,6 +244,8 @@ def setup_databases():
 def setup_users_db():
     conn = connect_for_setup(USER_DB)
     c = conn.cursor()
+
+    # Create table with auth_provider included
     c.execute("""
         CREATE TABLE IF NOT EXISTS users (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -222,11 +254,25 @@ def setup_users_db():
             password_hash TEXT NOT NULL,
             display_name TEXT,
             intent TEXT,
+            auth_provider TEXT DEFAULT 'email',
             email_verified INTEGER DEFAULT 0,
             is_admin INTEGER DEFAULT 0,
-            created_at TEXT NOT NULL
+            created_at TEXT NOT NULL,
+            last_login TEXT
         )
     """)
+
+    # Ensure column exists (for older DB versions)
+    c.execute("PRAGMA table_info(users)")
+    columns = [col[1] for col in c.fetchall()]
+
+    if "auth_provider" not in columns:
+        c.execute("ALTER TABLE users ADD COLUMN auth_provider TEXT DEFAULT 'email'")
+
+    # Add useful indexes
+    c.execute("CREATE INDEX IF NOT EXISTS idx_users_email ON users(email)")
+    c.execute("CREATE INDEX IF NOT EXISTS idx_users_created ON users(created_at)")
+
     conn.commit()
     conn.close()
 
@@ -255,6 +301,8 @@ def setup_otp_table():
     """)
     conn.commit()
     conn.close()
+    
+    
     # ensure an admin exists if ADMIN_PASSWORD provided
     create_admin_if_missing()
 
@@ -329,9 +377,9 @@ def save_history_by_conv_id(conv_id, history):
         return
     c = conn.cursor()
     c.execute(
-        "UPDATE conversations SET history = ?, created_at = ? WHERE id = ?",
-        (json.dumps(history), now(), conv_id)
-    )
+    "UPDATE conversations SET history = ?, created_at = ? WHERE id = ? AND user_id = ?",
+    (json.dumps(history), now(), conv_id, session.get("user_id"))
+)
     conn.commit()
 
 def delete_conversation(conv_id):
@@ -417,6 +465,15 @@ def login_user(user_row):
     session["username"] = user_row["username"]
     session["is_admin"] = bool(user_row["is_admin"])
     session.permanent = True
+
+    # 🔹 Update last_login timestamp
+    conn = get_db(USER_DB)
+    if conn:
+        conn.execute(
+            "UPDATE users SET last_login = ? WHERE id = ?",
+            (now(), user_row["id"])
+        )
+        conn.commit()
 
 def logout_user():
     for k in ("user_id", "username", "is_admin"):
@@ -1175,7 +1232,7 @@ def user_login():
             return redirect(url_for("verify_signup_otp"))
 
         login_user(user)
-        flash("Welcome back 💙", "success")
+        flash(f"✨ Welcome back, {user['username']}. Your space is ready.", "success")
         return redirect(url_for("home"))
 
     return render_template("auth/login.html")
@@ -1231,7 +1288,7 @@ def auth_google_callback():
 
     if user:
         login_user(user)
-        flash("Welcome back ✨", "success")
+        flash(f"✨ Welcome back, {user['username']}.", "success")
         return redirect(url_for("home"))
 
     session["oauth_temp_user"] = {
@@ -1257,18 +1314,18 @@ def oauth_confirm():
     conn.row_factory = sqlite3.Row
     c = conn.cursor()
 
-    # 🔎 Check if user already exists
+    #  Check if user already exists
     c.execute("SELECT * FROM users WHERE email = ?", (temp["email"],))
     existing = c.fetchone()
 
     if existing:
-        # ✅ Existing user → log in
+        # Existing user → log in
         login_user(existing)
         session.pop("oauth_temp_user", None)
         flash("Welcome back ✨", "success")
         return redirect(url_for("home"))
 
-    # 🆕 New Google user → create account
+    #  New Google user → create account
     pw_hash = generate_password_hash(os.urandom(16).hex())
 
     c.execute(
@@ -1277,10 +1334,11 @@ def oauth_confirm():
             username,
             email,
             password_hash,
+            auth_provider,
             email_verified,
             created_at
         )
-        VALUES (?, ?, ?, 1, ?)
+        VALUES (?, ?, ?, 'google', 1, ?)
         """,
         (
             temp["username"],
@@ -1355,7 +1413,7 @@ def verify_signup_otp():
 
     session.pop("pending_otp_email", None)
 
-    flash("You’re all set! Welcome to Theramind 🌱", "success")
+    flash("🌱 Your account is verified. Welcome to Theramind.", "success")
     return redirect(url_for("home"))
 
 
@@ -1397,10 +1455,10 @@ def signup():
             c.execute("""
                 INSERT INTO users (
                     username, email, password_hash,
-                    display_name, intent,
+                    display_name, intent, auth_provider,
                     email_verified, created_at
                 )
-                VALUES (?, ?, ?, ?, ?, 0, ?)
+                VALUES (?, ?, ?, ?, ?, 'email', 0, ?)
             """, (
                 display_name or email.split("@")[0],
                 email,
@@ -1697,10 +1755,41 @@ def admin_list_users():
     conn = get_db(USER_DB)
     if not conn:
         return jsonify([])
+
     c = conn.cursor()
-    c.execute("SELECT id, username, email, is_admin, created_at FROM users ORDER BY created_at DESC")
+    c.execute("""
+        SELECT 
+            id,
+            username,
+            email,
+            email_verified,
+            is_admin,
+            created_at,
+            last_login,
+            display_name,
+            intent,
+            auth_provider
+        FROM users
+        ORDER BY created_at DESC
+    """)
+
     rows = c.fetchall()
-    return jsonify([{"id": r["id"], "username": r["username"], "email": r["email"], "is_admin": bool(r["is_admin"]), "created_at": r["created_at"]} for r in rows])
+
+    return jsonify([
+        {
+            "id": r["id"],
+            "username": r["username"],
+            "email": r["email"],
+            "email_verified": bool(r["email_verified"]),
+            "is_admin": bool(r["is_admin"]),
+            "created_at": r["created_at"],
+            "last_login": r["last_login"],
+            "display_name": r["display_name"],
+            "intent": r["intent"],
+            "login_type": (r["auth_provider"] or "email").capitalize()
+        }
+        for r in rows
+    ])
 
 @app.route("/admin/create_user", methods=["POST"])
 @admin_required
@@ -1710,16 +1799,51 @@ def admin_create_user():
     email = (data.get("email") or "").strip()
     password = data.get("password") or ""
     is_admin = bool(data.get("is_admin", False))
+
     if not email or not password:
         return jsonify({"status": "failed", "message": "email & password required"}), 400
+
     pw_hash = generate_password_hash(password)
     conn = get_db(USER_DB)
     c = conn.cursor()
+
     try:
-        c.execute("INSERT INTO users (username, email, password_hash, is_admin, created_at) VALUES (?, ?, ?, ?, ?)",
-                  (username or email.split('@')[0], email, pw_hash, int(is_admin), now()))
+        # Email verified = 1 (admin-created users don’t need OTP)
+        c.execute("""
+            INSERT INTO users (
+                username,
+                email,
+                password_hash,
+                email_verified,
+                is_admin,
+                created_at
+            )
+            VALUES (?, ?, ?, 1, ?, ?)
+        """, (
+            username or email.split('@')[0],
+            email,
+            pw_hash,
+            int(is_admin),
+            now()
+        ))
+
+        new_user_id = c.lastrowid
+       
+        # Log admin action
+        c.execute("""
+            INSERT INTO admin_logs (admin_id, action, target_user_id, timestamp)
+            VALUES (?, ?, ?, ?)
+        """, (
+            session.get("user_id"),
+            "create_user",
+            new_user_id,
+            now()
+        ))
+
         conn.commit()
-        return jsonify({"status": "ok", "id": c.lastrowid})
+
+        return jsonify({"status": "ok", "id": new_user_id})
+
     except sqlite3.IntegrityError:
         return jsonify({"status": "failed", "message": "username or email already exists"}), 400
 
@@ -1736,15 +1860,31 @@ def admin_delete_user(user_id):
     conn = get_db(USER_DB)
     if not conn:
         return jsonify({"status": "failed", "message": "User DB unavailable"}), 500
+
     c = conn.cursor()
+
     try:
+        # 🔹 Delete user (CASCADE will handle related data if FK enabled)
         c.execute("DELETE FROM users WHERE id = ?", (user_id,))
+
+        # 🔹 Log admin action
+        c.execute("""
+            INSERT INTO admin_logs (admin_id, action, target_user_id, timestamp)
+            VALUES (?, ?, ?, ?)
+        """, (
+            session.get("user_id"),
+            "delete_user",
+            user_id,
+            now()
+        ))
+
         conn.commit()
+
         return jsonify({"status": "ok"})
-    except Exception as e:
+
+    except Exception:
         logger.exception("Failed to delete user %s", user_id)
         return jsonify({"status": "failed", "message": "DB error"}), 500
-
 
 @app.route("/admin/toggle_admin/<int:user_id>", methods=["POST"])
 @admin_required
@@ -1757,16 +1897,36 @@ def admin_toggle_admin(user_id):
     conn = get_db(USER_DB)
     if not conn:
         return jsonify({"status": "failed", "message": "User DB unavailable"}), 500
+
     c = conn.cursor()
+
     try:
         c.execute("SELECT is_admin FROM users WHERE id = ?", (user_id,))
         row = c.fetchone()
+
         if not row:
             return jsonify({"status": "failed", "message": "User not found"}), 404
+
         new_val = 0 if row["is_admin"] else 1
+
+        # 🔹 Update admin status
         c.execute("UPDATE users SET is_admin = ? WHERE id = ?", (int(new_val), user_id))
+
+        # 🔹 Log admin action
+        c.execute("""
+            INSERT INTO admin_logs (admin_id, action, target_user_id, timestamp)
+            VALUES (?, ?, ?, ?)
+        """, (
+            session.get("user_id"),
+            "toggle_admin",
+            user_id,
+            now()
+        ))
+
         conn.commit()
+
         return jsonify({"status": "ok", "is_admin": bool(new_val)})
+
     except Exception:
         logger.exception("Failed to toggle admin for %s", user_id)
         return jsonify({"status": "failed", "message": "DB error"}), 500
@@ -1837,9 +1997,9 @@ def admin_journals_json():
         if not conn:
             return jsonify([])
         c = conn.cursor()
-        c.execute("SELECT id, date, content FROM journal_entries ORDER BY id DESC")
+        c.execute("SELECT id, user_id, date, content FROM journal_entries ORDER BY id DESC")
         rows = c.fetchall()
-        return jsonify([{"id": r["id"], "date": r["date"], "content": r["content"]} for r in rows])
+        return jsonify([{"id": r["id"], "user_id": r["user_id"], "date": r["date"], "content": r["content"]} for r in rows])
     except Exception:
         logger.exception("Failed to return journals JSON")
         return jsonify([])
@@ -1854,9 +2014,9 @@ def admin_mood_json():
         if not conn:
             return jsonify([])
         c = conn.cursor()
-        c.execute("SELECT id, date, mood, message FROM mood_logs ORDER BY id DESC")
+        c.execute("SELECT id, user_id, date, mood, message FROM mood_logs ORDER BY id DESC")
         rows = c.fetchall()
-        return jsonify([{"id": r["id"], "date": r["date"], "mood": r["mood"], "message": r["message"]} for r in rows])
+        return jsonify([{"id": r["id"], "user_id": r["user_id"], "date": r["date"], "mood": r["mood"], "message": r["message"]} for r in rows])
     except Exception:
         logger.exception("Failed to return mood JSON")
         return jsonify([])

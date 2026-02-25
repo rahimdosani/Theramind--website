@@ -474,10 +474,16 @@ body.dark footer {
 
   /* ---------------- RESPONSIVE ---------------- */
   @media (max-width: 768px) {
-    header { padding: 14px 20px; }
-    .logo { font-size: 1.45rem; }
-    .profile-btn span { display: none; }
+  .profile-btn {
+    padding: 6px 12px;
+    font-size: 0.82rem;
+    gap: 4px;
   }
+
+  .profile-btn span {
+    display: inline;
+  }
+}
 
   @media (max-width: 480px) {
     .hero h1 { font-size: 2.4rem; }
@@ -620,20 +626,27 @@ header {
     </div>
 
     <div class="header-actions">
-      <a href="/login">Login</a>
-      <a href="/signup" class="primary">Sign Up</a>
+  <a href="/login" id="loginBtn">Login</a>
+  <a href="/signup" class="primary" id="signupBtn">Sign Up</a>
 
-      <!-- Profile (future-ready) -->
-      <button class="profile-btn" aria-label="Profile">
-        <span>👤</span>
-        <span>Profile</span>
-      </button>
+  <button class="profile-btn" aria-label="Profile" id="profileBtn">
+    <span>👤</span>
+    <span>Profile</span>
+  </button>
 
-      <!-- Theme Toggle -->
-      <button class="theme-toggle" id="themeToggle" aria-label="Toggle theme">
-        <span id="themeIcon">🌙</span>
-      </button>
-    </div>
+  <a href="/logout" id="logoutBtn" style="display:none;">Logout</a>
+
+  <button class="theme-toggle" id="themeToggle" aria-label="Toggle theme">
+    <span id="themeIcon">🌙</span>
+  </button>
+</div>
+
+  <!-- Theme Toggle (Always visible) -->
+  <button class="theme-toggle" id="themeToggle" aria-label="Toggle theme">
+    <span id="themeIcon">🌙</span>
+  </button>
+
+</div>
   </header>
   {% with messages = get_flashed_messages(with_categories=true) %}
   {% if messages %}
@@ -882,6 +895,30 @@ header {
     const flash = document.getElementById("flash-container");
     if (flash) flash.remove();
   }, 4500);
+  // Auth UI handling
+const isLoggedIn = {{ 'true' if is_logged_in else 'false' }};
+const username = "{{ username if username else '' }}";
+
+const loginBtn = document.getElementById("loginBtn");
+const signupBtn = document.getElementById("signupBtn");
+const profileBtn = document.getElementById("profileBtn");
+const logoutBtn = document.getElementById("logoutBtn");
+
+if (isLoggedIn) {
+  loginBtn.style.display = "none";
+  signupBtn.style.display = "none";
+  logoutBtn.style.display = "inline-block";
+
+  if (username) {
+    const greet = document.createElement("span");
+    greet.textContent = `Hi, ${username} 👋`;
+    greet.style.fontWeight = "600";
+    greet.style.opacity = "0.85";
+    document.querySelector(".header-actions").prepend(greet);
+  }
+} else {
+  profileBtn.style.display = "none";
+}
 </script>
     </body>
     </html>

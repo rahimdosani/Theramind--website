@@ -386,36 +386,57 @@ body.dark-theme .saved-item{
   transition: transform 0.3s ease;
 }
 
-@media (max-width: 1024px) {
-  .tm-sidebar {
-    position: fixed;
-    top: 75px;
-    left: 0;
-    height: calc(100dvh - 75px);
-    transform: translateX(-100%);
-    z-index: 200;
-  }
 
-  .tm-sidebar.show {
-    transform: translateX(0);
-  }
 
-  body.sidebar-open {
-    overflow: hidden;
-  }
-
-  .tm-navlinks {
-    display: none !important;
-  }
-
-  .mobile-only {
-    display: inline-flex;
-  }
-}
 
 @media (min-width: 1025px) {
   .tm-sidebar {
     display: none !important;
+  }
+}
+
+@media (max-width:1024px){
+
+  .tm-nav{
+    padding:0 1rem;
+    justify-content:flex-start;
+    gap:.75rem;
+  }
+
+  .tm-brand{
+    flex:1;
+    min-width:0;
+  }
+
+  .theme-toggle{
+    margin-left:auto;
+    margin-right:.75rem;
+    white-space:nowrap;
+  }
+
+  .mobile-only{
+    display:inline-flex;
+  }
+
+  .tm-navlinks{
+    display:none !important;
+  }
+
+  .tm-sidebar{
+    position:fixed;
+    top:75px;
+    left:0;
+    height:calc(100dvh - 75px);
+    transform:translateX(-100%);
+    z-index:200;
+  }
+
+  .tm-sidebar.show{
+    transform:translateX(0);
+  }
+
+  body.sidebar-open{
+    overflow:hidden;
   }
 }
 
@@ -496,7 +517,7 @@ body.dark-theme .saved-item{
   ☰
 </button>
 </header>
-<aside id="sidebar" class="tm-sidebar" aria-label="Sidebar Navigation">
+<aside id="sidebar" class="tm-sidebar hidden" aria-label="Sidebar Navigation">
   <nav class="sidebar-nav mobile-only">
     <a href="/">🏠 Home</a>
     <a href="/index">💬 Chat</a>

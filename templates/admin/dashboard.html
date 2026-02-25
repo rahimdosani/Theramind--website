@@ -236,17 +236,42 @@ async function stats(){
   const d=await (await fetch("/admin/stats")).json();
   stat("users",d.users);
   stat("journals",d.journals);
-  stat("moods",d.mood_logs);
+  stat("moods",d.moods);
 }
 function stat(k,v){document.getElementById("stat-"+k).textContent=v}
 
 async function users(){
-  const rows=await (await fetch("/admin/users")).json();
-  document.getElementById("users-table").innerHTML=
-  `<table><thead><tr><th>Username</th><th>Email</th><th>Admin</th></tr></thead>
-   <tbody>${rows.map(u=>`
-   <tr><td>${escapeHTML(u.username)}</td><td>${escapeHTML(u.email)}</td><td>${u.is_admin?"Yes":"No"}</td></tr>`).join("")}
-   </tbody></table>`;
+  const rows = await (await fetch("/admin/users")).json();
+
+  document.getElementById("users-table").innerHTML =
+  `<table>
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Username</th>
+        <th>Email</th>
+        <th>Login Type</th>
+        <th>Verified</th>
+        <th>Admin</th>
+        <th>Created</th>
+        <th>Last Login</th>
+      </tr>
+    </thead>
+    <tbody>
+      ${rows.map(u=>`
+      <tr>
+        <td>${u.id}</td>
+        <td>${escapeHTML(u.username)}</td>
+        <td>${escapeHTML(u.email)}</td>
+        <td>${u.login_type}</td>
+        <td>${u.email_verified ? "Yes" : "No"}</td>
+        <td>${u.is_admin ? "Yes" : "No"}</td>
+        <td>${u.created_at}</td>
+        <td>${u.last_login || "-"}</td>
+      </tr>
+      `).join("")}
+    </tbody>
+  </table>`;
 }
 
 async function journals(){

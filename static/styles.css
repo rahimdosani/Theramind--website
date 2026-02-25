@@ -664,6 +664,24 @@ body::before {
 }
 
 @media (max-width: 768px) {
+    .tm-nav {
+    padding: 0 1rem;
+  }
+
+  .tm-brand {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .tm-brand span {
+    font-size: 1.1rem;
+  }
+
+  .theme-toggle {
+    margin-left: 0.75rem;
+    padding: 6px 10px;
+    font-size: 0.85rem;
+  }
   .main-layout {
     flex-direction: column;
   }
@@ -706,6 +724,15 @@ body::before {
 }
 
 @media (max-width: 480px) {
+    .theme-toggle {
+    padding: 6px 8px;
+    font-size: 0.9rem;
+  }
+
+  .theme-toggle::after {
+    content: '';
+  }
+}
   .chat-inputbar textarea {
     font-size: 0.85rem;
     padding: 0.5rem 0.7rem;
@@ -738,7 +765,7 @@ body::before {
     padding: 0.35rem 0.6rem;
     font-size: 0.8rem;
   }
-}
+
 
 /* ===============================
    📱 Ultra-small phones (≤360px)
