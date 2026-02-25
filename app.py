@@ -1326,7 +1326,13 @@ def verify_signup_otp():
     c = conn.cursor()
 
     c.execute(
-        "SELECT otp, expires_at FROM email_otps WHERE email = ?",
+        """
+        SELECT otp, expires_at
+        FROM email_otps
+        WHERE email = ?
+        ORDER BY id DESC
+        LIMIT 1
+        """,
         (email,)
     )
     row = c.fetchone()
