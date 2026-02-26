@@ -437,7 +437,7 @@ body.dark-theme .saved-item{
   }
 
   .mobile-only{
-    display:inline-flex;
+    display:flex;
   }
 
   .tm-navlinks{
@@ -475,9 +475,6 @@ body.dark-theme .saved-item{
   cursor: pointer;
 }
 
-.mobile-only {
-  display: none;
-}
 
 
 /* ===================== Responsive ===================== */
@@ -501,6 +498,10 @@ body.dark-theme .saved-item{
 }
 @media (max-width:420px){
   .saved-panel{width:92%;}
+}
+
+.mobile-only {
+  display: none;
 }
 
 </style>
@@ -540,7 +541,7 @@ body.dark-theme .saved-item{
 </button>
 </header>
 <aside id="sidebar" class="tm-sidebar" aria-label="Sidebar Navigation">
-  <nav class="sidebar-nav mobile-only">
+  <nav class="sidebar-nav">
     <a href="/">🏠 Home</a>
     <a href="/index">💬 Chat</a>
     <a href="/journaling">📓 Journal</a>
