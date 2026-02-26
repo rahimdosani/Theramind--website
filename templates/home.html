@@ -758,163 +758,175 @@ header {
 
 
       <script>
-  window.addEventListener("DOMContentLoaded", () => {
-    /* ----------------------------------
-       Safety cleanup
-    ---------------------------------- */
-    document.body.classList.remove("sidebar-open");
+window.addEventListener("DOMContentLoaded", () => {
 
-    /* ----------------------------------
-       Loader (once per session)
-    ---------------------------------- */
-    const loader = document.getElementById("loader");
+  /* ----------------------------------
+     Safety cleanup
+  ---------------------------------- */
+  document.body.classList.remove("sidebar-open");
 
-    if (!sessionStorage.getItem("welcomeShown")) {
-      sessionStorage.setItem("welcomeShown", "true");
+  /* ----------------------------------
+     Loader (once per session)
+  ---------------------------------- */
+  const loader = document.getElementById("loader");
 
-      setTimeout(() => {
+  if (!sessionStorage.getItem("welcomeShown")) {
+    sessionStorage.setItem("welcomeShown", "true");
+
+    setTimeout(() => {
+      if (loader) {
         loader.style.opacity = "0";
         setTimeout(() => {
           loader.style.display = "none";
         }, 900);
-      }, 2200); // slightly faster for better UX
-    } else {
+      }
+    }, 2200);
+  } else {
+    if (loader) {
       loader.style.display = "none";
       loader.setAttribute("aria-hidden", "true");
     }
+  }
 
-    /* ----------------------------------
-       Theme handling
-    ---------------------------------- */
-    const themeBtn = document.getElementById("themeToggle");
-    const themeIcon = document.getElementById("themeIcon");
+  /* ----------------------------------
+     Theme handling
+  ---------------------------------- */
+  const themeBtn = document.getElementById("themeToggle");
+  const themeIcon = document.getElementById("themeIcon");
 
-    const storedTheme = localStorage.getItem("theme");
-    const prefersDark = window.matchMedia &&
-      window.matchMedia("(prefers-color-scheme: dark)").matches;
+  const storedTheme = localStorage.getItem("theme");
+  const prefersDark = window.matchMedia &&
+    window.matchMedia("(prefers-color-scheme: dark)").matches;
 
-    const isDarkInitial =
-      storedTheme === "dark" || (!storedTheme && prefersDark);
+  const isDarkInitial =
+    storedTheme === "dark" || (!storedTheme && prefersDark);
 
-    document.body.classList.toggle("dark", isDarkInitial);
-    themeIcon.textContent = isDarkInitial ? "🌞" : "🌙";
+  document.body.classList.toggle("dark", isDarkInitial);
+  themeIcon.textContent = isDarkInitial ? "🌞" : "🌙";
 
-    themeBtn.addEventListener("click", () => {
-      const isDark = document.body.classList.toggle("dark");
-      themeIcon.textContent = isDark ? "🌞" : "🌙";
-      localStorage.setItem("theme", isDark ? "dark" : "light");
-      loadParticlesBasedOnTheme();
-    });
-
-    /* ----------------------------------
-       Profile button (future-ready)
-    ---------------------------------- */
-    const profileBtn = document.querySelector(".profile-btn");
-    if (profileBtn) {
-      profileBtn.addEventListener("click", () => {
-        // Placeholder routing logic
-        // Later: replace with auth state check
-        window.location.href = "/profile";
-      });
-    }
-
-    /* ----------------------------------
-       Init particles
-    ---------------------------------- */
+  themeBtn.addEventListener("click", () => {
+    const isDark = document.body.classList.toggle("dark");
+    themeIcon.textContent = isDark ? "🌞" : "🌙";
+    localStorage.setItem("theme", isDark ? "dark" : "light");
     loadParticlesBasedOnTheme();
   });
 
-  function loadParticlesBasedOnTheme() {
-    const isDark = document.body.classList.contains("dark");
-    const prefersReducedMotion = window.matchMedia &&
-      window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  /* ----------------------------------
+     Profile button (future-ready)
+  ---------------------------------- */
+  const profileBtn = document.getElementById("profileBtn");
+  if (profileBtn) {
+    profileBtn.addEventListener("click", () => {
+      window.location.href = "/profile";
+    });
+  }
 
-    // Disable particles completely if user prefers reduced motion
-    if (prefersReducedMotion) {
-      if (window.pJSDom && window.pJSDom.length) {
-        window.pJSDom.forEach(p => p.pJS.fn.vendors.destroypJS());
-        window.pJSDom = [];
-      }
-      return;
+  /* ----------------------------------
+     Auth UI handling (SAFE)
+  ---------------------------------- */
+  const isLoggedIn = {{ is_logged_in | default(false) | tojson }};
+  const username = {{ username | default("") | tojson }};
+
+  const loginBtn = document.getElementById("loginBtn");
+  const signupBtn = document.getElementById("signupBtn");
+  const logoutBtn = document.getElementById("logoutBtn");
+
+  if (isLoggedIn) {
+    if (loginBtn) loginBtn.style.display = "none";
+    if (signupBtn) signupBtn.style.display = "none";
+    if (logoutBtn) logoutBtn.style.display = "inline-block";
+    if (profileBtn) profileBtn.style.display = "inline-flex";
+
+    if (username) {
+      const greet = document.createElement("span");
+      greet.textContent = `Hi, ${username} 👋`;
+      greet.style.fontWeight = "600";
+      greet.style.opacity = "0.85";
+      document.querySelector(".header-actions").prepend(greet);
     }
+  } else {
+    if (profileBtn) profileBtn.style.display = "none";
+  }
 
-    const isMobile = window.innerWidth <= 768;
-    const particleColor = isDark ? "#ffffff" : "#4f6df5";
+  /* ----------------------------------
+     Init particles
+  ---------------------------------- */
+  loadParticlesBasedOnTheme();
 
-    // Destroy existing instance safely
+});
+
+/* ----------------------------------
+   Particles Function (UNCHANGED)
+---------------------------------- */
+function loadParticlesBasedOnTheme() {
+  const isDark = document.body.classList.contains("dark");
+  const prefersReducedMotion = window.matchMedia &&
+    window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  if (prefersReducedMotion) {
     if (window.pJSDom && window.pJSDom.length) {
       window.pJSDom.forEach(p => p.pJS.fn.vendors.destroypJS());
       window.pJSDom = [];
     }
-
-    particlesJS("particles-js", {
-      particles: {
-        number: {
-          value: isMobile ? 40 : 60,
-          density: { enable: true, value_area: 800 }
-        },
-        color: { value: particleColor },
-        opacity: { value: 0.32 },
-        size: { value: 3 },
-        line_linked: {
-          enable: true,
-          color: particleColor,
-          opacity: 0.28,
-          distance: 130,
-          width: 1
-        },
-        move: {
-          enable: true,
-          speed: isMobile ? 0.8 : 1.1
-        }
-      },
-      interactivity: {
-        detect_on: "canvas",
-        events: {
-          onhover: { enable: !isMobile, mode: "grab" },
-          onclick: { enable: !isMobile, mode: "push" },
-          resize: true
-        },
-        modes: {
-          grab: {
-            distance: 120,
-            line_linked: { opacity: 0.5 }
-          },
-          push: { particles_nb: 2 }
-        }
-      },
-      retina_detect: true
-    });
+    return;
   }
-  setTimeout(() => {
-    const flash = document.getElementById("flash-container");
-    if (flash) flash.remove();
-  }, 4500);
-  // Auth UI handling
-const isLoggedIn = {{ 'true' if is_logged_in else 'false' }};
-const username = "{{ username if username else '' }}";
 
-const loginBtn = document.getElementById("loginBtn");
-const signupBtn = document.getElementById("signupBtn");
-const profileBtn = document.getElementById("profileBtn");
-const logoutBtn = document.getElementById("logoutBtn");
+  const isMobile = window.innerWidth <= 768;
+  const particleColor = isDark ? "#ffffff" : "#4f6df5";
 
-if (isLoggedIn) {
-  loginBtn.style.display = "none";
-  signupBtn.style.display = "none";
-  logoutBtn.style.display = "inline-block";
-  profileBtn.style.display = "inline-flex";
-
-  if (username) {
-    const greet = document.createElement("span");
-    greet.textContent = `Hi, ${username} 👋`;
-    greet.style.fontWeight = "600";
-    greet.style.opacity = "0.85";
-    document.querySelector(".header-actions").prepend(greet);
+  if (window.pJSDom && window.pJSDom.length) {
+    window.pJSDom.forEach(p => p.pJS.fn.vendors.destroypJS());
+    window.pJSDom = [];
   }
-// } else {
-//   profileBtn.style.display = "none";
-// }
+
+  particlesJS("particles-js", {
+    particles: {
+      number: {
+        value: isMobile ? 40 : 60,
+        density: { enable: true, value_area: 800 }
+      },
+      color: { value: particleColor },
+      opacity: { value: 0.32 },
+      size: { value: 3 },
+      line_linked: {
+        enable: true,
+        color: particleColor,
+        opacity: 0.28,
+        distance: 130,
+        width: 1
+      },
+      move: {
+        enable: true,
+        speed: isMobile ? 0.8 : 1.1
+      }
+    },
+    interactivity: {
+      detect_on: "canvas",
+      events: {
+        onhover: { enable: !isMobile, mode: "grab" },
+        onclick: { enable: !isMobile, mode: "push" },
+        resize: true
+      },
+      modes: {
+        grab: {
+          distance: 120,
+          line_linked: { opacity: 0.5 }
+        },
+        push: { particles_nb: 2 }
+      }
+    },
+    retina_detect: true
+  });
+}
+
+/* ----------------------------------
+   Flash auto remove (SAFE)
+---------------------------------- */
+setTimeout(() => {
+  const flash = document.getElementById("flash-container");
+  if (flash) flash.remove();
+}, 4500);
+
 </script>
     </body>
     </html>
