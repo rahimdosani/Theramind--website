@@ -450,10 +450,10 @@ body.dark-theme .saved-item{
     left:0;
     height:calc(100dvh - 75px);
     transform:translateX(-100%);
-    z-index:200;
+    z-index:1500;
   }
 
-  .tm-sidebar.show{
+  .tm-sidebar.active{
     transform:translateX(0);
   }
 
@@ -539,7 +539,7 @@ body.dark-theme .saved-item{
   ☰
 </button>
 </header>
-<aside id="sidebar" class="tm-sidebar hidden" aria-label="Sidebar Navigation">
+<aside id="sidebar" class="tm-sidebar" aria-label="Sidebar Navigation">
   <nav class="sidebar-nav mobile-only">
     <a href="/">🏠 Home</a>
     <a href="/index">💬 Chat</a>
@@ -940,10 +940,8 @@ const sidebar = document.getElementById("sidebar");
 const sidebarToggle = document.getElementById("sidebarToggle");
 
 sidebarToggle?.addEventListener("click", () => {
-  sidebar.classList.toggle("show");
-  document.body.classList.toggle("sidebar-open");
-
-  const isOpen = sidebar.classList.contains("show");
+  const isOpen = sidebar.classList.toggle("active");
+  document.body.classList.toggle("sidebar-open", isOpen);
   sidebarToggle.setAttribute("aria-expanded", isOpen);
 
   if (isOpen) {
@@ -954,7 +952,7 @@ sidebarToggle?.addEventListener("click", () => {
 
 sidebar?.querySelectorAll("a").forEach(link => {
   link.addEventListener("click", () => {
-    sidebar.classList.remove("show");
+    sidebar.classList.remove("active");
     document.body.classList.remove("sidebar-open");
     sidebarToggle.setAttribute("aria-expanded", "false");
   });
