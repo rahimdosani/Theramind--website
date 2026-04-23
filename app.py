@@ -1737,20 +1737,6 @@ def admin_login():
     return render_template("admin/login.html")
 
 
-
-
-
-@app.route("/logout")
-def user_logout():
-
-    logout_user()
-
-    session.clear()
-
-    flash("You have been logged out successfully.", "success")
-
-    return redirect(url_for("home"))
-
 @app.route("/admin/dashboard")
 @admin_required
 def admin_dashboard():
