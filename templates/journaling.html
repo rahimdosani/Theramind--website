@@ -596,7 +596,8 @@ function autoSaveDraft() {
 }
 
   // --- Session-aware Journal Greeting ---
-const JOURNAL_USER_NAME = localStorage.getItem("userName");
+const JOURNAL_USER_NAME =
+  localStorage.getItem("userName") || "Friend";
 const JOURNAL_GREETING_SHOWN =
   sessionStorage.getItem("journalGreetingShown") === "true";
 
@@ -810,7 +811,7 @@ async function loadHistory() {
       const div = document.createElement("div");
       div.className = "entry-item";
       div.innerHTML = `
-        <span>${rec.date} [${rec.mood || "—"}]</span>
+        <span>${rec.date} - ${rec.title || "Untitled"} [${rec.mood || "—"}]</span>
         <div class="entry-actions">
           <button onclick="deleteEntry(${i})">🗑️</button>
         </div>
@@ -824,7 +825,8 @@ async function loadHistory() {
     generateReflectionInsights();
 
   } catch {
-    container.textContent = "Could not load journal history.";
+    container.textContent =
+  "Could not load journal history. Try refreshing.";
   }
 }
 
@@ -833,7 +835,7 @@ function openModal(index) {
   currentModalIndex=index;
   const entry=journalData[index];
   document.getElementById("modal-title").textContent=entry.title;
-  document.getElementById("modal-content").textContent=entry.entry;
+  document.getElementById("modal-content").textContent=entry.content;
   document.getElementById("modal-tags").textContent=entry.tags?`Tags: ${entry.tags}`:'';
   document.getElementById("modal-mood").textContent=`Mood: ${entry.mood}`;
   document.getElementById("entryModal").classList.add("active");
@@ -879,81 +881,236 @@ async function confirmDelete() {
 }
 
 async function saveEntry() {
+
   const title =
     document.getElementById("entry-title").value.trim() || "Untitled";
+
   const entry =
     document.getElementById("journal-entry").value.trim();
+
   const mood =
     document.getElementById("moodSelect").value;
+
   const tags =
-    document.getElementById("tags").value;
+    document.getElementById("tags").value.trim();
+
+
+  /* ------------------------
+     Validate
+  ------------------------ */
 
   if (!entry) {
-    showToast("Please write something.");
+
+    showToast("Please write something before saving.");
+
     return;
+
   }
+
 
   try {
+
     const res = await fetch("/journaling", {
+
       method: "POST",
+
       headers: {
-        "Content-Type": "application/json",
+        "Content-Type": "application/json"
       },
+
       body: JSON.stringify({
-        title,
+
+        title: title,
         content: entry,
-        mood,
-        tags,
-      }),
+        mood: mood,
+        tags: tags
+
+      })
+
     });
 
-    if (!res.ok) throw new Error("Save/job failed");
 
-    // Clear inputs
+    /* ------------------------
+       Read response safely
+    ------------------------ */
+
+    let data = null;
+
+    try {
+
+      data = await res.json();
+
+    }
+
+    catch {
+
+      console.warn("Response not JSON");
+
+    }
+
+
+    /* ------------------------
+       Handle failure
+    ------------------------ */
+
+    if (!res.ok) {
+
+      console.error("Save failed:", data);
+
+      showToast("Could not save entry. Please try again.");
+
+      return;
+
+    }
+
+
+    /* ------------------------
+       Reset fields
+    ------------------------ */
+
     document.getElementById("journal-entry").value = "";
+
     document.getElementById("entry-title").value = "";
+
     document.getElementById("tags").value = "";
 
-    // Refresh history from backend
+
+    /* ------------------------
+       Reload history
+    ------------------------ */
+
     await loadHistory();
 
-    showToast("Entry saved!");
-    localStorage.removeItem(JOURNAL_DRAFT_KEY);
 
-  } catch (err) {
-    console.error(err);
-    showToast("Could not save entry. Please try again.");
+    /* ------------------------
+       Remove draft
+    ------------------------ */
+
+    localStorage.removeItem("journalDraft");
+
+
+    showToast("Entry saved successfully 💾");
+
+
   }
+
+  catch (err) {
+
+    console.error("Network error:", err);
+
+    showToast("Network error. Please try again.");
+
+  }
+
 }
+    // Clear inputs
+   
 
 function searchJournal(query){
-  const container=document.getElementById("history");
-  const filtered=journalData.filter(rec=>
-    rec.title.toLowerCase().includes(query.toLowerCase())||
-    rec.entry.toLowerCase().includes(query.toLowerCase())||
-    (rec.tags && rec.tags.toLowerCase().includes(query.toLowerCase()))
-  );
-  container.innerHTML='';
-  if(!filtered.length){ container.textContent="No entries match your search."; return; }
+
+  const container =
+    document.getElementById("history");
+
+  const q =
+    query.toLowerCase();
+
+  const filtered =
+    journalData.filter(rec =>
+
+      rec.title.toLowerCase().includes(q) ||
+
+      rec.content.toLowerCase().includes(q) ||
+
+      (rec.tags &&
+       rec.tags.toLowerCase().includes(q))
+
+    );
+
+  container.innerHTML = '';
+
+  if(!filtered.length){
+
+    container.textContent =
+      "No entries match your search.";
+
+    return;
+
+  }
+
   filtered.forEach((rec,i)=>{
-    const div=document.createElement("div");
-    div.className="entry-item";
-    div.innerHTML=`<span>${rec.date} - ${rec.title} [${rec.mood}]</span>
-                   <div class="entry-actions"><button onclick="deleteEntry(${i})">🗑️</button></div>`;
-    div.addEventListener("click",(e)=>{if(!e.target.closest("button")) openModal(i)});
+
+    const div =
+      document.createElement("div");
+
+    div.className = "entry-item";
+
+    div.innerHTML = `
+      <span>
+        ${rec.date} - ${rec.title}
+        [${rec.mood}]
+      </span>
+
+      <div class="entry-actions">
+        <button onclick="deleteEntry(${i})">
+          🗑️
+        </button>
+      </div>
+    `;
+
+    div.addEventListener("click",(e)=>{
+
+      if(!e.target.closest("button"))
+        openModal(i)
+
+    });
+
     container.appendChild(div);
+
   });
+
 }
 
 function changeFont(font){ document.getElementById("journal-entry").style.fontFamily=font; showToast("Font changed!"); }
 
 function readAloud(){
-  const text=document.getElementById("journal-entry").value;
-  if(!text){ showToast("No text to read."); return; }
-  const utter = new SpeechSynthesisUtterance(text);
-  utter.lang = detectJournalLanguage(text);
+
+  const text =
+    document.getElementById("journal-entry").value.trim();
+
+  if (!text){
+
+    showToast("No text to read.");
+
+    return;
+
+  }
+
+  // Stop previous speech
+  speechSynthesis.cancel();
+
+  const utter =
+    new SpeechSynthesisUtterance(text);
+
+  utter.lang = "en-IN";
+
+  utter.rate = 1;
+
+  utter.pitch = 1;
+
+  utter.onstart = () => {
+
+    showToast("Reading journal 🔊");
+
+  };
+
+  utter.onerror = () => {
+
+    showToast("Speech failed.");
+
+  };
+
   speechSynthesis.speak(utter);
-  showToast("Reading aloud...");
+
 }
 
 function detectJournalLanguage(text) {
@@ -962,37 +1119,101 @@ function detectJournalLanguage(text) {
 }
 let recognition, recognizing=false;
 function toggleDictation(){
-  const SpeechRecognition=window.SpeechRecognition||window.webkitSpeechRecognition;
-  if(!SpeechRecognition){showToast("Speech recognition not supported."); return;}
-  if(!recognition){
-    recognition=new SpeechRecognition();
-    recognition.continuous=true;
-    recognition.lang = detectJournalLanguage(
-  document.getElementById("journal-entry").value || ""
-);
+  if (!navigator.mediaDevices) {
+  showToast("Microphone not supported.");
+  return;
+}
 
-    recognition.onresult=(e)=>{
-      for(let i=e.resultIndex;i<e.results.length;i++){
-        if(e.results[i].isFinal)
-          document.getElementById("journal-entry").value+=e.results[i][0].transcript+" ";
+  const SpeechRecognition =
+    window.SpeechRecognition ||
+    window.webkitSpeechRecognition;
+
+  if (!SpeechRecognition){
+    showToast("Speech recognition not supported in this browser.");
+    return;
+  }
+
+  const textarea =
+    document.getElementById("journal-entry");
+
+  const btn =
+    document.querySelector(".speech-button");
+
+  if (!recognition){
+
+    recognition = new SpeechRecognition();
+
+    recognition.continuous = true;
+    recognition.interimResults = false;
+
+    recognition.lang = "en-IN";
+
+    recognition.onresult = (event) => {
+
+      let transcript = "";
+
+      for (let i = event.resultIndex; i < event.results.length; i++){
+
+        if (event.results[i].isFinal){
+
+          transcript +=
+            event.results[i][0].transcript + " ";
+
+        }
+
       }
+
+      textarea.value += transcript;
+
     };
-    recognition.onerror=(e)=>showToast("Speech recognition error: "+e.error);
+
+    recognition.onerror = (event) => {
+
+      console.error(event.error);
+
+      showToast("Microphone error: " + event.error);
+
+      recognizing = false;
+
+      btn.textContent = "🎤 Start Dictation";
+
+    };
+
+    recognition.onend = () => {
+
+      recognizing = false;
+
+      btn.textContent = "🎤 Start Dictation";
+
+    };
+
   }
-  const btn=document.querySelector('.speech-button');
-  if(!recognizing){
+
+  if (!recognizing){
+
     recognition.start();
-    recognizing=true;
-    btn.style.background="#3e53cc";
-    btn.textContent='🛑 Stop Dictation';
-    showToast("Dictation started");
-  } else {
-    recognition.stop();
-    recognizing=false;
-    btn.style.background="#4f6df5";
-    btn.textContent='🎤 Start Dictation';
-    showToast("Dictation stopped");
+    btn.style.background = "#ef4444";
+
+    recognizing = true;
+
+    btn.textContent = "🛑 Stop Dictation";
+
+    showToast("Dictation started 🎤");
+
   }
+
+  else {
+
+    recognition.stop();
+
+    recognizing = false;
+
+    btn.textContent = "🎤 Start Dictation";
+
+    showToast("Dictation stopped");
+
+  }
+
 }
 
 async function exportPDF() {
@@ -1018,7 +1239,7 @@ async function exportPDF() {
         15
       );
       doc.setFontSize(10);
-      doc.text(entry.entry || "", 10, 25, { maxWidth: 180 });
+      doc.text(entry.content || "", 10, 25, { maxWidth: 180 });
 
       if (entry.tags) {
         doc.text(`Tags: ${entry.tags}`, 10, 40);

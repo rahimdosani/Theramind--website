@@ -1232,7 +1232,7 @@ def user_login():
             return redirect(url_for("verify_signup_otp"))
 
         login_user(user)
-        flash(f"✨ Welcome back, {user['username']}. Your space is ready.", "success")
+        flash(f"Welcome back, {user['username']} 👋", "success")
         return redirect(url_for("home"))
 
     return render_template("auth/login.html")
@@ -1504,10 +1504,13 @@ def signup():
 
 @app.route("/logout")
 def user_logout():
+
     logout_user()
-    session.pop("conv_id", None)
-    session.pop("oauth_temp_user", None)
-    flash("Logged out successfully", "info")
+
+    session.clear()
+
+    flash("You have been logged out successfully.", "success")
+
     return redirect(url_for("home"))
 
 
@@ -1737,11 +1740,16 @@ def admin_login():
 
 
 
-@app.route("/admin/logout")
-def admin_logout():
+@app.route("/logout")
+def user_logout():
+
     logout_user()
-    flash("Logged out", "info")
-    return redirect(url_for("admin_login"))
+
+    session.clear()
+
+    flash("You have been logged out successfully.", "success")
+
+    return redirect(url_for("home"))
 
 @app.route("/admin/dashboard")
 @admin_required
@@ -2054,8 +2062,13 @@ def admin_mood_json():
 
 @app.route("/")
 def home():
-    session["welcome_shown"] = False
-    return render_template("home.html")
+
+    is_logged_in = bool(session.get("user_id"))
+
+    return render_template(
+        "home.html",
+        is_logged_in=is_logged_in
+    )
 
 @app.route("/index")
 @login_required

@@ -832,10 +832,17 @@ window.addEventListener("DOMContentLoaded", () => {
   const logoutBtn = document.getElementById("logoutBtn");
 
   if (isLoggedIn) {
-    if (loginBtn) loginBtn.style.display = "none";
-    if (signupBtn) signupBtn.style.display = "none";
-    if (logoutBtn) logoutBtn.style.display = "inline-block";
-    if (profileBtn) profileBtn.style.display = "inline-flex";
+
+  if (loginBtn) loginBtn.style.display = "none";
+  if (signupBtn) signupBtn.style.display = "none";
+  if (logoutBtn) logoutBtn.style.display = "inline-block";
+
+}
+else {
+
+  if (logoutBtn) logoutBtn.style.display = "none";
+
+}
 
     if (username) {
       const greet = document.createElement("span");
@@ -853,7 +860,7 @@ window.addEventListener("DOMContentLoaded", () => {
   ---------------------------------- */
   loadParticlesBasedOnTheme();
 
-});
+);
 
 /* ----------------------------------
    Particles Function (UNCHANGED)
