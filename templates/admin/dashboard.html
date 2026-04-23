@@ -165,11 +165,28 @@ td.small{max-width:360px;white-space:nowrap;overflow:hidden;text-overflow:ellips
 <div id="stat-moods" class="stat">—</div>
 <div class="muted">Emotional check-ins</div>
 </div>
+<!-- ADD THIS -->
+<div class="card">
+<h3>Conversations</h3>
+<div id="stat-conversations" class="stat">—</div>
+<div class="muted">Chat sessions</div>
+</div>
+
+<!-- ADD THIS -->
+<div class="card">
+<h3>Active Users</h3>
+<div id="stat-active_users" class="stat">—</div>
+<div class="muted">Logged-in users</div>
+</div>
 
 <div class="card">
 <h3>System Health</h3>
-<div class="status"><span class="dot"></span> API operational</div>
-<div class="status"><span class="dot"></span> Database connected</div>
+
+<div class="status">
+<span class="dot" id="health-dot"></span>
+<span id="health-text">Checking...</span>
+</div>
+
 </div>
 
 <div class="card large">
@@ -228,15 +245,48 @@ function show(id, el){
 }
 
 async function loadAll(){
-  await Promise.all([stats(),users(),journals(),moods()]);
+  await Promise.all([
+      stats(),
+      users(),
+      journals(),
+      moods(),
+      health()   // ADD THIS
+  ]);
+
   charts();
 }
 
 async function stats(){
   const d=await (await fetch("/admin/stats")).json();
-  stat("users",d.users);
-  stat("journals",d.journals);
-  stat("moods",d.moods);
+
+  stat("users", d.users);
+  stat("journals", d.journals);
+  stat("moods", d.moods);
+
+  stat("conversations", d.conversations);
+  stat("active_users", d.active_users);
+}
+async function health(){
+
+  try{
+    const d = await (await fetch("/admin/health")).json();
+
+    const dot = document.getElementById("health-dot");
+    const text = document.getElementById("health-text");
+
+    if(d.status === "ok"){
+        dot.style.background = "#22c55e";
+        text.textContent = "Database connected";
+    }
+    else{
+        dot.style.background = "red";
+        text.textContent = "Database error";
+    }
+
+  } catch {
+        document.getElementById("health-dot").style.background = "red";
+        document.getElementById("health-text").textContent = "Health check failed";
+  }
 }
 function stat(k,v){document.getElementById("stat-"+k).textContent=v}
 

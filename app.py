@@ -1939,6 +1939,7 @@ def admin_stats():
     out = {
         "users": 0,
         "conversations": 0,
+        "active_users": 0, 
         "journals": 0,
         "moods": 0,
     }
@@ -1952,6 +1953,18 @@ def admin_stats():
             out["users"] = c.fetchone()["cnt"]
     except Exception:
         logger.exception("Failed to count users")
+    
+        # ---- Active Users ----
+    try:
+        conn = get_db(USER_DB)
+        if conn:
+            c = conn.cursor()
+            c.execute(
+                "SELECT COUNT(*) AS cnt FROM users WHERE last_login IS NOT NULL"
+            )
+            out["active_users"] = c.fetchone()["cnt"]
+    except Exception:
+        logger.exception("Failed to count active users")
 
     # ---- Conversations ----
     try:
@@ -1986,6 +1999,23 @@ def admin_stats():
         logger.exception("Failed to count mood logs")
 
     return jsonify(out)
+
+@app.route("/admin/health")
+@admin_required
+def admin_health():
+    try:
+        conn = sqlite3.connect(USER_DB)
+        conn.execute("SELECT 1")
+        conn.close()
+
+        return jsonify({
+            "status": "ok"
+        })
+
+    except:
+        return jsonify({
+            "status": "error"
+        })
 
 
 @app.route("/admin/journals_json")
