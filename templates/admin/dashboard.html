@@ -275,21 +275,65 @@ async function users(){
 }
 
 async function journals(){
-  _journals=await (await fetch("/admin/journals_json")).json();
-  document.getElementById("journals-table").innerHTML=
-  `<table><thead><tr><th>Date</th><th>Content</th></tr></thead>
-   <tbody>${_journals.map(j=>`
-   <tr><td>${j.date}</td><td class="small">${escapeHTML(j.content)}</td></tr>`).join("")}
-   </tbody></table>`;
+
+  _journals = await (await fetch("/admin/journals_json")).json();
+
+  document.getElementById("journals-table").innerHTML =
+
+  `<table>
+  <thead>
+    <tr>
+      <th>Date</th>
+      <th>User</th>
+      <th>Entry Size</th>
+    </tr>
+  </thead>
+
+  <tbody>
+
+  ${_journals.map(j=>`
+
+  <tr>
+    <td>${j.date}</td>
+    <td>User ${j.user_id}</td>
+    <td>${(j.content || "").length} chars</td>
+  </tr>
+
+  `).join("")}
+
+  </tbody>
+  </table>`;
 }
 
 async function moods(){
-  _moods=await (await fetch("/admin/mood_json")).json();
-  document.getElementById("moods-table").innerHTML=
-  `<table><thead><tr><th>Date</th><th>Mood</th><th>Note</th></tr></thead>
-   <tbody>${_moods.map(m=>`
-   <tr><td>${m.date}</td><td>${escapeHTML(m.mood)}</td><td class="small">${escapeHTML(m.message||"")}</td></tr>`).join("")}
-   </tbody></table>`;
+
+  _moods = await (await fetch("/admin/mood_json")).json();
+
+  document.getElementById("moods-table").innerHTML =
+
+  `<table>
+  <thead>
+    <tr>
+      <th>Date</th>
+      <th>Mood</th>
+      <th>User</th>
+    </tr>
+  </thead>
+
+  <tbody>
+
+  ${_moods.map(m=>`
+
+  <tr>
+    <td>${m.date}</td>
+    <td>${m.mood}</td>
+    <td>User ${m.user_id}</td>
+  </tr>
+
+  `).join("")}
+
+  </tbody>
+  </table>`;
 }
 
 function charts(){
