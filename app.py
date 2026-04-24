@@ -1507,8 +1507,6 @@ def user_logout():
 
     logout_user()
 
-    session.clear()
-
     flash("You have been logged out successfully.", "success")
 
     return redirect(url_for("home"))
@@ -2050,12 +2048,14 @@ def admin_mood_json():
 def home():
 
     is_logged_in = bool(session.get("user_id"))
+    username = session.get("username", "")
 
     return render_template(
         "home.html",
-        is_logged_in=is_logged_in
+        is_logged_in=is_logged_in,
+        username=username
     )
-
+    
 @app.route("/index")
 @login_required
 def index():
