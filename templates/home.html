@@ -861,23 +861,13 @@ else {
 
 }
 
-    if (username) {
-      const greet = document.createElement("span");
-      greet.textContent = `Hi, ${username} 👋`;
-      greet.style.fontWeight = "600";
-      greet.style.opacity = "0.85";
-      document.querySelector(".header-actions").prepend(greet);
-    }
-  } else {
-    if (profileBtn) profileBtn.style.display = "none";
-  }
 
   /* ----------------------------------
      Init particles
   ---------------------------------- */
   loadParticlesBasedOnTheme();
 
-);
+});
 
 /* ----------------------------------
    Particles Function (UNCHANGED)
