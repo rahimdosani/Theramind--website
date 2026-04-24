@@ -821,21 +821,38 @@ window.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  /* ----------------------------------
-     Auth UI handling (SAFE)
-  ---------------------------------- */
-  const isLoggedIn = {{ is_logged_in | default(false) | tojson }};
-  const username = {{ username | default("") | tojson }};
+/* ----------------------------------
+   Auth UI handling (FIXED FINAL)
+---------------------------------- */
 
-  const loginBtn = document.getElementById("loginBtn");
-  const signupBtn = document.getElementById("signupBtn");
-  const logoutBtn = document.getElementById("logoutBtn");
+const isLoggedIn = {{ is_logged_in | default(false) | tojson }};
+const username = {{ username | default("") | tojson }};
 
-  if (isLoggedIn) {
+const loginBtn = document.getElementById("loginBtn");
+const signupBtn = document.getElementById("signupBtn");
+const logoutBtn = document.getElementById("logoutBtn");
+
+if (isLoggedIn) {
 
   if (loginBtn) loginBtn.style.display = "none";
   if (signupBtn) signupBtn.style.display = "none";
   if (logoutBtn) logoutBtn.style.display = "inline-block";
+
+  // Show greeting
+  if (username) {
+
+    const greet = document.createElement("span");
+
+    greet.textContent = `Hi, ${username} 👋`;
+
+    greet.style.fontWeight = "600";
+    greet.style.opacity = "0.85";
+
+    document
+      .querySelector(".header-actions")
+      .prepend(greet);
+
+  }
 
 }
 else {
