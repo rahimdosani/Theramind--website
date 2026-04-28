@@ -2381,20 +2381,6 @@ def rename_conversation(chat_id):
     return jsonify(ok=True, message="Chat renamed")
 
 
-@app.route("/get_current_conversation")
-@login_required
-def get_current_conversation():
-    conv_id = session.get("conv_id")
-    if not conv_id:
-        return jsonify(ok=False, message="No active conversation")
-
-    history = get_history_by_conv_id(conv_id)
-    if not history:
-        return jsonify(ok=False, message="Nothing to export")
-
-    return jsonify(ok=True, history=history)
-
-
 # -------- Journaling & other pages --------
 @app.route("/journaling", methods=["GET", "POST"])
 @login_required
