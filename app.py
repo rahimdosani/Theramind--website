@@ -186,8 +186,10 @@ def setup_databases():
     conn.close()
 
     # journal
+       
     conn = connect_for_setup(JOURNAL_DB)
     c = conn.cursor()
+
     c.execute("""
         CREATE TABLE IF NOT EXISTS journal_entries (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -197,9 +199,28 @@ def setup_databases():
             FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
         )
     """)
-    c.execute("CREATE INDEX IF NOT EXISTS idx_journal_user ON journal_entries(user_id)")
+
+    # 🔧 MIGRATION — Add missing columns safely
+    c.execute("PRAGMA table_info(journal_entries)")
+    columns = [col[1] for col in c.fetchall()]
+
+    if "title" not in columns:
+        c.execute("ALTER TABLE journal_entries ADD COLUMN title TEXT")
+
+    if "mood" not in columns:
+        c.execute("ALTER TABLE journal_entries ADD COLUMN mood TEXT")
+
+    if "tags" not in columns:
+        c.execute("ALTER TABLE journal_entries ADD COLUMN tags TEXT")
+
+    c.execute(
+        "CREATE INDEX IF NOT EXISTS idx_journal_user ON journal_entries(user_id)"
+    )
+
     conn.commit()
     conn.close()
+    
+    
 
     # conversations + rest
     setup_conversations_db()
@@ -1642,7 +1663,52 @@ def profile():
         goals=goals_row["goals"] if goals_row else ""
     )
     
+@app.route("/journaling", methods=["GET", "POST"])
+@login_required
+def journaling():
 
+    # -------- LOAD PAGE --------
+    if request.method == "GET":
+        return render_template("journaling.html")
+
+    # -------- SAVE ENTRY --------
+    try:
+        data = request.get_json()
+
+        title = data.get("title", "Untitled")
+        content = data.get("content", "")
+        mood = data.get("mood", "")
+        tags = data.get("tags", "")
+
+        if not content.strip():
+            return jsonify({"ok": False})
+
+        conn = get_db(JOURNAL_DB)
+
+        conn.execute(
+            """
+            INSERT INTO journal_entries
+            (user_id, title, content, mood, tags, date)
+            VALUES (?, ?, ?, ?, ?, ?)
+            """,
+            (
+                session["user_id"],
+                title,
+                content,
+                mood,
+                tags,
+                now()
+            )
+        )
+
+        conn.commit()
+
+        return jsonify({"ok": True})
+
+    except Exception as e:
+        logger.exception("Journal save failed: %s", e)
+        return jsonify({"ok": False})
+    
 @app.before_request
 def ensure_session_and_conv():
     """
@@ -2283,27 +2349,35 @@ def get_conversations():
 def get_journal_history():
 
     try:
-
         conn = get_db(JOURNAL_DB)
 
         rows = conn.execute(
             """
-            SELECT id, date, content
+            SELECT
+                id,
+                title,
+                content,
+                mood,
+                tags,
+                date
             FROM journal_entries
             WHERE user_id = ?
             ORDER BY id DESC
             """,
-            (session["user_id"],)
+            (session.get("user_id"),)
         ).fetchall()
 
-        journals = [
-            {
+        journals = []
+
+        for row in rows:
+            journals.append({
                 "id": row["id"],
-                "date": row["date"],
-                "content": row["content"]
-            }
-            for row in rows
-        ]
+                "title": row["title"] or "",
+                "content": row["content"] or "",
+                "mood": row["mood"] or "",
+                "tags": row["tags"] or "",
+                "date": row["date"] or ""
+            })
 
         return jsonify(journals)
 
@@ -2381,25 +2455,7 @@ def rename_conversation(chat_id):
     return jsonify(ok=True, message="Chat renamed")
 
 
-# -------- Journaling & other pages --------
-@app.route("/journaling", methods=["GET", "POST"])
-@login_required
-def journaling():
-    saved = False
-    if request.method == "POST":
-        entry = safe_trim(request.form.get("entry", ""), 5000)
-        if entry:
-            conn = get_db(JOURNAL_DB)
-            if conn:
-                c = conn.cursor()
-                c.execute(
-    "INSERT INTO journal_entries (user_id, date, content) VALUES (?, ?, ?)",
-    (session["user_id"], now(), entry),
-)
 
-                conn.commit()
-                saved = True
-    return render_template("journaling.html", saved=saved)
 
 @app.route("/search_journals", methods=["GET"])
 @login_required
