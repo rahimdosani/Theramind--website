@@ -1667,21 +1667,35 @@ def profile():
 @login_required
 def journaling():
 
-    # -------- LOAD PAGE --------
+    # ---------- LOAD PAGE ----------
     if request.method == "GET":
         return render_template("journaling.html")
 
-    # -------- SAVE ENTRY --------
+    # ---------- SAVE ENTRY ----------
     try:
-        data = request.get_json()
+
+        # Accept BOTH JSON and form data
+        data = request.get_json(silent=True)
+
+        if not data:
+            data = request.form
 
         title = data.get("title", "Untitled")
-        content = data.get("content", "")
+
+        content = (
+            data.get("content")
+            or data.get("entry")
+            or ""
+        )
+
         mood = data.get("mood", "")
         tags = data.get("tags", "")
 
         if not content.strip():
-            return jsonify({"ok": False})
+            return jsonify({
+                "ok": False,
+                "message": "Empty entry"
+            })
 
         conn = get_db(JOURNAL_DB)
 
@@ -1703,11 +1717,19 @@ def journaling():
 
         conn.commit()
 
+        print("✅ Journal saved")  # Debug print
+
         return jsonify({"ok": True})
 
     except Exception as e:
-        logger.exception("Journal save failed: %s", e)
+
+        logger.exception(
+            "Journal save failed: %s",
+            e
+        )
+
         return jsonify({"ok": False})
+    
 @app.route("/api/history/journals")
 @login_required
 def get_journal_history():

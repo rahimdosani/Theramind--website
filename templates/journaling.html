@@ -1225,48 +1225,94 @@ async function exportPDF() {
 
   try {
 
-    const res =
-      await fetch("/api/history/journals");
+    const res = await fetch("/api/history/journals");
 
-    const data = await res.json();
+    if (!res.ok) {
+      throw new Error("Failed to fetch journals");
+    }
 
-    if (!data.length) {
-      alert("No entries to export");
+    const journalData = await res.json();
+
+    if (!journalData.length) {
+      showToast("No entries to export.");
       return;
     }
 
-    const { jsPDF } = window.jspdf;
+    // Safe jsPDF detection
+    const jsPDF = window.jspdf?.jsPDF;
+
+    if (!jsPDF) {
+      showToast("PDF export not available.");
+      return;
+    }
 
     const doc = new jsPDF();
 
-    let y = 10;
+    let y = 15;
 
-    data.forEach(entry => {
+    journalData.forEach((entry, idx) => {
 
-      const text =
-        `${entry.date}\n${entry.content}`;
+      doc.setFontSize(12);
 
+      const header =
+        `Entry ${idx + 1} – ${entry.mood || ""} – ${entry.date || ""}`;
+
+      doc.text(header, 10, y);
+
+      y += 8;
+
+      doc.setFontSize(10);
+
+      const content =
+        entry.content || "";
+
+      // Wrap long text
       const lines =
-        doc.splitTextToSize(text, 180);
+        doc.splitTextToSize(content, 180);
 
-      lines.forEach(line => {
-
-        doc.text(line, 10, y);
-
-        y += 7;
+      lines.forEach((line) => {
 
         if (y > 270) {
           doc.addPage();
-          y = 10;
+          y = 15;
         }
+
+        doc.text(line, 10, y);
+
+        y += 6;
 
       });
 
-      y += 5;
+      if (entry.tags) {
+
+        if (y > 270) {
+          doc.addPage();
+          y = 15;
+        }
+
+        doc.text(
+          `Tags: ${entry.tags}`,
+          10,
+          y
+        );
+
+        y += 10;
+
+      }
+
+      // Add spacing between entries
+      y += 6;
+
+      if (y > 270 && idx < journalData.length - 1) {
+        doc.addPage();
+        y = 15;
+      }
 
     });
 
     doc.save("Theramind_Journal.pdf");
+
+    showToast("PDF exported!");
 
   }
 
@@ -1274,11 +1320,12 @@ async function exportPDF() {
 
     console.error(err);
 
-    alert("PDF export failed");
+    showToast("Could not export PDF.");
 
   }
 
 }
+
 async function exportAll() {
   try {
     const res = await fetch("/api/history/journals");
