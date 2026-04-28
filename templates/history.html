@@ -844,32 +844,145 @@ sidebar?.querySelectorAll("a").forEach(link => {
           </div>`;
       });
     }
+    /* ===================== EXPORT JOURNAL ===================== */
 
-    /* ===================== JOURNAL ENTRIES ===================== */
-    const journalEntriesDiv = document.getElementById("journalEntries");
+document
+  .getElementById("exportJournal")
+  ?.addEventListener("click", async () => {
 
-    function renderJournalEntries(query = "") {
-      journalEntriesDiv.innerHTML = "";
-      const q = query.toLowerCase();
+    try {
 
-      const entries = filteredJournalData.filter(e =>
-        [e.entry, e.tags, e.mood].join(" ").toLowerCase().includes(q)
-      );
+      const res =
+        await fetch("/api/history/journals");
 
-      if (!entries.length) {
-        journalEntriesDiv.innerHTML = `<p class="empty-state">No entries found.</p>`;
+      const data = await res.json();
+
+      if (!data.length) {
+        alert("No journal data to export.");
         return;
       }
 
-      entries.forEach(e => {
-        journalEntriesDiv.innerHTML += `
-          <div class="entry">
-            <small>${e.date || ""}</small>
-            ${e.mood ? `<strong>${e.mood}</strong>` : ""}
-            <div>${e.entry || ""}</div>
-          </div>`;
-      });
+      const blob =
+        new Blob(
+          [JSON.stringify(data, null, 2)],
+          { type: "application/json" }
+        );
+
+      const url =
+        URL.createObjectURL(blob);
+
+      const a =
+        document.createElement("a");
+
+      a.href = url;
+
+      a.download =
+        "Theramind_Journal_History.json";
+
+      a.click();
+
+      URL.revokeObjectURL(url);
+
     }
+    catch {
+      alert("Export failed.");
+    }
+
+});
+
+
+/* ===================== EXPORT CHAT ===================== */
+
+document
+  .getElementById("exportChat")
+  ?.addEventListener("click", async () => {
+
+    try {
+
+      const res =
+        await fetch("/get_conversations");
+
+      const data = await res.json();
+
+      const blob =
+        new Blob(
+          [JSON.stringify(data, null, 2)],
+          { type: "application/json" }
+        );
+
+      const url =
+        URL.createObjectURL(blob);
+
+      const a =
+        document.createElement("a");
+
+      a.href = url;
+
+      a.download =
+        "Theramind_Chat_History.json";
+
+      a.click();
+
+      URL.revokeObjectURL(url);
+
+    }
+    catch {
+      alert("Chat export failed.");
+    }
+
+});
+
+    /* ===================== JOURNAL ENTRIES ===================== */
+    function renderJournalEntries(query = "") {
+
+  journalEntriesDiv.innerHTML = "";
+
+  const q = query.toLowerCase();
+
+  const entries = filteredJournalData.filter(e =>
+
+    [
+      e.entry || "",
+      e.tags || "",
+      e.mood || ""
+    ]
+
+    .join(" ")
+
+    .toLowerCase()
+
+    .includes(q)
+
+  );
+
+  if (!entries.length) {
+
+    journalEntriesDiv.innerHTML =
+      `<p class="empty-state">No entries found.</p>`;
+
+    return;
+
+  }
+
+  entries.forEach(e => {
+
+    journalEntriesDiv.innerHTML += `
+
+      <div class="entry">
+
+        <small>${e.date || ""}</small>
+
+        ${e.mood ? `<strong>${e.mood}</strong>` : ""}
+
+        <div>${e.entry || ""}</div>
+
+      </div>
+
+    `;
+
+  });
+
+}
 
     /* ===================== CHARTS ===================== */
     const moodScoreMap = {
@@ -964,7 +1077,24 @@ sidebar?.querySelectorAll("a").forEach(link => {
       document.getElementById("wellnessScore").textContent = score;
       document.getElementById("breathingCount").textContent = "—";
       document.getElementById("breathingStreak").textContent = "—";
+      const circle =
+  document.querySelector(".ring-progress");
+
+const circumference = 264;
+
+const offset =
+  circumference -
+  (score / 100) * circumference;
+
+circle.style.strokeDashoffset = offset;
     }
+  window.addEventListener("resize", () => {
+
+  moodLineChart?.resize();
+  moodPieChart?.resize();
+  anxietyChart?.resize();
+
+});
 
     /* ===================== SAVED CHATS ===================== */
     fetch("/get_conversations")
@@ -999,6 +1129,7 @@ sidebar?.querySelectorAll("a").forEach(link => {
     }
 
   });
+
 
   </script>
     </body>

@@ -487,7 +487,12 @@ def current_user():
     if not conn:
         return None
     c = conn.cursor()
-    c.execute("SELECT id, username, email, is_admin, created_at FROM users WHERE id = ?", (uid,))
+    c.execute("""
+    SELECT id, username, email, display_name,
+           is_admin, created_at
+    FROM users
+    WHERE id = ?
+""", (uid,))
     row = c.fetchone()
     return row
 
@@ -1124,9 +1129,19 @@ def generate_reply_with_context(chat_history, conv_id=None, allow_remote_process
 
     ),
 }
+       # -------------------------------------------------
     # Retrieve high-level memories (previous summaries)
+    # -------------------------------------------------
+
+    memories = []
+
     if conv_id and allow_remote_processing:
-     memories = retrieve_relevant_memories(conv_id, last_user_message, top_k=3)
+        memories = retrieve_relevant_memories(
+            conv_id,
+            last_user_message,
+            top_k=3
+        )
+
     if memories:
         messages.append(
             {
@@ -1138,6 +1153,8 @@ def generate_reply_with_context(chat_history, conv_id=None, allow_remote_process
                 ),
             }
         )
+
+    # Always add system prompt AFTER memory context
     messages.append(system_prompt)
 
     # -------------------------------------------------
@@ -1505,6 +1522,9 @@ def signup():
 @app.route("/logout")
 def user_logout():
 
+    # Clear conversation session too
+    session.pop("conv_id", None)
+
     logout_user()
 
     flash("You have been logged out successfully.", "success")
@@ -1522,7 +1542,6 @@ def user_dashboard():
 def profile():
     user = current_user()
     if not user:
-        logout_user()
         flash("Your session expired. Please log in again.", "warning")
         return redirect(url_for("user_login"))
 
@@ -1637,7 +1656,8 @@ def ensure_session_and_conv():
     # -----------------------------
     # Always keep session permanent
     # -----------------------------
-    if "user_id" in session:
+    
+    if session.get("user_id"):
      session.permanent = True
 
     # ---------------------------------
@@ -1669,6 +1689,7 @@ def ensure_session_and_conv():
         "chat",
         "index",
         "get_current_session",
+        "get_current_conversation",
         "reset_session",
     }
 
@@ -1678,7 +1699,9 @@ def ensure_session_and_conv():
         "conv_id" not in session
     ):
         try:
-            session["conv_id"] = create_empty_conversation()
+             conv_id = create_empty_conversation()
+             if conv_id:
+                 session["conv_id"] = conv_id
         except Exception:
             logger.exception("Failed to create conversation for user_id=%s", session.get("user_id"))
 
@@ -2048,7 +2071,8 @@ def admin_mood_json():
 def home():
 
     is_logged_in = bool(session.get("user_id"))
-    username = session.get("username", "")
+    user = current_user()
+    username = get_display_name(user)
 
     return render_template(
         "home.html",
@@ -2061,8 +2085,9 @@ def home():
 def index():
     show_welcome = not session.get("welcome_shown", False)
     session["welcome_shown"] = True
-
-    user_name = session.get("username")  # or name/email fallback
+    
+    user = current_user()
+    user_name = get_display_name(user)
 
     return render_template(
         "index.html",
@@ -2142,17 +2167,30 @@ def chat():
 
 
 @app.route("/reset_session")
+@login_required
 def reset_session():
+
     conv_id = session.get("conv_id")
+
     try:
         if conv_id:
             delete_conversation(conv_id)
+
     except Exception:
         logger.exception("Error deleting conv on reset")
-    session["conv_id"] = create_empty_conversation()
+
+    # Create new conversation safely
+    new_conv = create_empty_conversation()
+
+    if new_conv:
+        session["conv_id"] = new_conv
+    else:
+        logger.error("Failed to create new conversation during reset")
+
     return jsonify({"status": "reset"})
 
 @app.route("/get_current_session")
+@login_required
 def get_current_session():
     conv_id = session.get("conv_id")
     try:
@@ -2160,8 +2198,28 @@ def get_current_session():
     except Exception:
         logger.exception("Error loading current session")
         history = []
-    return jsonify(history)
+    return jsonify(ok=True, history=history)
 
+@app.route("/get_current_conversation")
+@login_required
+def get_current_conversation():
+
+    conv_id = session.get("conv_id")
+
+    if not conv_id:
+        return jsonify(ok=False, message="No active conversation")
+
+    try:
+        history = get_history_by_conv_id(conv_id)
+
+        if not history:
+            return jsonify(ok=False, message="Nothing to export")
+
+        return jsonify(ok=True, history=history)
+
+    except Exception:
+        logger.exception("Error fetching current conversation")
+        return jsonify(ok=False, message="Export failed")
 # -------- Conversations CRUD --------
 @app.route("/save_conversation", methods=["POST"])
 @login_required
@@ -2219,6 +2277,39 @@ def get_conversations():
     ]
 
     return jsonify(ok=True, chats=chats)
+
+@app.route("/api/history/journals")
+@login_required
+def get_journal_history():
+
+    try:
+
+        conn = get_db(JOURNAL_DB)
+
+        rows = conn.execute(
+            """
+            SELECT id, date, content
+            FROM journal_entries
+            WHERE user_id = ?
+            ORDER BY id DESC
+            """,
+            (session["user_id"],)
+        ).fetchall()
+
+        journals = [
+            {
+                "id": row["id"],
+                "date": row["date"],
+                "content": row["content"]
+            }
+            for row in rows
+        ]
+
+        return jsonify(journals)
+
+    except Exception:
+        logger.exception("Failed to fetch journal history")
+        return jsonify([])
 
 
 

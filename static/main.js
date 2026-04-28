@@ -537,43 +537,64 @@ function exportChat() {
 }
 
 function downloadChatPDF() {
+
   fetch("/get_current_conversation")
+
     .then((r) => r.json())
+
     .then((res) => {
+
       if (!res.ok || !Array.isArray(res.history)) {
         showToast(res.message || "Nothing to export");
         return;
       }
 
-      const { jsPDF } = window.jspdf;
+      // Safe jsPDF detection
+      const jsPDF = window.jspdf?.jsPDF;
+
       if (!jsPDF) {
         showToast("PDF export not available", "error");
         return;
       }
 
       const doc = new jsPDF();
+
       let y = 10;
 
       res.history.forEach((msg) => {
-        const label = msg.role === "user" ? "You" : assistantName;
+
+        const label =
+          msg.role === "user"
+            ? "You"
+            : (window.assistantName || "Theramind");
+
         const text = `${label}: ${msg.content}`;
+
         const lines = doc.splitTextToSize(text, 180);
 
         lines.forEach((line) => {
+
           doc.text(line, 10, y);
+
           y += 7;
+
           if (y > 270) {
             doc.addPage();
             y = 10;
           }
+
         });
 
         y += 4;
+
       });
 
       doc.save("Theramind_Chat.pdf");
+
       showToast("PDF downloaded");
+
     })
+
     .catch(() => showToast("PDF export failed", "error"));
 }
 

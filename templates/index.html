@@ -108,7 +108,7 @@
       <p class="modal-subtitle">This makes your conversations feel personal.</p>
       <input type="text" id="personaNameInput" class="modal-input" placeholder="e.g., Mira, CalmMind" />
       <div class="modal-actions">
-        <button class="save-btn" id="setPersonaName">✅ Save</button>
+        <button class="save-btn" id="setPersonaName">Save</button>
         <button class="close-btn" onclick="closePersonaModal()">×</button>
       </div>
     </div>
@@ -138,7 +138,7 @@
 
  <script>
     window.THERAMIND_USER = {
-      name: {{ user_name|tojson }}
+      name: {{ (user_name or "User") | tojson }}
     };
   </script>
 

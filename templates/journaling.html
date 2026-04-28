@@ -1015,16 +1015,21 @@ function searchJournal(query){
     query.toLowerCase();
 
   const filtered =
-    journalData.filter(rec =>
+  journalData.filter(rec =>
 
-      rec.title.toLowerCase().includes(q) ||
+    (rec.title || "")
+      .toLowerCase()
+      .includes(q) ||
 
-      rec.content.toLowerCase().includes(q) ||
+    (rec.content || "")
+      .toLowerCase()
+      .includes(q) ||
 
-      (rec.tags &&
-       rec.tags.toLowerCase().includes(q))
+    (rec.tags || "")
+      .toLowerCase()
+      .includes(q)
 
-    );
+  );
 
   container.innerHTML = '';
 
@@ -1217,9 +1222,14 @@ function toggleDictation(){
 }
 
 async function exportPDF() {
+
   try {
+
     const res = await fetch("/api/history/journals");
-    if (!res.ok) throw new Error("Failed to fetch journals");
+
+    if (!res.ok) {
+      throw new Error("Failed to fetch journals");
+    }
 
     const journalData = await res.json();
 
@@ -1228,33 +1238,92 @@ async function exportPDF() {
       return;
     }
 
-    const { jsPDF } = window.jspdf;
+    // Safe jsPDF detection
+    const jsPDF = window.jspdf?.jsPDF;
+
+    if (!jsPDF) {
+      showToast("PDF export not available.");
+      return;
+    }
+
     const doc = new jsPDF();
 
+    let y = 15;
+
     journalData.forEach((entry, idx) => {
+
       doc.setFontSize(12);
-      doc.text(
-        `Entry ${idx + 1} – ${entry.mood || ""} – ${entry.date}`,
-        10,
-        15
-      );
+
+      const header =
+        `Entry ${idx + 1} – ${entry.mood || ""} – ${entry.date || ""}`;
+
+      doc.text(header, 10, y);
+
+      y += 8;
+
       doc.setFontSize(10);
-      doc.text(entry.content || "", 10, 25, { maxWidth: 180 });
+
+      const content =
+        entry.content || "";
+
+      // Wrap long text
+      const lines =
+        doc.splitTextToSize(content, 180);
+
+      lines.forEach((line) => {
+
+        if (y > 270) {
+          doc.addPage();
+          y = 15;
+        }
+
+        doc.text(line, 10, y);
+
+        y += 6;
+
+      });
 
       if (entry.tags) {
-        doc.text(`Tags: ${entry.tags}`, 10, 40);
+
+        if (y > 270) {
+          doc.addPage();
+          y = 15;
+        }
+
+        doc.text(
+          `Tags: ${entry.tags}`,
+          10,
+          y
+        );
+
+        y += 10;
+
       }
 
-      if (idx < journalData.length - 1) doc.addPage();
+      // Add spacing between entries
+      y += 6;
+
+      if (y > 270 && idx < journalData.length - 1) {
+        doc.addPage();
+        y = 15;
+      }
+
     });
 
     doc.save("Theramind_Journal.pdf");
+
     showToast("PDF exported!");
 
-  } catch (err) {
-    console.error(err);
-    showToast("Could not export PDF.");
   }
+
+  catch (err) {
+
+    console.error(err);
+
+    showToast("Could not export PDF.");
+
+  }
+
 }
 
 async function exportAll() {

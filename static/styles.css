@@ -724,7 +724,8 @@ body::before {
 }
 
 @media (max-width: 480px) {
-    .theme-toggle {
+
+  .theme-toggle {
     padding: 6px 8px;
     font-size: 0.9rem;
   }
@@ -732,7 +733,7 @@ body::before {
   .theme-toggle::after {
     content: '';
   }
-}
+
   .chat-inputbar textarea {
     font-size: 0.85rem;
     padding: 0.5rem 0.7rem;
@@ -766,6 +767,7 @@ body::before {
     font-size: 0.8rem;
   }
 
+}
 
 /* ===============================
    📱 Ultra-small phones (≤360px)
