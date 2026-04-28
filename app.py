@@ -2642,31 +2642,6 @@ def history():
         mood_logs=mood_list,
         journal_entries=journal_list
     )
-@app.route("/api/history/journals")
-@login_required
-def api_history_journals():
-    db = get_db(JOURNAL_DB)
-    if not db:
-        return jsonify([])
-
-    rows = db.execute(
-        """
-        SELECT id, date, content
-        FROM journal_entries
-        WHERE user_id = ?
-        ORDER BY date DESC
-        """,
-        (session["user_id"],)
-    ).fetchall()
-
-    return jsonify([
-        {
-            "id": r["id"],
-            "date": r["date"],
-            "entry": r["content"]
-        }
-        for r in rows
-    ])
 
 
 
