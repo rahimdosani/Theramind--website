@@ -1708,6 +1708,43 @@ def journaling():
     except Exception as e:
         logger.exception("Journal save failed: %s", e)
         return jsonify({"ok": False})
+@app.route("/api/history/journals")
+@login_required
+def get_journal_history():
+
+    try:
+        conn = get_db(JOURNAL_DB)
+
+        if not conn:
+            return jsonify([])
+
+        rows = conn.execute(
+            """
+            SELECT id, title, content, mood, tags, date
+            FROM journal_entries
+            WHERE user_id = ?
+            ORDER BY id DESC
+            """,
+            (session["user_id"],)
+        ).fetchall()
+
+        journals = []
+
+        for row in rows:
+            journals.append({
+                "id": row["id"],
+                "title": row["title"] or "",
+                "content": row["content"] or "",
+                "mood": row["mood"] or "",
+                "tags": row["tags"] or "",
+                "date": row["date"] or ""
+            })
+
+        return jsonify(journals)
+
+    except Exception as e:
+        logger.exception("Journal history fetch failed: %s", e)
+        return jsonify([])
     
 @app.before_request
 def ensure_session_and_conv():
