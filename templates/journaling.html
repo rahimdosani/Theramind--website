@@ -1225,94 +1225,48 @@ async function exportPDF() {
 
   try {
 
-    const res = await fetch("/api/history/journals");
+    const res =
+      await fetch("/api/history/journals");
 
-    if (!res.ok) {
-      throw new Error("Failed to fetch journals");
-    }
+    const data = await res.json();
 
-    const journalData = await res.json();
-
-    if (!journalData.length) {
-      showToast("No entries to export.");
+    if (!data.length) {
+      alert("No entries to export");
       return;
     }
 
-    // Safe jsPDF detection
-    const jsPDF = window.jspdf?.jsPDF;
-
-    if (!jsPDF) {
-      showToast("PDF export not available.");
-      return;
-    }
+    const { jsPDF } = window.jspdf;
 
     const doc = new jsPDF();
 
-    let y = 15;
+    let y = 10;
 
-    journalData.forEach((entry, idx) => {
+    data.forEach(entry => {
 
-      doc.setFontSize(12);
+      const text =
+        `${entry.date}\n${entry.content}`;
 
-      const header =
-        `Entry ${idx + 1} – ${entry.mood || ""} – ${entry.date || ""}`;
-
-      doc.text(header, 10, y);
-
-      y += 8;
-
-      doc.setFontSize(10);
-
-      const content =
-        entry.content || "";
-
-      // Wrap long text
       const lines =
-        doc.splitTextToSize(content, 180);
+        doc.splitTextToSize(text, 180);
 
-      lines.forEach((line) => {
-
-        if (y > 270) {
-          doc.addPage();
-          y = 15;
-        }
+      lines.forEach(line => {
 
         doc.text(line, 10, y);
 
-        y += 6;
-
-      });
-
-      if (entry.tags) {
+        y += 7;
 
         if (y > 270) {
           doc.addPage();
-          y = 15;
+          y = 10;
         }
 
-        doc.text(
-          `Tags: ${entry.tags}`,
-          10,
-          y
-        );
+      });
 
-        y += 10;
-
-      }
-
-      // Add spacing between entries
-      y += 6;
-
-      if (y > 270 && idx < journalData.length - 1) {
-        doc.addPage();
-        y = 15;
-      }
+      y += 5;
 
     });
 
     doc.save("Theramind_Journal.pdf");
-
-    showToast("PDF exported!");
 
   }
 
@@ -1320,12 +1274,11 @@ async function exportPDF() {
 
     console.error(err);
 
-    showToast("Could not export PDF.");
+    alert("PDF export failed");
 
   }
 
 }
-
 async function exportAll() {
   try {
     const res = await fetch("/api/history/journals");

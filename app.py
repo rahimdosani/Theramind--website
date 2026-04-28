@@ -1715,12 +1715,9 @@ def get_journal_history():
     try:
         conn = get_db(JOURNAL_DB)
 
-        if not conn:
-            return jsonify([])
-
         rows = conn.execute(
             """
-            SELECT id, title, content, mood, tags, date
+            SELECT id, date, content
             FROM journal_entries
             WHERE user_id = ?
             ORDER BY id DESC
@@ -1733,11 +1730,8 @@ def get_journal_history():
         for row in rows:
             journals.append({
                 "id": row["id"],
-                "title": row["title"] or "",
-                "content": row["content"] or "",
-                "mood": row["mood"] or "",
-                "tags": row["tags"] or "",
-                "date": row["date"] or ""
+                "date": row["date"] or "",
+                "content": row["content"] or ""
             })
 
         return jsonify(journals)
