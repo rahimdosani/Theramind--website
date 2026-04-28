@@ -2381,49 +2381,6 @@ def get_conversations():
 
     return jsonify(ok=True, chats=chats)
 
-@app.route("/api/history/journals")
-@login_required
-def get_journal_history():
-
-    try:
-        conn = get_db(JOURNAL_DB)
-
-        rows = conn.execute(
-            """
-            SELECT
-                id,
-                title,
-                content,
-                mood,
-                tags,
-                date
-            FROM journal_entries
-            WHERE user_id = ?
-            ORDER BY id DESC
-            """,
-            (session.get("user_id"),)
-        ).fetchall()
-
-        journals = []
-
-        for row in rows:
-            journals.append({
-                "id": row["id"],
-                "title": row["title"] or "",
-                "content": row["content"] or "",
-                "mood": row["mood"] or "",
-                "tags": row["tags"] or "",
-                "date": row["date"] or ""
-            })
-
-        return jsonify(journals)
-
-    except Exception:
-        logger.exception("Failed to fetch journal history")
-        return jsonify([])
-
-
-
 @app.route("/load_conversation/<int:chat_id>")
 @login_required
 def load_conversation(chat_id):
