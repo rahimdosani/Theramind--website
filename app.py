@@ -1739,7 +1739,13 @@ def get_journal_history():
 
         rows = conn.execute(
             """
-            SELECT id, date, content
+            SELECT 
+                id,
+                date,
+                title,
+                content,
+                mood,
+                tags
             FROM journal_entries
             WHERE user_id = ?
             ORDER BY id DESC
@@ -1753,14 +1759,57 @@ def get_journal_history():
             journals.append({
                 "id": row["id"],
                 "date": row["date"] or "",
-                "content": row["content"] or ""
+                "title": row["title"] or "Untitled",
+                "content": row["content"] or "",
+                "mood": row["mood"] or "",
+                "tags": row["tags"] or ""
             })
+
+        # ✅ DEBUG PRINT (optional but helpful)
+        print(f"📘 Loaded {len(journals)} journal entries")
 
         return jsonify(journals)
 
     except Exception as e:
-        logger.exception("Journal history fetch failed: %s", e)
+        logger.exception(
+            "Journal history fetch failed: %s",
+            e
+        )
+
         return jsonify([])
+
+@app.route("/api/journals/<int:entry_id>", methods=["DELETE"])
+@login_required
+def delete_journal(entry_id):
+
+    try:
+        conn = get_db(JOURNAL_DB)
+
+        conn.execute(
+            """
+            DELETE FROM journal_entries
+            WHERE id = ?
+            AND user_id = ?
+            """,
+            (
+                entry_id,
+                session["user_id"]
+            )
+        )
+
+        conn.commit()
+
+        print(f"🗑️ Deleted entry {entry_id}")
+
+        return jsonify({"ok": True})
+
+    except Exception as e:
+        logger.exception(
+            "Delete failed: %s",
+            e
+        )
+
+        return jsonify({"ok": False}), 500
     
 @app.before_request
 def ensure_session_and_conv():
