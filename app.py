@@ -1664,17 +1664,14 @@ def profile():
     )
     
 @app.route("/journaling", methods=["GET", "POST"])
+@csrf.exempt
 @login_required
 def journaling():
 
-    # ---------- LOAD PAGE ----------
     if request.method == "GET":
         return render_template("journaling.html")
 
-    # ---------- SAVE ENTRY ----------
     try:
-
-        # Accept BOTH JSON and form data
         data = request.get_json(silent=True)
 
         if not data:
@@ -1717,20 +1714,16 @@ def journaling():
 
         conn.commit()
 
-        print("✅ Journal saved")  # Debug print
+        print("✅ Journal saved for user:", session["user_id"])
 
         return jsonify({"ok": True})
 
     except Exception as e:
-
-        logger.exception(
-            "Journal save failed: %s",
-            e
-        )
-
+        logger.exception("Journal save failed: %s", e)
         return jsonify({"ok": False})
     
 @app.route("/api/history/journals")
+@csrf.exempt
 @login_required
 def get_journal_history():
 
@@ -1765,17 +1758,12 @@ def get_journal_history():
                 "tags": row["tags"] or ""
             })
 
-        # ✅ DEBUG PRINT (optional but helpful)
-        print(f"📘 Loaded {len(journals)} journal entries")
+        print("📘 Found entries:", len(journals))
 
         return jsonify(journals)
 
     except Exception as e:
-        logger.exception(
-            "Journal history fetch failed: %s",
-            e
-        )
-
+        logger.exception("Journal history fetch failed: %s", e)
         return jsonify([])
 
 @app.route("/api/journals/<int:entry_id>", methods=["DELETE"])
