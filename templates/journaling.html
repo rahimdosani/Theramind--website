@@ -591,7 +591,7 @@
       })
     );
 
-    showToast("Draft saved quietly");
+    
   }
 
     // --- Session-aware Journal Greeting ---
@@ -787,7 +787,7 @@
   }
 
   // --- Journal Storage + Functions ---
- let journalData = [];
+  let journalData = [];
 
 async function loadHistory() {
 
@@ -795,13 +795,16 @@ async function loadHistory() {
 
     const res = await fetch(
       "/api/history/journals",
-      { credentials: "include" }
+      {
+        credentials: "include"
+      }
     );
 
     const data = await res.json();
 
-    console.log("📘 History received:", data);
+    console.log("📘 Loaded history:", data);
 
+    // 🔥 IMPORTANT — store globally
     journalData = data || [];
 
     const historyDiv =
@@ -809,7 +812,7 @@ async function loadHistory() {
 
     historyDiv.innerHTML = "";
 
-    if (!journalData.length) {
+    if (journalData.length === 0) {
 
       historyDiv.innerHTML =
         "<p>No journal entries yet.</p>";
@@ -838,10 +841,12 @@ async function loadHistory() {
 
     generateReflectionInsights();
 
-  } catch (err) {
+  }
+
+  catch (err) {
 
     console.error(
-      "❌ History load failed:",
+      "❌ Failed loading history:",
       err
     );
 
@@ -1194,6 +1199,7 @@ async function loadHistory() {
 
   try {
 
+    // reload history if empty
     if (!journalData.length) {
 
       await loadHistory();
@@ -1203,7 +1209,6 @@ async function loadHistory() {
     if (!journalData.length) {
 
       alert("No entries to export.");
-
       return;
 
     }
@@ -1240,26 +1245,21 @@ async function loadHistory() {
 
       y += 8;
 
-      const contentLines =
+      const lines =
         doc.splitTextToSize(
           entry.content,
           180
         );
 
-      doc.text(
-        contentLines,
-        10,
-        y
-      );
+      doc.text(lines, 10, y);
 
-      y += contentLines.length * 8;
+      y += lines.length * 8;
 
       y += 10;
 
       if (y > 270) {
 
         doc.addPage();
-
         y = 10;
 
       }
@@ -1268,7 +1268,9 @@ async function loadHistory() {
 
     doc.save("journal_entries.pdf");
 
-  } catch (err) {
+  }
+
+  catch (err) {
 
     console.error(
       "❌ Export failed:",
