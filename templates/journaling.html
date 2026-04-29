@@ -790,11 +790,11 @@ function generatePrompt() {
 let journalData = [];
 let currentModalIndex = 0;
 
-let journalData = [];
-
 function loadHistory() {
 
-  fetch("/api/history/journals")
+  fetch("/api/history/journals", {
+  credentials: "include"
+})
     .then(res => res.json())
     .then(data => {
 
@@ -887,10 +887,17 @@ async function confirmDelete() {
 
 function saveEntry() {
 
-  const title = document.getElementById("entry-title").value;
-  const content = document.getElementById("journal-entry").value;
-  const mood = document.getElementById("moodSelect").value;
-  const tags = document.getElementById("tags").value;
+  const title =
+    document.getElementById("entry-title").value;
+
+  const content =
+    document.getElementById("journal-entry").value;
+
+  const mood =
+    document.getElementById("moodSelect").value;
+
+  const tags =
+    document.getElementById("tags").value;
 
   if (!content.trim()) {
     showToast("Write something before saving.");
@@ -909,27 +916,34 @@ function saveEntry() {
       tags
     })
   })
+
   .then(res => res.json())
+
   .then(data => {
 
-    if (data.success) {
+    // 🔥 FIXED HERE
+    if (data.ok) {
 
       showToast("Entry saved successfully!");
 
       document.getElementById("journal-entry").value = "";
       document.getElementById("entry-title").value = "";
 
-      loadHistory(); // reload history
+      loadHistory();
 
     } else {
+
       showToast("Failed to save entry.");
+
     }
 
   })
+
   .catch(err => {
     console.error(err);
     showToast("Error saving entry.");
   });
+
 }
     // Clear inputs
    
@@ -1154,7 +1168,9 @@ async function exportPDF() {
   try {
 
     // Get latest entries from backend
-    const res = await fetch("/api/history/journals");
+    const res = await fetch("/api/history/journals", {
+  credentials: "include"
+});
 
     const entries = await res.json();
 

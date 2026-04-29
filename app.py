@@ -297,41 +297,6 @@ def setup_users_db():
     conn.commit()
     conn.close()
 
-def migrate_journal_schema():
-    conn = sqlite3.connect(JOURNAL_DB)
-    c = conn.cursor()
-
-    # Ensure table exists
-    c.execute("""
-        CREATE TABLE IF NOT EXISTS journal_entries (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            user_id INTEGER NOT NULL,
-            date TEXT,
-            content TEXT,
-            title TEXT,
-            mood TEXT,
-            tags TEXT
-        )
-    """)
-
-    # Check existing columns
-    c.execute("PRAGMA table_info(journal_entries)")
-    columns = [col[1] for col in c.fetchall()]
-
-    # Add missing columns safely
-    if "title" not in columns:
-        c.execute("ALTER TABLE journal_entries ADD COLUMN title TEXT")
-
-    if "mood" not in columns:
-        c.execute("ALTER TABLE journal_entries ADD COLUMN mood TEXT")
-
-    if "tags" not in columns:
-        c.execute("ALTER TABLE journal_entries ADD COLUMN tags TEXT")
-
-    conn.commit()
-    conn.close()
-    
-
 def setup_user_profile():
     conn = connect_for_setup(USER_DB)
     c = conn.cursor()
@@ -388,7 +353,6 @@ def create_admin_if_missing():
     logger.info("Admin user created: %s", ADMIN_USER)
 
 setup_databases()
-migrate_journal_schema()
 
 # ======================================================
 # Session / conversation helpers
@@ -1699,88 +1663,120 @@ def profile():
         goals=goals_row["goals"] if goals_row else ""
     )
     
-@app.route("/journaling", methods=["POST"])
+@app.route("/journaling", methods=["GET", "POST"])
+@csrf.exempt
 @login_required
-def save_journal_entry():
+def journaling():
+
+    if request.method == "GET":
+        return render_template("journaling.html")
+
     try:
-        conn = get_db(JOURNAL_DB)
-        cursor = conn.cursor()
+        print("📥 POST /journaling received")
 
-        data = request.get_json()
+        data = request.get_json(force=True)
 
-        title = data.get("title", "")
-        content = data.get("content", "")
+        if not data:
+            data = request.form
+
+        print("📦 Data received:", data)
+
+        title = data.get("title", "Untitled")
+
+        content = (
+    data.get("content")
+    or data.get("entry")
+    or data.get("journal-entry")   
+    or ""
+)
+
         mood = data.get("mood", "")
         tags = data.get("tags", "")
-        date = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+
+        if not content.strip():
+            print("⚠️ Empty content")
+            return jsonify({
+                "ok": False,
+                "message": "Empty entry"
+            })
 
         user_id = session.get("user_id")
 
         if not user_id:
-            return jsonify({"error": "User not logged in"}), 401
+            print("❌ No user_id in session")
+            return jsonify({"ok": False})
 
-        cursor.execute("""
+        conn = get_db(JOURNAL_DB)
+
+        conn.execute(
+            """
             INSERT INTO journal_entries
-            (user_id, date, content, title, mood, tags)
+            (user_id, title, content, mood, tags, date)
             VALUES (?, ?, ?, ?, ?, ?)
-        """, (
-            user_id,
-            date,
-            content,
-            title,
-            mood,
-            tags
-        ))
+            """,
+            (
+                user_id,
+                title,
+                content,
+                mood,
+                tags,
+                now()
+            )
+        )
 
         conn.commit()
 
-        return jsonify({
-            "success": True,
-            "message": "Entry saved successfully"
-        })
+        print("✅ Journal saved for user:", user_id)
+
+        return jsonify({"ok": True})
 
     except Exception as e:
-        print("Save Journal Error:", e)
-        return jsonify({
-            "error": str(e)
-        }), 500
+        logger.exception("❌ Journal save failed: %s", e)
+        return jsonify({"ok": False})
     
 @app.route("/api/history/journals")
+@csrf.exempt
 @login_required
 def get_journal_history():
 
     try:
         conn = get_db(JOURNAL_DB)
-        cursor = conn.cursor()
 
-        user_id = session.get("user_id")
-
-        cursor.execute("""
-            SELECT id, title, content, mood, tags, date
+        rows = conn.execute(
+            """
+            SELECT 
+                id,
+                date,
+                title,
+                content,
+                mood,
+                tags
             FROM journal_entries
             WHERE user_id = ?
-            ORDER BY date DESC
-        """, (user_id,))
+            ORDER BY id DESC
+            """,
+            (session["user_id"],)
+        ).fetchall()
 
-        rows = cursor.fetchall()
-
-        entries = []
+        journals = []
 
         for row in rows:
-            entries.append({
+            journals.append({
                 "id": row["id"],
-                "title": row["title"],
-                "content": row["content"],
-                "mood": row["mood"],
-                "tags": row["tags"],
-                "date": row["date"]
+                "date": row["date"] or "",
+                "title": row["title"] or "Untitled",
+                "content": row["content"] or "",
+                "mood": row["mood"] or "",
+                "tags": row["tags"] or ""
             })
 
-        return jsonify(entries)
+        print("📘 Found entries:", len(journals))
+
+        return jsonify(journals)
 
     except Exception as e:
-        print("History Fetch Error:", e)
-        return jsonify({"error": str(e)}), 500
+        logger.exception("Journal history fetch failed: %s", e)
+        return jsonify([])
 
 @app.route("/api/journals/<int:entry_id>", methods=["DELETE"])
 @login_required
