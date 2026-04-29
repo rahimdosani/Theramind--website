@@ -336,6 +336,47 @@
     background-color: #0f1225;
     color: #f5f7ff;
   }
+  .view-btn,
+.delete-btn {
+
+  padding: 6px 12px;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  font-size: 13px;
+  margin-left: 6px;
+
+}
+
+.view-btn {
+
+  background: linear-gradient(
+    135deg,
+    #4f46e5,
+    #06b6d4
+  );
+
+  color: white;
+
+}
+
+.delete-btn {
+
+  background: linear-gradient(
+    135deg,
+    #ef4444,
+    #f97316
+  );
+
+  color: white;
+
+}
+
+.entry-actions {
+
+  display: flex;
+
+}
 
   /* =====================
     Icon Button
@@ -349,6 +390,19 @@
     font-size: 1.2rem;
     cursor: pointer;
   }
+  .entry-item {
+
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 12px;
+  margin-bottom: 8px;
+
+  background: rgba(255,255,255,0.05);
+
+  border-radius: 10px;
+
+}
 
 
   /* =====================
@@ -403,6 +457,7 @@
       overflow: hidden;
     }
   }
+
 
   @media (max-width: 768px) {
     .journal-container {
@@ -820,25 +875,53 @@ async function loadHistory() {
       return;
     }
 
-    journalData.forEach(entry => {
+    journalData.forEach((entry, i) => {
 
-      const div =
-        document.createElement("div");
+  const div =
+    document.createElement("div");
 
-      div.className = "journal-card";
+  div.className = "entry-item";
 
-      div.innerHTML = `
-        <h4>${entry.title}</h4>
-        <p>${entry.date}</p>
-        <button onclick="openModal(${entry.id})">
-          View
+  div.innerHTML = `
+
+    <div style="
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      margin-bottom:6px;
+    ">
+
+      <span>
+        ${entry.date} — ${entry.title}
+      </span>
+
+      <div class="entry-actions">
+
+        <button 
+          onclick="openModal(${i})"
+          class="view-btn">
+
+          👁 View
+
         </button>
-      `;
 
-      historyDiv.appendChild(div);
+        <button 
+          onclick="deleteEntry(${i})"
+          class="delete-btn">
 
-    });
+          🗑 Delete
 
+        </button>
+
+      </div>
+
+    </div>
+
+  `;
+
+  historyDiv.appendChild(div);
+
+});
     generateReflectionInsights();
 
   }
@@ -1017,25 +1100,50 @@ async function loadHistory() {
 
     }
 
-    filtered.forEach((rec,i)=>{
+    filtered.forEach((rec)=>{
 
-      const div =
-        document.createElement("div");
+  const originalIndex =
+    journalData.findIndex(
+      e => e.id === rec.id
+    );
 
-      div.className = "entry-item";
+  const div =
+    document.createElement("div");
 
-      div.innerHTML = `
-        <span>
-          ${rec.date} - ${rec.title}
-          [${rec.mood}]
-        </span>
+  div.className = "entry-item";
 
-        <div class="entry-actions">
-          <button onclick="deleteEntry(${i})">
-            🗑️
-          </button>
-        </div>
-      `;
+  div.innerHTML = `
+
+    <span>
+      ${rec.date} — ${rec.title}
+      [${rec.mood}]
+    </span>
+
+    <div class="entry-actions">
+
+      <button
+        onclick="openModal(${originalIndex})"
+        class="view-btn">
+
+        👁 View
+
+      </button>
+
+      <button
+        onclick="deleteEntry(${originalIndex})"
+        class="delete-btn">
+
+        🗑 Delete
+
+      </button>
+
+    </div>
+
+  `;
+
+  container.appendChild(div);
+
+});
 
       div.addEventListener("click",(e)=>{
 
