@@ -444,7 +444,6 @@
       overflow: hidden;
     }
   }
-  
 
   @media (max-width: 768px) {
     .journal-container {
@@ -1101,28 +1100,37 @@ async function loadHistory() {
 
   div.innerHTML = `
 
-    <span>
-      ${rec.date} — ${rec.title}
-      [${rec.mood}]
-    </span>
+    <div style="
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      margin-bottom:6px;
+    ">
 
-    <div class="entry-actions">
+      <span>
+        ${rec.date} — ${rec.title}
+        [${rec.mood}]
+      </span>
 
-      <button
-        onclick="openModal(${originalIndex})"
-        class="view-btn">
+      <div class="entry-actions">
 
-        👁 View
+        <button 
+          onclick="openModal(${originalIndex})"
+          class="view-btn">
 
-      </button>
+          👁 View
 
-      <button
-        onclick="deleteEntry(${originalIndex})"
-        class="delete-btn">
+        </button>
 
-        🗑 Delete
+        <button 
+          onclick="deleteEntry(${originalIndex})"
+          class="delete-btn">
 
-      </button>
+          🗑 Delete
+
+        </button>
+
+      </div>
 
     </div>
 
