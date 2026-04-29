@@ -790,46 +790,49 @@ function generatePrompt() {
 let journalData = [];
 let currentModalIndex = 0;
 
-async function loadHistory() {
-  const container = document.getElementById("history");
-  container.innerHTML = "Loading…";
+let journalData = [];
 
-  try {
-    
-    const res = await fetch("/api/history/journals", {
-  credentials: "include"
-});
-    if (!res.ok) throw new Error();
+function loadHistory() {
 
-    journalData = await res.json();
-    container.innerHTML = "";
+  fetch("/api/history/journals")
+    .then(res => res.json())
+    .then(data => {
 
-    if (!journalData.length) {
-      container.textContent = "No previous entries yet.";
-      return;
-    }
+      journalData = data;
 
-    journalData.forEach((rec, i) => {
-      const div = document.createElement("div");
-      div.className = "entry-item";
-      div.innerHTML = `
-        <span>${rec.date} - ${rec.title || "Untitled"} [${rec.mood || "—"}]</span>
-        <div class="entry-actions">
-          <button onclick="deleteEntry(${i})">🗑️</button>
-        </div>
-      `;
-      div.addEventListener("click", e => {
-        if (!e.target.closest("button")) openModal(i);
+      const container = document.getElementById("history");
+      container.innerHTML = "";
+
+      if (data.length === 0) {
+
+        container.innerHTML =
+          "<p>No entries yet.</p>";
+
+        return;
+      }
+
+      data.forEach(entry => {
+
+        const div = document.createElement("div");
+
+        div.innerHTML = `
+          <div class="entry-card">
+            <h4>${entry.title || "Untitled"}</h4>
+            <p>${entry.content.substring(0,120)}...</p>
+            <small>${entry.date}</small>
+          </div>
+        `;
+
+        container.appendChild(div);
+
       });
-      container.appendChild(div);
+
+      generateReflectionInsights();
+
+    })
+    .catch(err => {
+      console.error(err);
     });
-
-    generateReflectionInsights();
-
-  } catch {
-    container.textContent =
-  "Could not load journal history. Try refreshing.";
-  }
 }
 
 
@@ -882,130 +885,51 @@ async function confirmDelete() {
   closeDeleteModal();
 }
 
-async function saveEntry() {
+function saveEntry() {
 
-  const title =
-    document.getElementById("entry-title").value.trim() || "Untitled";
+  const title = document.getElementById("entry-title").value;
+  const content = document.getElementById("journal-entry").value;
+  const mood = document.getElementById("moodSelect").value;
+  const tags = document.getElementById("tags").value;
 
-  const entry =
-    document.getElementById("journal-entry").value.trim();
-
-  const mood =
-    document.getElementById("moodSelect").value;
-
-  const tags =
-    document.getElementById("tags").value.trim();
-
-
-  /* ------------------------
-     Validate
-  ------------------------ */
-
-  if (!entry) {
-
-    showToast("Please write something before saving.");
-
+  if (!content.trim()) {
+    showToast("Write something before saving.");
     return;
-
   }
 
+  fetch("/journaling", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      title,
+      content,
+      mood,
+      tags
+    })
+  })
+  .then(res => res.json())
+  .then(data => {
 
-  try {
+    if (data.success) {
 
-    const res = await fetch("/journaling", {
+      showToast("Entry saved successfully!");
 
-  method: "POST",
+      document.getElementById("journal-entry").value = "";
+      document.getElementById("entry-title").value = "";
 
-  credentials: "include",
+      loadHistory(); // reload history
 
-  headers: {
-    "Content-Type": "application/json"
-  },
-
-  body: JSON.stringify({
-
-        title: title,
-        content: entry,
-        mood: mood,
-        tags: tags
-
-      })
-
-    });
-
-
-    /* ------------------------
-       Read response safely
-    ------------------------ */
-
-    let data = null;
-
-    try {
-
-      data = await res.json();
-
+    } else {
+      showToast("Failed to save entry.");
     }
 
-    catch {
-
-      console.warn("Response not JSON");
-
-    }
-
-
-    /* ------------------------
-       Handle failure
-    ------------------------ */
-
-    if (!res.ok) {
-
-      console.error("Save failed:", data);
-
-      showToast("Could not save entry. Please try again.");
-
-      return;
-
-    }
-
-
-    /* ------------------------
-       Reset fields
-    ------------------------ */
-
-    document.getElementById("journal-entry").value = "";
-
-    document.getElementById("entry-title").value = "";
-
-    document.getElementById("tags").value = "";
-
-
-    /* ------------------------
-       Reload history
-    ------------------------ */
-
-    await loadHistory();
-
-
-    /* ------------------------
-       Remove draft
-    ------------------------ */
-
-    localStorage.removeItem("journalDraft");
-
-
-    showToast("Entry saved successfully 💾");
-
-
-  }
-
-  catch (err) {
-
-    console.error("Network error:", err);
-
-    showToast("Network error. Please try again.");
-
-  }
-
+  })
+  .catch(err => {
+    console.error(err);
+    showToast("Error saving entry.");
+  });
 }
     // Clear inputs
    
