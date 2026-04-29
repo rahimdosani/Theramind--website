@@ -96,7 +96,13 @@ logger.setLevel(logging.INFO)
 # DB paths & helpers
 # ======================================================
 CONV_DB = os.path.join(DB_DIR, "conversations.db")
-JOURNAL_DB = os.path.join(DB_DIR, "journal.db")
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+
+JOURNAL_DB = os.path.abspath(
+    os.path.join(BASE_DIR, "journal.db")
+)
+
+print("📂 JOURNAL DB:", JOURNAL_DB)
 MOOD_DB = os.path.join(DB_DIR, "mood_data.db")
 USER_DB = os.path.join(DB_DIR, "users.db")  # new DB for user/auth
 
@@ -1672,56 +1678,39 @@ def journaling():
         return render_template("journaling.html")
 
     try:
+
         print("📥 POST /journaling received")
 
-        # ✅ USE FORM DATA ONLY
-        data = request.form
+        title = request.form.get("title", "Untitled")
+        content = request.form.get("content", "")
+        mood = request.form.get("mood", "")
+        tags = request.form.get("tags", "")
 
-        print("📦 Form Data received:", data)
-
-        # Extract fields
-        title = data.get("title", "Untitled")
-        content = data.get("content", "")
-        mood = data.get("mood", "")
-        tags = data.get("tags", "")
-
-        # Validate content
         if not content.strip():
-            print("⚠️ Empty content")
-            return jsonify({
-                "ok": False,
-                "message": "Empty entry"
-            })
-
-        # Get logged-in user
-        user_id = session.get("user_id")
-
-        if not user_id:
-            print("❌ No user_id in session")
             return jsonify({"ok": False})
 
-        # Insert into DB
-        conn = get_db(JOURNAL_DB)
+        user_id = session.get("user_id")
 
-        conn.execute(
-            """
+        conn = sqlite3.connect(JOURNAL_DB)
+        conn.row_factory = sqlite3.Row
+
+        conn.execute("""
             INSERT INTO journal_entries
             (user_id, title, content, mood, tags, date)
             VALUES (?, ?, ?, ?, ?, ?)
-            """,
-            (
-                user_id,
-                title,
-                content,
-                mood,
-                tags,
-                now()
-            )
-        )
+        """, (
+            user_id,
+            title,
+            content,
+            mood,
+            tags,
+            now()
+        ))
 
         conn.commit()
+        conn.close()
 
-        print("✅ Journal saved for user:", user_id)
+        print("✅ Saved entry")
 
         return jsonify({"ok": True})
 
@@ -1729,10 +1718,7 @@ def journaling():
 
         print("❌ SAVE ERROR:", e)
 
-        return jsonify({
-            "ok": False,
-            "error": str(e)
-        })
+        return jsonify({"ok": False})
     
 @app.route("/api/history/journals")
 @csrf.exempt
@@ -1740,34 +1726,30 @@ def journaling():
 def get_journal_history():
 
     try:
-        conn = get_db(JOURNAL_DB)
 
-        rows = conn.execute(
-            """
-            SELECT 
-                id,
-                date,
-                title,
-                content,
-                mood,
-                tags
+        conn = sqlite3.connect(JOURNAL_DB)
+        conn.row_factory = sqlite3.Row
+
+        rows = conn.execute("""
+            SELECT id, date, title, content, mood, tags
             FROM journal_entries
             WHERE user_id = ?
             ORDER BY id DESC
-            """,
-            (session["user_id"],)
-        ).fetchall()
+        """, (session["user_id"],)).fetchall()
+
+        conn.close()
 
         journals = []
 
         for row in rows:
+
             journals.append({
                 "id": row["id"],
-                "date": row["date"] or "",
-                "title": row["title"] or "Untitled",
-                "content": row["content"] or "",
-                "mood": row["mood"] or "",
-                "tags": row["tags"] or ""
+                "date": row["date"],
+                "title": row["title"],
+                "content": row["content"],
+                "mood": row["mood"],
+                "tags": row["tags"]
             })
 
         print("📘 Found entries:", len(journals))
@@ -1775,7 +1757,9 @@ def get_journal_history():
         return jsonify(journals)
 
     except Exception as e:
-        logger.exception("Journal history fetch failed: %s", e)
+
+        print("❌ HISTORY ERROR:", e)
+
         return jsonify([])
 
 @app.route("/api/journals/<int:entry_id>", methods=["DELETE"])

@@ -917,10 +917,8 @@ async function loadHistory() {
     document.getElementById("tags").value;
 
   if (!content.trim()) {
-
-    showToast("Write something first.");
+    alert("Write something first.");
     return;
-
   }
 
   const formData = new FormData();
@@ -930,26 +928,18 @@ async function loadHistory() {
   formData.append("mood", mood);
   formData.append("tags", tags);
 
-  const res = await fetch(
-    "/journaling",
-    {
-      method: "POST",
-      credentials: "include",
-      body: formData
-    }
-  );
+  const res = await fetch("/journaling", {
+    method: "POST",
+    body: formData
+  });
 
   const data = await res.json();
 
   if (data.ok) {
 
-    showToast("Entry saved!");
+    alert("Saved!");
 
-    await loadHistory();
-
-  } else {
-
-    showToast("Save failed.");
+    location.reload();   // 🔥 force refresh
 
   }
 
