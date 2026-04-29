@@ -796,7 +796,10 @@ async function loadHistory() {
   container.innerHTML = "Loading…";
 
   try {
-    const res = await fetch("/api/history/journals");
+    
+    const res = await fetch("/api/history/journals", {
+  credentials: "include"
+});
     if (!res.ok) throw new Error();
 
     journalData = await res.json();
@@ -912,13 +915,15 @@ async function saveEntry() {
 
     const res = await fetch("/journaling", {
 
-      method: "POST",
+  method: "POST",
 
-      headers: {
-        "Content-Type": "application/json"
-      },
+  credentials: "include",
 
-      body: JSON.stringify({
+  headers: {
+    "Content-Type": "application/json"
+  },
+
+  body: JSON.stringify({
 
         title: title,
         content: entry,
@@ -1225,7 +1230,10 @@ async function exportPDF() {
 
   try {
 
-    const res = await fetch("/api/history/journals");
+    
+    const res = await fetch("/api/history/journals", {
+  credentials: "include"
+});
 
     if (!res.ok) {
       throw new Error("Failed to fetch journals");
@@ -1328,7 +1336,9 @@ async function exportPDF() {
 
 async function exportAll() {
   try {
-    const res = await fetch("/api/history/journals");
+    const res = await fetch("/api/history/journals", {
+  credentials: "include"
+});
     if (!res.ok) throw new Error("Failed to fetch journals");
 
     const journalData = await res.json();

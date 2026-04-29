@@ -1672,10 +1672,14 @@ def journaling():
         return render_template("journaling.html")
 
     try:
+        print("📥 POST /journaling received")
+
         data = request.get_json(silent=True)
 
         if not data:
             data = request.form
+
+        print("📦 Data received:", data)
 
         title = data.get("title", "Untitled")
 
@@ -1689,10 +1693,17 @@ def journaling():
         tags = data.get("tags", "")
 
         if not content.strip():
+            print("⚠️ Empty content")
             return jsonify({
                 "ok": False,
                 "message": "Empty entry"
             })
+
+        user_id = session.get("user_id")
+
+        if not user_id:
+            print("❌ No user_id in session")
+            return jsonify({"ok": False})
 
         conn = get_db(JOURNAL_DB)
 
@@ -1703,7 +1714,7 @@ def journaling():
             VALUES (?, ?, ?, ?, ?, ?)
             """,
             (
-                session["user_id"],
+                user_id,
                 title,
                 content,
                 mood,
@@ -1714,12 +1725,12 @@ def journaling():
 
         conn.commit()
 
-        print("✅ Journal saved for user:", session["user_id"])
+        print("✅ Journal saved for user:", user_id)
 
         return jsonify({"ok": True})
 
     except Exception as e:
-        logger.exception("Journal save failed: %s", e)
+        logger.exception("❌ Journal save failed: %s", e)
         return jsonify({"ok": False})
     
 @app.route("/api/history/journals")
