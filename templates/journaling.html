@@ -917,8 +917,10 @@ async function loadHistory() {
     document.getElementById("tags").value;
 
   if (!content.trim()) {
-    alert("Write something first.");
+
+    showToast("Write something first ✍️");
     return;
+
   }
 
   const formData = new FormData();
@@ -928,18 +930,50 @@ async function loadHistory() {
   formData.append("mood", mood);
   formData.append("tags", tags);
 
-  const res = await fetch("/journaling", {
-    method: "POST",
-    body: formData
-  });
+  try {
 
-  const data = await res.json();
+    const res = await fetch(
+      "/journaling",
+      {
+        method: "POST",
+        credentials: "include",
+        body: formData
+      }
+    );
 
-  if (data.ok) {
+    const data = await res.json();
 
-    alert("Saved!");
+    if (data.ok) {
 
-    location.reload();   // 🔥 force refresh
+      showToast("Entry saved successfully ✅");
+
+      // reload entries
+      await loadHistory();
+
+      // clear inputs
+      document.getElementById(
+        "journal-entry"
+      ).value = "";
+
+      document.getElementById(
+        "entry-title"
+      ).value = "";
+
+    }
+
+    else {
+
+      showToast("Unable to save entry ❌");
+
+    }
+
+  }
+
+  catch (err) {
+
+    console.error(err);
+
+    showToast("Server error while saving ⚠️");
 
   }
 
@@ -1175,7 +1209,7 @@ async function loadHistory() {
 
     if (!journalData.length) {
 
-      alert("No entries to export.");
+      showToast("No entries to export 📄");
       return;
 
     }
