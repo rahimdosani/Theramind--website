@@ -1,459 +1,484 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Theramind – Journal</title>
-  <link rel="icon" type="image/png" href="{{ url_for('static', filename='journal.png') }}">
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&family=Shadows+Into+Light&family=Merriweather&family=Roboto+Mono&display=swap" rel="stylesheet" />
-  <script src="https://cdn.jsdelivr.net/npm/tsparticles@2.12.0/tsparticles.bundle.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <!DOCTYPE html>
+  <html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Theramind – Journal</title>
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='journal.png') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&family=Shadows+Into+Light&family=Merriweather&family=Roboto+Mono&display=swap" rel="stylesheet" />
+    <script src="https://cdn.jsdelivr.net/npm/tsparticles@2.12.0/tsparticles.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
-<style>
+  <style>
 
-/* =====================
-   Theme Variables
-===================== */
-:root {
-  --background: #ffffff;
-  --foreground: #111111;
-  --primary: #4f46e5;
-  --accent: #06b6d4;
-  --sidebar-bg: rgba(255, 255, 255, 0.85);
-  --glass-blur: blur(16px) saturate(180%);
-  --button-color: #ffffff;
-}
+  /* =====================
+    Theme Variables
+  ===================== */
+  :root {
+    --background: #ffffff;
+    --foreground: #111111;
+    --primary: #4f46e5;
+    --accent: #06b6d4;
+    --sidebar-bg: rgba(255, 255, 255, 0.85);
+    --glass-blur: blur(16px) saturate(180%);
+    --button-color: #ffffff;
+  }
 
-body.dark-theme {
-  --background: #0b0c1a;
-  --foreground: #f5f7ff;
-  --primary: #4f6df5;
-  --accent: #4fd1c5;
-  --sidebar-bg: rgba(20, 22, 40, 0.85);
-}
+  body.dark-theme {
+    --background: #0b0c1a;
+    --foreground: #f5f7ff;
+    --primary: #4f6df5;
+    --accent: #4fd1c5;
+    --sidebar-bg: rgba(20, 22, 40, 0.85);
+  }
 
-/* =====================
-   Base
-===================== */
-* { box-sizing: border-box; }
+  /* =====================
+    Base
+  ===================== */
+  * { box-sizing: border-box; }
 
-body {
-  margin: 0;
-  font-family: "Poppins", sans-serif;
-  background: var(--background);
-  color: var(--foreground);
-  transition: background 0.3s, color 0.3s;
-}
+  body {
+    margin: 0;
+    font-family: "Poppins", sans-serif;
+    background: var(--background);
+    color: var(--foreground);
+    transition: background 0.3s, color 0.3s;
+  }
 
-#tsparticles {
-  position: fixed;
-  inset: 0;
-  z-index: 1;
-}
+  #tsparticles {
+    position: fixed;
+    inset: 0;
+    z-index: 1;
+  }
 
-/* =====================
-   Navbar
-===================== */
-.tm-nav {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  height: 75px;
-  padding: 0 2rem;
-  background: var(--sidebar-bg);
-  backdrop-filter: var(--glass-blur);
-  box-shadow: 0 6px 25px rgba(0, 0, 0, 0.15);
-  position: sticky;
-  top: 0;
-  z-index: 100;
-}
-
-.tm-brand {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  font-weight: 700;
-  font-size: 1.4rem;
-  color: var(--foreground);
-  text-decoration: none;
-}
-
-.tm-brand img {
-  height: 36px;
-}
-
-.tm-navlinks {
-  display: flex;
-  gap: 1.5rem;
-  align-items: center;
-}
-
-.tm-navlinks a {
-  text-decoration: none;
-  font-weight: 600;
-  color: var(--primary);
-  position: relative;
-  transition: color 0.3s;
-}
-
-.tm-navlinks a:hover {
-  color: var(--accent);
-}
-
-.tm-navlinks a.active::after {
-  content: "";
-  position: absolute;
-  bottom: -6px;
-  left: 0;
-  width: 100%;
-  height: 3px;
-  background: var(--primary);
-  border-radius: 4px;
-}
-
-.theme-toggle {
-  cursor: pointer;
-  font-size: 0.9rem;
-  background: linear-gradient(135deg, var(--primary), var(--accent));
-  padding: 6px 10px;
-  border-radius: 6px;
-  color: var(--button-color);
-  white-space: nowrap;
-}
-
-/* =====================
-   Sidebar (Chat Style)
-===================== */
-.tm-sidebar {
-  background: var(--sidebar-bg);
-  backdrop-filter: var(--glass-blur);
-  width: 260px;
-  padding: 1.5rem 1.2rem;
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-  box-shadow: 4px 0 20px rgba(0,0,0,0.2);
-  border-radius: 0 14px 14px 0;
-  transition: transform 0.3s ease;
-}
-
-.tm-sidebar.hidden {
-  transform: translateX(-100%);
-}
-
-.sidebar-nav {
-  display: flex;
-  flex-direction: column;
-  gap: 0.6rem;
-}
-
-.sidebar-nav a {
-  text-decoration: none;
-  font-weight: 600;
-  padding: 0.6rem 0.9rem;
-  border-radius: 10px;
-  color: var(--foreground);
-  transition: background 0.2s, transform 0.15s;
-}
-
-.sidebar-nav a:hover {
-  background: rgba(0,0,0,0.08);
-  transform: translateX(2px);
-}
-
-.sidebar-nav a.active {
-  background: linear-gradient(135deg, var(--primary), var(--accent));
-  color: #fff;
-}
-.toast {
-  position: fixed;
-  bottom: 20px;
-  right: 20px;
-  background: var(--primary);
-  color: #fff;
-  padding: 10px 14px;
-  border-radius: 10px;
-  font-weight: 600;
-  box-shadow: 0 6px 18px rgba(0,0,0,0.25);
-  z-index: 500;
-  opacity: 0;
-  transition: opacity 0.3s ease;
-}
-
-.toast.show {
-  opacity: 1;
-}
-.modal-content {
-  background: var(--sidebar-bg);
-  padding: 24px;
-  border-radius: 16px;
-  width: min(90%, 500px);
-  box-shadow: 0 8px 28px rgba(0,0,0,0.25);
-}
-
-/* =====================
-   Journal Layout
-===================== */
-.journal-container {
-  max-width: 900px;
-  margin: 100px auto;
-  padding: 40px;
-  background: rgba(255, 255, 255, 0.08);
-  border-radius: 20px;
-  backdrop-filter: blur(12px);
-  position: relative;
-  z-index: 2;
-  box-shadow: 0 8px 40px rgba(0, 0, 0, 0.2);
-}
-
-body.dark-theme .journal-container {
-  background-color: rgba(44, 44, 62, 0.8);
-}
-
-h2 {
-  font-size: 2rem;
-  margin-bottom: 20px;
-}
-
-.mood-select,
-.prompt-section,
-.entry-section,
-.history-section {
-  margin-top: 24px;
-}
-
-select,
-textarea,
-input[type="text"] {
-  width: 100%;
-  margin-top: 10px;
-  padding: 12px;
-  font-size: 1rem;
-  border-radius: 10px;
-  border: 1px solid #ccc;
-  background-color: inherit;
-  color: inherit;
-}
-
-/* =====================
-   Buttons
-===================== */
-.prompt-section button,
-.actions button,
-.speech-button,
-#font-select,
-#export-all,
-#export-pdf {
-  padding: 12px 18px;
-  border: none;
-  border-radius: 10px;
-  background-color: var(--primary);
-  color: var(--button-color);
-  font-weight: 600;
-  cursor: pointer;
-  margin: 10px 10px 0 0;
-  transition: background-color 0.2s;
-}
-
-.prompt-section button:hover,
-.actions button:hover,
-.speech-button:hover,
-#font-select:hover,
-#export-all:hover,
-#export-pdf:hover {
-  background-color: var(--accent);
-}
-
-/* =====================
-   Illustration
-===================== */
-.illustration {
-  text-align: center;
-  margin-top: 16px;
-}
-
-.illustration img {
-  max-width: 220px;
-  border-radius: 12px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-  animation: float 3s ease-in-out infinite;
-}
-
-@keyframes float {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-6px); }
-}
-
-/* =====================
-   Insights
-===================== */
-.insights-card {
-  margin: 16px 0;
-  padding: 14px 16px;
-  border-radius: 14px;
-  background: var(--sidebar-bg);
-  backdrop-filter: blur(14px);
-  box-shadow: 0 6px 18px rgba(0,0,0,0.08);
-}
-
-.insights-card h3 {
-  margin-bottom: 8px;
-  font-size: 1rem;
-  color: var(--primary);
-}
-
-.insights-card ul {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-}
-
-.insights-card li {
-  font-size: 0.9rem;
-  opacity: 0.85;
-  margin-bottom: 6px;
-}
-
-.insights-card.hidden {
-  display: none;
-}
-
-/* =====================
-   Dark Mode Select Fix
-===================== */
-select {
-  background-color: var(--background);
-  color: var(--foreground);
-}
-
-body.dark-theme select {
-  background-color: #0f1225;
-  color: #f5f7ff;
-  border-color: rgba(255, 255, 255, 0.25);
-}
-
-body.dark-theme select option {
-  background-color: #0f1225;
-  color: #f5f7ff;
-}
-
-/* =====================
-   Icon Button
-===================== */
-.icon-btn {
-  background: linear-gradient(135deg, var(--primary), var(--accent));
-  border: none;
-  color: white;
-  padding: 8px 12px;
-  border-radius: 10px;
-  font-size: 1.2rem;
-  cursor: pointer;
-}
-
-
-/* =====================
-   MOBILE FIXES
-===================== */
-.mobile-only {
-  display: none;
-}
-
-@media (max-width: 1024px) {
-
+  /* =====================
+    Navbar
+  ===================== */
   .tm-nav {
-    padding: 0 1rem;
-    justify-content: flex-start;
-    gap: 0.75rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 75px;
+    padding: 0 2rem;
+    background: var(--sidebar-bg);
+    backdrop-filter: var(--glass-blur);
+    box-shadow: 0 6px 25px rgba(0, 0, 0, 0.15);
+    position: sticky;
+    top: 0;
+    z-index: 100;
   }
 
   .tm-brand {
-    flex: 1;
-    min-width: 0;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    font-weight: 700;
+    font-size: 1.4rem;
+    color: var(--foreground);
+    text-decoration: none;
   }
 
-  .theme-toggle {
-    margin-left: auto;
-    margin-right: 0.75rem;
-    font-size: 0.85rem;
-  }
-
-  .mobile-only {
-    display: inline-flex;
+  .tm-brand img {
+    height: 36px;
   }
 
   .tm-navlinks {
-    display: none !important;
+    display: flex;
+    gap: 1.5rem;
+    align-items: center;
   }
 
-  .tm-sidebar {
-    position: fixed;
-    top: 75px;
+  .tm-navlinks a {
+    text-decoration: none;
+    font-weight: 600;
+    color: var(--primary);
+    position: relative;
+    transition: color 0.3s;
+  }
+
+  .tm-navlinks a:hover {
+    color: var(--accent);
+  }
+
+  .tm-navlinks a.active::after {
+    content: "";
+    position: absolute;
+    bottom: -6px;
     left: 0;
-    height: calc(100dvh - 75px);
-    transform: translateX(-100%);
-    z-index: 200;
-    will-change: transform;
+    width: 100%;
+    height: 3px;
+    background: var(--primary);
+    border-radius: 4px;
   }
 
-  .tm-sidebar.show {
-    transform: translateX(0);
+  .theme-toggle {
+    cursor: pointer;
+    font-size: 0.9rem;
+    background: linear-gradient(135deg, var(--primary), var(--accent));
+    padding: 6px 10px;
+    border-radius: 6px;
+    color: var(--button-color);
+    white-space: nowrap;
   }
 
-  body.sidebar-open {
-    overflow: hidden;
-  }
-}
-
-@media (max-width: 768px) {
-  .journal-container {
-    margin: 60px 15px;
-    padding: 25px;
-  }
-}
-
-@media (max-width: 480px) {
-  .journal-container {
-    margin: 50px 10px;
-    padding: 20px;
-  }
-}
-
-/* =====================
-   Modal
-===================== */
-.modal {
-  position: fixed;
-  inset: 0;
-  display: none;
-  align-items: center;
-  justify-content: center;
-  background: rgba(0,0,0,0.45);
-  z-index: 300;
-}
-
-.modal.active {
-  display: flex;
-}
-
-@media (min-width: 1025px) {
+  /* =====================
+    Sidebar (Chat Style)
+  ===================== */
   .tm-sidebar {
-    display: none !important;
+    background: var(--sidebar-bg);
+    backdrop-filter: var(--glass-blur);
+    width: 260px;
+    padding: 1.5rem 1.2rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    box-shadow: 4px 0 20px rgba(0,0,0,0.2);
+    border-radius: 0 14px 14px 0;
+    transition: transform 0.3s ease;
   }
-}
 
-</style>
+  .tm-sidebar.hidden {
+    transform: translateX(-100%);
+  }
 
-</head>
-<body>
-  <div id="tsparticles"></div>
+  .sidebar-nav {
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+  }
 
-  <!-- Navbar -->
-  <header class="tm-nav">
-    <a class="tm-brand" href="/home">
-      <img src="https://img.icons8.com/fluency/48/brain.png" alt="Theramind Logo" class="brand-mark">
-      <span>Theramind</span>
-    </a>
-    <nav class="tm-navlinks">
+  .sidebar-nav a {
+    text-decoration: none;
+    font-weight: 600;
+    padding: 0.6rem 0.9rem;
+    border-radius: 10px;
+    color: var(--foreground);
+    transition: background 0.2s, transform 0.15s;
+  }
+
+  .sidebar-nav a:hover {
+    background: rgba(0,0,0,0.08);
+    transform: translateX(2px);
+  }
+
+  .sidebar-nav a.active {
+    background: linear-gradient(135deg, var(--primary), var(--accent));
+    color: #fff;
+  }
+  .toast {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background: var(--primary);
+    color: #fff;
+    padding: 10px 14px;
+    border-radius: 10px;
+    font-weight: 600;
+    box-shadow: 0 6px 18px rgba(0,0,0,0.25);
+    z-index: 500;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+  }
+
+  .toast.show {
+    opacity: 1;
+  }
+  .modal-content {
+    background: var(--sidebar-bg);
+    padding: 24px;
+    border-radius: 16px;
+    width: min(90%, 500px);
+    box-shadow: 0 8px 28px rgba(0,0,0,0.25);
+  }
+
+  /* =====================
+    Journal Layout
+  ===================== */
+  .journal-container {
+    max-width: 900px;
+    margin: 100px auto;
+    padding: 40px;
+    background: rgba(255, 255, 255, 0.08);
+    border-radius: 20px;
+    backdrop-filter: blur(12px);
+    position: relative;
+    z-index: 2;
+    box-shadow: 0 8px 40px rgba(0, 0, 0, 0.2);
+  }
+
+  body.dark-theme .journal-container {
+    background-color: rgba(44, 44, 62, 0.8);
+  }
+
+  h2 {
+    font-size: 2rem;
+    margin-bottom: 20px;
+  }
+
+  .mood-select,
+  .prompt-section,
+  .entry-section,
+  .history-section {
+    margin-top: 24px;
+  }
+
+  select,
+  textarea,
+  input[type="text"] {
+    width: 100%;
+    margin-top: 10px;
+    padding: 12px;
+    font-size: 1rem;
+    border-radius: 10px;
+    border: 1px solid #ccc;
+    background-color: inherit;
+    color: inherit;
+  }
+
+  /* =====================
+    Buttons
+  ===================== */
+  .prompt-section button,
+  .actions button,
+  .speech-button,
+  #font-select,
+  #export-all,
+  #export-pdf {
+    padding: 12px 18px;
+    border: none;
+    border-radius: 10px;
+    background-color: var(--primary);
+    color: var(--button-color);
+    font-weight: 600;
+    cursor: pointer;
+    margin: 10px 10px 0 0;
+    transition: background-color 0.2s;
+  }
+
+  .prompt-section button:hover,
+  .actions button:hover,
+  .speech-button:hover,
+  #font-select:hover,
+  #export-all:hover,
+  #export-pdf:hover {
+    background-color: var(--accent);
+  }
+
+  /* =====================
+    Illustration
+  ===================== */
+  .illustration {
+    text-align: center;
+    margin-top: 16px;
+  }
+
+  .illustration img {
+    max-width: 220px;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    animation: float 3s ease-in-out infinite;
+  }
+
+  @keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-6px); }
+  }
+
+  /* =====================
+    Insights
+  ===================== */
+  .insights-card {
+    margin: 16px 0;
+    padding: 14px 16px;
+    border-radius: 14px;
+    background: var(--sidebar-bg);
+    backdrop-filter: blur(14px);
+    box-shadow: 0 6px 18px rgba(0,0,0,0.08);
+  }
+
+  .insights-card h3 {
+    margin-bottom: 8px;
+    font-size: 1rem;
+    color: var(--primary);
+  }
+
+  .insights-card ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+
+  .insights-card li {
+    font-size: 0.9rem;
+    opacity: 0.85;
+    margin-bottom: 6px;
+  }
+
+  .insights-card.hidden {
+    display: none;
+  }
+
+  /* =====================
+    Dark Mode Select Fix
+  ===================== */
+  select {
+    background-color: var(--background);
+    color: var(--foreground);
+  }
+
+  body.dark-theme select {
+    background-color: #0f1225;
+    color: #f5f7ff;
+    border-color: rgba(255, 255, 255, 0.25);
+  }
+
+  body.dark-theme select option {
+    background-color: #0f1225;
+    color: #f5f7ff;
+  }
+
+  /* =====================
+    Icon Button
+  ===================== */
+  .icon-btn {
+    background: linear-gradient(135deg, var(--primary), var(--accent));
+    border: none;
+    color: white;
+    padding: 8px 12px;
+    border-radius: 10px;
+    font-size: 1.2rem;
+    cursor: pointer;
+  }
+
+
+  /* =====================
+    MOBILE FIXES
+  ===================== */
+  .mobile-only {
+    display: none;
+  }
+
+  @media (max-width: 1024px) {
+
+    .tm-nav {
+      padding: 0 1rem;
+      justify-content: flex-start;
+      gap: 0.75rem;
+    }
+
+    .tm-brand {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .theme-toggle {
+      margin-left: auto;
+      margin-right: 0.75rem;
+      font-size: 0.85rem;
+    }
+
+    .mobile-only {
+      display: inline-flex;
+    }
+
+    .tm-navlinks {
+      display: none !important;
+    }
+
+    .tm-sidebar {
+      position: fixed;
+      top: 75px;
+      left: 0;
+      height: calc(100dvh - 75px);
+      transform: translateX(-100%);
+      z-index: 200;
+      will-change: transform;
+    }
+
+    .tm-sidebar.show {
+      transform: translateX(0);
+    }
+
+    body.sidebar-open {
+      overflow: hidden;
+    }
+  }
+
+  @media (max-width: 768px) {
+    .journal-container {
+      margin: 60px 15px;
+      padding: 25px;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .journal-container {
+      margin: 50px 10px;
+      padding: 20px;
+    }
+  }
+
+  /* =====================
+    Modal
+  ===================== */
+  .modal {
+    position: fixed;
+    inset: 0;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0,0,0,0.45);
+    z-index: 300;
+  }
+
+  .modal.active {
+    display: flex;
+  }
+
+  @media (min-width: 1025px) {
+    .tm-sidebar {
+      display: none !important;
+    }
+  }
+
+  </style>
+
+  </head>
+  <body>
+    <div id="tsparticles"></div>
+
+    <!-- Navbar -->
+    <header class="tm-nav">
+      <a class="tm-brand" href="/home">
+        <img src="https://img.icons8.com/fluency/48/brain.png" alt="Theramind Logo" class="brand-mark">
+        <span>Theramind</span>
+      </a>
+      <nav class="tm-navlinks">
+        <a href="/">🏠 Home</a>
+        <a href="/index">💬 Chat</a>
+        <a href="/journaling" class="active">📓 Journal</a>
+        <a href="/breathing">🫁 Breathing</a>
+        <a href="/pick-a-peace">📃 Pick-a-Peace</a>
+        <a href="/calm-corner">🧘 Calm Corner</a>
+        <a href="/ebooks">📚 E-Books</a>
+        <a href="/history">🕰️ History</a>
+      </nav>
+      <div class="theme-toggle" id="themeToggle">🌓 Theme</div>
+      <button
+    id="sidebarToggle"
+    class="icon-btn mobile-only"
+    aria-label="Toggle sidebar"
+    aria-expanded="false"
+  >
+    ☰
+  </button>
+
+
+      
+    </header>
+    <aside id="sidebar" class="tm-sidebar hidden" aria-label="Sidebar Navigation">
+
+    <nav class="sidebar-nav mobile-only">
       <a href="/">🏠 Home</a>
       <a href="/index">💬 Chat</a>
       <a href="/journaling" class="active">📓 Journal</a>
@@ -463,429 +488,416 @@ body.dark-theme select option {
       <a href="/ebooks">📚 E-Books</a>
       <a href="/history">🕰️ History</a>
     </nav>
-    <div class="theme-toggle" id="themeToggle">🌓 Theme</div>
-    <button
-  id="sidebarToggle"
-  class="icon-btn mobile-only"
-  aria-label="Toggle sidebar"
-  aria-expanded="false"
->
-  ☰
-</button>
 
+  </aside>
 
-    
-  </header>
-  <aside id="sidebar" class="tm-sidebar hidden" aria-label="Sidebar Navigation">
+    <!-- Journal Container -->
+    <div class="journal-container">
+      <h2 id="journalGreeting">How are you feeling today?</h2>
+      <!-- Reflection Insights -->
+  <div id="reflectionInsights" class="insights-card hidden">
+    <h3>🧠 Reflection Insights</h3>
+    <ul>
+      <li id="insightMood"></li>
+      <li id="insightPattern"></li>
+      <li id="insightEncouragement"></li>
+    </ul>
+  </div>
 
-  <nav class="sidebar-nav mobile-only">
-    <a href="/">🏠 Home</a>
-    <a href="/index">💬 Chat</a>
-    <a href="/journaling" class="active">📓 Journal</a>
-    <a href="/breathing">🫁 Breathing</a>
-    <a href="/pick-a-peace">📃 Pick-a-Peace</a>
-    <a href="/calm-corner">🧘 Calm Corner</a>
-    <a href="/ebooks">📚 E-Books</a>
-    <a href="/history">🕰️ History</a>
-  </nav>
-
-</aside>
-
-  <!-- Journal Container -->
-  <div class="journal-container">
-    <h2 id="journalGreeting">How are you feeling today?</h2>
-    <!-- Reflection Insights -->
-<div id="reflectionInsights" class="insights-card hidden">
-  <h3>🧠 Reflection Insights</h3>
-  <ul>
-    <li id="insightMood"></li>
-    <li id="insightPattern"></li>
-    <li id="insightEncouragement"></li>
-  </ul>
-</div>
-
-    <div class="mood-select">
-      <label>Select Your Mood:</label>
-      <select id="moodSelect" onchange="updateIllustrationAndPrompt()">
-        <option>😃 Happy</option>
-        <option>😔 Sad</option>
-        <option>😠 Angry</option>
-        <option>😨 Anxious</option>
-        <option>😌 Calm</option>
-        <option>😵 Overwhelmed</option>
-      </select>
-    </div>
-    <div class="illustration"><img id="mood-image" /></div>
-    <div class="prompt-section">
-      <button onclick="generatePrompt()">🎯 Generate Prompt</button>
-      <p id="prompt-display">Your prompt will appear here...</p>
-    </div>
-    <div class="entry-section">
-      <input type="text" id="entry-title" placeholder="Entry Title" />
-      <textarea id="journal-entry" placeholder="Start writing..."></textarea>
-      <div class="actions">
-        <button onclick="saveEntry()">💾 Save Entry</button>
-        <button class="speech-button" onclick="toggleDictation()">🎤 Start Dictation</button>
-        <button onclick="readAloud()">🔊 Read Journal</button>
-        <select id="font-select" onchange="changeFont(this.value)">
-          <option value="'Shadows Into Light',cursive">Font</option>
-          <option value="'Merriweather',serif">Serif</option>
-          <option value="'Poppins',sans-serif">Sans-serif</option>
-          <option value="'Roboto Mono',monospace">Monospace</option>
-          <option value="'Inter',sans-serif">Inter</option>
-          <option value="'Playfair Display',serif">Playfair Display</option>
-          <option value="'Source Serif 4',serif">Source Serif</option>
-
+      <div class="mood-select">
+        <label>Select Your Mood:</label>
+        <select id="moodSelect" onchange="updateIllustrationAndPrompt()">
+          <option>😃 Happy</option>
+          <option>😔 Sad</option>
+          <option>😠 Angry</option>
+          <option>😨 Anxious</option>
+          <option>😌 Calm</option>
+          <option>😵 Overwhelmed</option>
         </select>
-        <button onclick="exportPDF()">📄 Export PDF</button>
       </div>
-      <div class="search-tags">
-        <input type="text" placeholder="Search journal..." oninput="searchJournal(this.value)">
-        <input type="text" placeholder="Tag (comma separated)" id="tags">
+      <div class="illustration"><img id="mood-image" /></div>
+      <div class="prompt-section">
+        <button onclick="generatePrompt()">🎯 Generate Prompt</button>
+        <p id="prompt-display">Your prompt will appear here...</p>
       </div>
-    </div>
-    <div class="history-section">
-      <h3>Previous Entries</h3>
-      <div id="history" class="journal-history"></div>
-    </div>
-  </div>
+      <div class="entry-section">
+        <input type="text" id="entry-title" placeholder="Entry Title" />
+        <textarea id="journal-entry" placeholder="Start writing..."></textarea>
+        <div class="actions">
+          <button onclick="saveEntry()">💾 Save Entry</button>
+          <button class="speech-button" onclick="toggleDictation()">🎤 Start Dictation</button>
+          <button onclick="readAloud()">🔊 Read Journal</button>
+          <select id="font-select" onchange="changeFont(this.value)">
+            <option value="'Shadows Into Light',cursive">Font</option>
+            <option value="'Merriweather',serif">Serif</option>
+            <option value="'Poppins',sans-serif">Sans-serif</option>
+            <option value="'Roboto Mono',monospace">Monospace</option>
+            <option value="'Inter',sans-serif">Inter</option>
+            <option value="'Playfair Display',serif">Playfair Display</option>
+            <option value="'Source Serif 4',serif">Source Serif</option>
 
-  <!-- Modals -->
-  <div class="modal" id="entryModal">
+          </select>
+          <button onclick="exportPDF()">📄 Export PDF</button>
+        </div>
+        <div class="search-tags">
+          <input type="text" placeholder="Search journal..." oninput="searchJournal(this.value)">
+          <input type="text" placeholder="Tag (comma separated)" id="tags">
+        </div>
+      </div>
+      <div class="history-section">
+        <h3>Previous Entries</h3>
+        <div id="history" class="journal-history"></div>
+      </div>
+    </div>
+
+    <!-- Modals -->
+    <div class="modal" id="entryModal">
+      <div class="modal-content">
+        <span class="modal-close" onclick="closeModal()">×</span>
+        <h3 id="modal-title"></h3>
+        <p id="modal-content"></p>
+        <p id="modal-mood"></p>
+        <p id="modal-tags"></p>
+      </div>
+    </div>
+    <div class="toast" id="toast"></div>
+
+    <div class="modal" id="deleteModal">
     <div class="modal-content">
-      <span class="modal-close" onclick="closeModal()">×</span>
-      <h3 id="modal-title"></h3>
-      <p id="modal-content"></p>
-      <p id="modal-mood"></p>
-      <p id="modal-tags"></p>
+      <h3>Delete journal entry?</h3>
+      <p>This action cannot be undone.</p>
+      <div style="margin-top:16px;display:flex;gap:10px;">
+        <button onclick="confirmDelete()" style="background:#e53e3e;color:white;">Delete</button>
+        <button onclick="closeDeleteModal()">Cancel</button>
+      </div>
     </div>
   </div>
-  <div class="toast" id="toast"></div>
-
-  <div class="modal" id="deleteModal">
-  <div class="modal-content">
-    <h3>Delete journal entry?</h3>
-    <p>This action cannot be undone.</p>
-    <div style="margin-top:16px;display:flex;gap:10px;">
-      <button onclick="confirmDelete()" style="background:#e53e3e;color:white;">Delete</button>
-      <button onclick="closeDeleteModal()">Cancel</button>
-    </div>
-  </div>
-</div>
 
 
-<script>
-  const JOURNAL_DRAFT_KEY = "journalDraft";
+  <script>
+    const JOURNAL_DRAFT_KEY = "journalDraft";
 
-function autoSaveDraft() {
-  const entry = document.getElementById("journal-entry").value.trim();
-  if (!entry) return;
+  function autoSaveDraft() {
+    const entry = document.getElementById("journal-entry").value.trim();
+    if (!entry) return;
 
-  localStorage.setItem(
-    JOURNAL_DRAFT_KEY,
-    JSON.stringify({
-      title: document.getElementById("entry-title").value,
-      mood: document.getElementById("moodSelect").value,
-      content: entry,
-      timestamp: Date.now()
-    })
-  );
+    localStorage.setItem(
+      JOURNAL_DRAFT_KEY,
+      JSON.stringify({
+        title: document.getElementById("entry-title").value,
+        mood: document.getElementById("moodSelect").value,
+        content: entry,
+        timestamp: Date.now()
+      })
+    );
 
-  showToast("Draft saved quietly");
-}
-
-  // --- Session-aware Journal Greeting ---
-const JOURNAL_USER_NAME =
-  localStorage.getItem("userName") || "Friend";
-const JOURNAL_GREETING_SHOWN =
-  sessionStorage.getItem("journalGreetingShown") === "true";
-
-function setJournalGreeting() {
-  const el = document.getElementById("journalGreeting");
-  if (!el) return;
-
-  if (!JOURNAL_GREETING_SHOWN) {
-    el.textContent = JOURNAL_USER_NAME
-      ? `Welcome back, ${JOURNAL_USER_NAME}. How are you feeling today?`
-      : "Welcome back. How are you feeling today?";
-
-    sessionStorage.setItem("journalGreetingShown", "true");
-  } else {
-    el.textContent = "How are you feeling right now?";
+    showToast("Draft saved quietly");
   }
-}
 
-function generateReflectionInsights() {
-  if (!journalData || journalData.length < 1) return;
+    // --- Session-aware Journal Greeting ---
+  const JOURNAL_USER_NAME =
+    localStorage.getItem("userName") || "Friend";
+  const JOURNAL_GREETING_SHOWN =
+    sessionStorage.getItem("journalGreetingShown") === "true";
 
-  const insightsEl = document.getElementById("reflectionInsights");
-  if (!insightsEl) return;
+  function setJournalGreeting() {
+    const el = document.getElementById("journalGreeting");
+    if (!el) return;
 
-  // Filter last 7 days
-  const oneWeekAgo = Date.now() - 7 * 24 * 60 * 60 * 1000;
-  const recentEntries = journalData.filter(e => {
-  const d = new Date(e.date).getTime();
-  return !isNaN(d) && d >= oneWeekAgo;
-});
+    if (!JOURNAL_GREETING_SHOWN) {
+      el.textContent = JOURNAL_USER_NAME
+        ? `Welcome back, ${JOURNAL_USER_NAME}. How are you feeling today?`
+        : "Welcome back. How are you feeling today?";
 
-
-  if (recentEntries.length === 0) return;
-
-  // Mood frequency
-  const moodCount = {};
-  recentEntries.forEach(e => {
-    if (e.mood) moodCount[e.mood] = (moodCount[e.mood] || 0) + 1;
-  });
-
-  const dominantMood = Object.keys(moodCount).reduce((a, b) =>
-    moodCount[a] > moodCount[b] ? a : b
-  );
-
-  // Writing length vs mood
-  const lengthByMood = {};
-  recentEntries.forEach(e => {
-    if (!e.mood || !e.content) return;
-    if (!lengthByMood[e.mood]) lengthByMood[e.mood] = [];
-    lengthByMood[e.mood].push(e.content.length);
-  });
-
-  let longestMood = null;
-  let longestAvg = 0;
-  Object.keys(lengthByMood).forEach(m => {
-    const avg =
-      lengthByMood[m].reduce((a, b) => a + b, 0) /
-      lengthByMood[m].length;
-    if (avg > longestAvg) {
-      longestAvg = avg;
-      longestMood = m;
-    }
-  });
-
-  // Populate UI
-  document.getElementById("insightMood").textContent =
-    `Most frequent mood this week: ${dominantMood}`;
-
-  document.getElementById("insightPattern").textContent =
-    longestMood
-      ? `You tend to write longer entries when you feel ${longestMood}.`
-      : `Your writing patterns are becoming more consistent.`;
-
-  document.getElementById("insightEncouragement").textContent =
-    `Regular journaling helps build self-awareness over time.`;
-
-  insightsEl.classList.remove("hidden");
-}
-
-document.addEventListener("DOMContentLoaded", () => {
-  tsParticles.load("tsparticles", {
-     background: { color: { value: "transparent" } },
-  fullScreen: false,
-  particles: {
-    number: {
-      value: 70,
-      density: { enable: true, area: 800 }
-    },
-    color: {
-      value: ["#6b7cff", "#67e8f9"]
-    },
-    shape: { type: "circle" },
-    opacity: {
-      value: 0.35,
-      random: true
-    },
-    size: {
-      value: { min: 1.5, max: 3.5 }
-    },
-    links: {
-      enable: true,
-      distance: 120,
-      color: "#aab8ff",
-      opacity: 0.15,
-      width: 1
-    },
-    move: {
-      enable: true,
-      speed: 0.6,
-      direction: "none",
-      outModes: "out"
-    }
-  }
-});
-
-
-  const themeToggle = document.getElementById("themeToggle");
-  const prefersDark = localStorage.getItem("theme") === "dark";
-  if(prefersDark){ document.body.classList.add("dark-theme"); themeToggle.textContent = "☀️ Theme"; }
-  else{ document.body.classList.remove("dark-theme"); themeToggle.textContent = "🌙 Theme"; }
-
-  themeToggle.addEventListener("click", toggleTheme);
-
-  const draft = localStorage.getItem(JOURNAL_DRAFT_KEY);
-  if (draft) {
-    try {
-      const d = JSON.parse(draft);
-      document.getElementById("entry-title").value = d.title || "";
-      document.getElementById("moodSelect").value = d.mood || "";
-      document.getElementById("journal-entry").value = d.content || "";
-      showToast("Draft restored");
-    } catch (e) {
-      console.warn("Failed to restore journal draft", e);
+      sessionStorage.setItem("journalGreetingShown", "true");
+    } else {
+      el.textContent = "How are you feeling right now?";
     }
   }
 
-  loadHistory();
-  updateIllustrationAndPrompt();
-  setInterval(autoSaveDraft, 5000);
-  setJournalGreeting();
-});
+  function generateReflectionInsights() {
+    if (!journalData || journalData.length < 1) return;
+
+    const insightsEl = document.getElementById("reflectionInsights");
+    if (!insightsEl) return;
+
+    // Filter last 7 days
+    const oneWeekAgo = Date.now() - 7 * 24 * 60 * 60 * 1000;
+    const recentEntries = journalData.filter(e => {
+    const d = new Date(e.date).getTime();
+    return !isNaN(d) && d >= oneWeekAgo;
+  });
 
 
-function showToast(msg){ const toast=document.getElementById("toast"); toast.textContent=msg; toast.classList.add("show"); setTimeout(()=>{toast.classList.remove("show");},2500); }
+    if (recentEntries.length === 0) return;
 
-function toggleTheme(){
-  const themeToggle=document.getElementById("themeToggle");
-  document.body.classList.toggle("dark-theme");
-  const isDark=document.body.classList.contains("dark-theme");
-  localStorage.setItem("theme", isDark?"dark":"light");
-  themeToggle.textContent=isDark?"☀️ Theme":"🌙 Theme";
-  showToast("Theme changed");
-}
-
-// --- Prompts + Mood Images ---
-const promptMap = {
-  "😃 Happy": ["What made you smile today?","Who brought joy into your life today?","What small victory did you achieve today?","Which moment made you laugh out loud?","What are you grateful for today?","Describe a joyful interaction you had.","What inspired your happiness today?","How can you spread positivity?","Share a happy memory from today.","What energized you today?"],
-  "😔 Sad": ["What’s weighing on your heart?","How are you comforting yourself today?","What made you feel low today?","Describe a moment of sadness today.","What would help lighten your mood?","Who or what can support you today?","Reflect on a challenging emotion.","How can you nurture yourself?","What lesson does your sadness teach?","Share a moment of vulnerability today."],
-  "😠 Angry": ["What triggered your anger?","How can you express it constructively?","Which situation frustrated you?","What could have gone differently?","How can you release anger safely?","Identify any unfair treatment today.","How did you respond to your anger?","What emotions lie beneath your anger?","Share an experience where you stayed calm.","What steps can prevent anger tomorrow?"],
-  "😨 Anxious": ["What's causing anxiety right now?","What can you control in this moment?","Which thoughts are overwhelming you?","How can you ground yourself?","What support can you seek?","Describe your anxious feelings.","What steps help reduce stress?","Identify triggers for anxiety today.","Reflect on past moments you managed anxiety.","What reassures you?"],
-  "😌 Calm": ["What brings you peace?","Today I feel calm because…","Describe a serene moment you had.","What activities help you relax?","Who contributes to your tranquility?","How did you manage stress today?","Reflect on mindful breathing moments.","What music or sounds soothe you?","Share a quiet moment from today.","What positive thoughts keep you grounded?"],
-  "😵 Overwhelmed": ["What’s making you feel overwhelmed?","Break down your feelings into parts.","Identify top stressors today.","Which tasks are weighing on you?","What is outside your control?","What small wins occurred today?","How can you prioritize tasks?","Who can help you manage responsibilities?","Reflect on emotions and reactions.","How can you reset and recharge?"]
-};
-const imageMap = {
-  "😃 Happy":"https://img.icons8.com/emoji/96/000000/smiling-face-with-smiling-eyes.png",
-  "😔 Sad":"https://img.icons8.com/emoji/96/000000/pensive-face.png",
-  "😠 Angry":"https://img.icons8.com/emoji/96/000000/pouting-face.png",
-  "😨 Anxious":"https://img.icons8.com/emoji/96/000000/fearful-face.png",
-  "😌 Calm":"https://img.icons8.com/emoji/96/000000/relieved-face.png",
-  "😵 Overwhelmed":"https://img.icons8.com/emoji/96/000000/dizzy-face.png"
-};
-
-function updateIllustrationAndPrompt() {
-  const select = document.getElementById("moodSelect");
-  if (!select || !select.value || !imageMap[select.value]) return;
-
-  document.getElementById("mood-image").src = imageMap[select.value];
-  generatePrompt();
-}
-
-
-function generatePrompt() {
-  const mood = document.getElementById("moodSelect").value;
-  const prompts = promptMap[mood];
-  const prompt = prompts[Math.floor(Math.random() * prompts.length)];
-  document.getElementById("prompt-display").textContent = prompt;
-  document.getElementById("journal-entry").placeholder = prompt.startsWith("Today") ? prompt : "";
-}
-
-// --- Journal Storage + Functions ---
-let journalData = [];
-let currentModalIndex = 0;
-
-function loadHistory() {
-
-  fetch("/api/history/journals", {
-  credentials: "include"
-})
-    .then(res => res.json())
-    .then(data => {
-
-      journalData = data;
-
-      const container = document.getElementById("history");
-      container.innerHTML = "";
-
-      if (data.length === 0) {
-
-        container.innerHTML =
-          "<p>No entries yet.</p>";
-
-        return;
-      }
-
-      data.forEach(entry => {
-
-        const div = document.createElement("div");
-
-        div.innerHTML = `
-          <div class="entry-card">
-            <h4>${entry.title || "Untitled"}</h4>
-            <p>${entry.content.substring(0,120)}...</p>
-            <small>${entry.date}</small>
-          </div>
-        `;
-
-        container.appendChild(div);
-
-      });
-
-      generateReflectionInsights();
-
-    })
-    .catch(err => {
-      console.error(err);
+    // Mood frequency
+    const moodCount = {};
+    recentEntries.forEach(e => {
+      if (e.mood) moodCount[e.mood] = (moodCount[e.mood] || 0) + 1;
     });
-}
 
+    const dominantMood = Object.keys(moodCount).reduce((a, b) =>
+      moodCount[a] > moodCount[b] ? a : b
+    );
 
-function openModal(index) {
-  currentModalIndex=index;
-  const entry=journalData[index];
-  document.getElementById("modal-title").textContent=entry.title;
-  document.getElementById("modal-content").textContent=entry.content;
-  document.getElementById("modal-tags").textContent=entry.tags?`Tags: ${entry.tags}`:'';
-  document.getElementById("modal-mood").textContent=`Mood: ${entry.mood}`;
-  document.getElementById("entryModal").classList.add("active");
-}
-function closeModal() { document.getElementById("entryModal").classList.remove("active"); }
+    // Writing length vs mood
+    const lengthByMood = {};
+    recentEntries.forEach(e => {
+      if (!e.mood || !e.content) return;
+      if (!lengthByMood[e.mood]) lengthByMood[e.mood] = [];
+      lengthByMood[e.mood].push(e.content.length);
+    });
 
-let deleteIndex = null;
+    let longestMood = null;
+    let longestAvg = 0;
+    Object.keys(lengthByMood).forEach(m => {
+      const avg =
+        lengthByMood[m].reduce((a, b) => a + b, 0) /
+        lengthByMood[m].length;
+      if (avg > longestAvg) {
+        longestAvg = avg;
+        longestMood = m;
+      }
+    });
 
-function deleteEntry(i){
-  deleteIndex = i;
-  document.getElementById("deleteModal").classList.add("active");
-}
+    // Populate UI
+    document.getElementById("insightMood").textContent =
+      `Most frequent mood this week: ${dominantMood}`;
 
-function closeDeleteModal(){
-  document.getElementById("deleteModal").classList.remove("active");
-  deleteIndex = null;
-}
+    document.getElementById("insightPattern").textContent =
+      longestMood
+        ? `You tend to write longer entries when you feel ${longestMood}.`
+        : `Your writing patterns are becoming more consistent.`;
 
-async function confirmDelete() {
-  if (deleteIndex === null || !journalData[deleteIndex]) {
-    closeDeleteModal();
-    return;
+    document.getElementById("insightEncouragement").textContent =
+      `Regular journaling helps build self-awareness over time.`;
+
+    insightsEl.classList.remove("hidden");
   }
 
-  const entryId = journalData[deleteIndex].id;
+  document.addEventListener("DOMContentLoaded", () => {
+    tsParticles.load("tsparticles", {
+      background: { color: { value: "transparent" } },
+    fullScreen: false,
+    particles: {
+      number: {
+        value: 70,
+        density: { enable: true, area: 800 }
+      },
+      color: {
+        value: ["#6b7cff", "#67e8f9"]
+      },
+      shape: { type: "circle" },
+      opacity: {
+        value: 0.35,
+        random: true
+      },
+      size: {
+        value: { min: 1.5, max: 3.5 }
+      },
+      links: {
+        enable: true,
+        distance: 120,
+        color: "#aab8ff",
+        opacity: 0.15,
+        width: 1
+      },
+      move: {
+        enable: true,
+        speed: 0.6,
+        direction: "none",
+        outModes: "out"
+      }
+    }
+  });
+
+
+    const themeToggle = document.getElementById("themeToggle");
+    const prefersDark = localStorage.getItem("theme") === "dark";
+    if(prefersDark){ document.body.classList.add("dark-theme"); themeToggle.textContent = "☀️ Theme"; }
+    else{ document.body.classList.remove("dark-theme"); themeToggle.textContent = "🌙 Theme"; }
+
+    themeToggle.addEventListener("click", toggleTheme);
+
+    const draft = localStorage.getItem(JOURNAL_DRAFT_KEY);
+    if (draft) {
+      try {
+        const d = JSON.parse(draft);
+        document.getElementById("entry-title").value = d.title || "";
+        document.getElementById("moodSelect").value = d.mood || "";
+        document.getElementById("journal-entry").value = d.content || "";
+        showToast("Draft restored");
+      } catch (e) {
+        console.warn("Failed to restore journal draft", e);
+      }
+    }
+
+    loadHistory();
+    updateIllustrationAndPrompt();
+    setInterval(autoSaveDraft, 5000);
+    setJournalGreeting();
+  });
+
+
+  function showToast(msg){ const toast=document.getElementById("toast"); toast.textContent=msg; toast.classList.add("show"); setTimeout(()=>{toast.classList.remove("show");},2500); }
+
+  function toggleTheme(){
+    const themeToggle=document.getElementById("themeToggle");
+    document.body.classList.toggle("dark-theme");
+    const isDark=document.body.classList.contains("dark-theme");
+    localStorage.setItem("theme", isDark?"dark":"light");
+    themeToggle.textContent=isDark?"☀️ Theme":"🌙 Theme";
+    showToast("Theme changed");
+  }
+
+  // --- Prompts + Mood Images ---
+  const promptMap = {
+    "😃 Happy": ["What made you smile today?","Who brought joy into your life today?","What small victory did you achieve today?","Which moment made you laugh out loud?","What are you grateful for today?","Describe a joyful interaction you had.","What inspired your happiness today?","How can you spread positivity?","Share a happy memory from today.","What energized you today?"],
+    "😔 Sad": ["What’s weighing on your heart?","How are you comforting yourself today?","What made you feel low today?","Describe a moment of sadness today.","What would help lighten your mood?","Who or what can support you today?","Reflect on a challenging emotion.","How can you nurture yourself?","What lesson does your sadness teach?","Share a moment of vulnerability today."],
+    "😠 Angry": ["What triggered your anger?","How can you express it constructively?","Which situation frustrated you?","What could have gone differently?","How can you release anger safely?","Identify any unfair treatment today.","How did you respond to your anger?","What emotions lie beneath your anger?","Share an experience where you stayed calm.","What steps can prevent anger tomorrow?"],
+    "😨 Anxious": ["What's causing anxiety right now?","What can you control in this moment?","Which thoughts are overwhelming you?","How can you ground yourself?","What support can you seek?","Describe your anxious feelings.","What steps help reduce stress?","Identify triggers for anxiety today.","Reflect on past moments you managed anxiety.","What reassures you?"],
+    "😌 Calm": ["What brings you peace?","Today I feel calm because…","Describe a serene moment you had.","What activities help you relax?","Who contributes to your tranquility?","How did you manage stress today?","Reflect on mindful breathing moments.","What music or sounds soothe you?","Share a quiet moment from today.","What positive thoughts keep you grounded?"],
+    "😵 Overwhelmed": ["What’s making you feel overwhelmed?","Break down your feelings into parts.","Identify top stressors today.","Which tasks are weighing on you?","What is outside your control?","What small wins occurred today?","How can you prioritize tasks?","Who can help you manage responsibilities?","Reflect on emotions and reactions.","How can you reset and recharge?"]
+  };
+  const imageMap = {
+    "😃 Happy":"https://img.icons8.com/emoji/96/000000/smiling-face-with-smiling-eyes.png",
+    "😔 Sad":"https://img.icons8.com/emoji/96/000000/pensive-face.png",
+    "😠 Angry":"https://img.icons8.com/emoji/96/000000/pouting-face.png",
+    "😨 Anxious":"https://img.icons8.com/emoji/96/000000/fearful-face.png",
+    "😌 Calm":"https://img.icons8.com/emoji/96/000000/relieved-face.png",
+    "😵 Overwhelmed":"https://img.icons8.com/emoji/96/000000/dizzy-face.png"
+  };
+
+  function updateIllustrationAndPrompt() {
+    const select = document.getElementById("moodSelect");
+    if (!select || !select.value || !imageMap[select.value]) return;
+
+    document.getElementById("mood-image").src = imageMap[select.value];
+    generatePrompt();
+  }
+
+
+  function generatePrompt() {
+    const mood = document.getElementById("moodSelect").value;
+    const prompts = promptMap[mood];
+    const prompt = prompts[Math.floor(Math.random() * prompts.length)];
+    document.getElementById("prompt-display").textContent = prompt;
+    document.getElementById("journal-entry").placeholder = prompt.startsWith("Today") ? prompt : "";
+  }
+
+  // --- Journal Storage + Functions ---
+ let journalData = [];
+
+async function loadHistory() {
 
   try {
-    const res = await fetch(`/api/journals/${entryId}`, {
-      method: "DELETE",
+
+    const res = await fetch(
+      "/api/history/journals",
+      { credentials: "include" }
+    );
+
+    const data = await res.json();
+
+    console.log("📘 History received:", data);
+
+    journalData = data || [];
+
+    const historyDiv =
+      document.getElementById("history");
+
+    historyDiv.innerHTML = "";
+
+    if (!journalData.length) {
+
+      historyDiv.innerHTML =
+        "<p>No journal entries yet.</p>";
+
+      return;
+    }
+
+    journalData.forEach(entry => {
+
+      const div =
+        document.createElement("div");
+
+      div.className = "journal-card";
+
+      div.innerHTML = `
+        <h4>${entry.title}</h4>
+        <p>${entry.date}</p>
+        <button onclick="openModal(${entry.id})">
+          View
+        </button>
+      `;
+
+      historyDiv.appendChild(div);
+
     });
 
-    if (!res.ok) throw new Error("Delete failed");
-
-    showToast("Entry deleted 🗑️");
-    await loadHistory(); // reload from backend
+    generateReflectionInsights();
 
   } catch (err) {
-    console.error(err);
-    showToast("Could not delete entry.");
+
+    console.error(
+      "❌ History load failed:",
+      err
+    );
+
   }
 
-  closeDeleteModal();
 }
+  function openModal(index) {
+    currentModalIndex=index;
+    const entry=journalData[index];
+    document.getElementById("modal-title").textContent=entry.title;
+    document.getElementById("modal-content").textContent=entry.content;
+    document.getElementById("modal-tags").textContent=entry.tags?`Tags: ${entry.tags}`:'';
+    document.getElementById("modal-mood").textContent=`Mood: ${entry.mood}`;
+    document.getElementById("entryModal").classList.add("active");
+  }
+  function closeModal() { document.getElementById("entryModal").classList.remove("active"); }
 
-function saveEntry() {
+  let deleteIndex = null;
+
+  function deleteEntry(i){
+    deleteIndex = i;
+    document.getElementById("deleteModal").classList.add("active");
+  }
+
+  function closeDeleteModal(){
+    document.getElementById("deleteModal").classList.remove("active");
+    deleteIndex = null;
+  }
+
+  async function confirmDelete() {
+    if (deleteIndex === null || !journalData[deleteIndex]) {
+      closeDeleteModal();
+      return;
+    }
+
+    const entryId = journalData[deleteIndex].id;
+
+    try {
+      const res = await fetch(`/api/journals/${entryId}`, {
+        method: "DELETE",
+      });
+
+      if (!res.ok) throw new Error("Delete failed");
+
+      showToast("Entry deleted 🗑️");
+      await loadHistory(); // reload from backend
+
+    } catch (err) {
+      console.error(err);
+      showToast("Could not delete entry.");
+    }
+
+    closeDeleteModal();
+  }
+
+  async function saveEntry() {
 
   const title =
     document.getElementById("entry-title").value;
@@ -900,283 +912,300 @@ function saveEntry() {
     document.getElementById("tags").value;
 
   if (!content.trim()) {
-    showToast("Write something before saving.");
-    return;
-  }
 
-  fetch("/journaling", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify({
-      title,
-      content,
-      mood,
-      tags
-    })
-  })
-
-  .then(res => res.json())
-
-  .then(data => {
-
-    // 🔥 FIXED HERE
-    if (data.ok) {
-
-      showToast("Entry saved successfully!");
-
-      document.getElementById("journal-entry").value = "";
-      document.getElementById("entry-title").value = "";
-
-      loadHistory();
-
-    } else {
-
-      showToast("Failed to save entry.");
-
-    }
-
-  })
-
-  .catch(err => {
-    console.error(err);
-    showToast("Error saving entry.");
-  });
-
-}
-    // Clear inputs
-   
-
-function searchJournal(query){
-
-  const container =
-    document.getElementById("history");
-
-  const q =
-    query.toLowerCase();
-
-  const filtered =
-  journalData.filter(rec =>
-
-    (rec.title || "")
-      .toLowerCase()
-      .includes(q) ||
-
-    (rec.content || "")
-      .toLowerCase()
-      .includes(q) ||
-
-    (rec.tags || "")
-      .toLowerCase()
-      .includes(q)
-
-  );
-
-  container.innerHTML = '';
-
-  if(!filtered.length){
-
-    container.textContent =
-      "No entries match your search.";
+    showToast("Write something first.");
 
     return;
 
   }
-
-  filtered.forEach((rec,i)=>{
-
-    const div =
-      document.createElement("div");
-
-    div.className = "entry-item";
-
-    div.innerHTML = `
-      <span>
-        ${rec.date} - ${rec.title}
-        [${rec.mood}]
-      </span>
-
-      <div class="entry-actions">
-        <button onclick="deleteEntry(${i})">
-          🗑️
-        </button>
-      </div>
-    `;
-
-    div.addEventListener("click",(e)=>{
-
-      if(!e.target.closest("button"))
-        openModal(i)
-
-    });
-
-    container.appendChild(div);
-
-  });
-
-}
-
-function changeFont(font){ document.getElementById("journal-entry").style.fontFamily=font; showToast("Font changed!"); }
-
-function readAloud(){
-
-  const text =
-    document.getElementById("journal-entry").value.trim();
-
-  if (!text){
-
-    showToast("No text to read.");
-
-    return;
-
-  }
-
-  // Stop previous speech
-  speechSynthesis.cancel();
-
-  const utter =
-    new SpeechSynthesisUtterance(text);
-
-  utter.lang = "en-IN";
-
-  utter.rate = 1;
-
-  utter.pitch = 1;
-
-  utter.onstart = () => {
-
-    showToast("Reading journal 🔊");
-
-  };
-
-  utter.onerror = () => {
-
-    showToast("Speech failed.");
-
-  };
-
-  speechSynthesis.speak(utter);
-
-}
-
-function detectJournalLanguage(text) {
-  // Hindi vs English
-  return /[ऀ-ॿ]/.test(text) ? "hi-IN" : "en-IN";
-}
-let recognition, recognizing=false;
-function toggleDictation(){
-  if (!navigator.mediaDevices) {
-  showToast("Microphone not supported.");
-  return;
-}
-
-  const SpeechRecognition =
-    window.SpeechRecognition ||
-    window.webkitSpeechRecognition;
-
-  if (!SpeechRecognition){
-    showToast("Speech recognition not supported in this browser.");
-    return;
-  }
-
-  const textarea =
-    document.getElementById("journal-entry");
-
-  const btn =
-    document.querySelector(".speech-button");
-
-  if (!recognition){
-
-    recognition = new SpeechRecognition();
-
-    recognition.continuous = true;
-    recognition.interimResults = false;
-
-    recognition.lang = "en-IN";
-
-    recognition.onresult = (event) => {
-
-      let transcript = "";
-
-      for (let i = event.resultIndex; i < event.results.length; i++){
-
-        if (event.results[i].isFinal){
-
-          transcript +=
-            event.results[i][0].transcript + " ";
-
-        }
-
-      }
-
-      textarea.value += transcript;
-
-    };
-
-    recognition.onerror = (event) => {
-
-      console.error(event.error);
-
-      showToast("Microphone error: " + event.error);
-
-      recognizing = false;
-
-      btn.textContent = "🎤 Start Dictation";
-
-    };
-
-    recognition.onend = () => {
-
-      recognizing = false;
-
-      btn.textContent = "🎤 Start Dictation";
-
-    };
-
-  }
-
-  if (!recognizing){
-
-    recognition.start();
-    btn.style.background = "#ef4444";
-
-    recognizing = true;
-
-    btn.textContent = "🛑 Stop Dictation";
-
-    showToast("Dictation started 🎤");
-
-  }
-
-  else {
-
-    recognition.stop();
-
-    recognizing = false;
-
-    btn.textContent = "🎤 Start Dictation";
-
-    showToast("Dictation stopped");
-
-  }
-
-}
-
-async function exportPDF() {
 
   try {
 
-    // Get latest entries from backend
-    const res = await fetch("/api/history/journals", {
-  credentials: "include"
-});
+    const res = await fetch(
+      "/journaling",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        credentials: "include",
+        body: JSON.stringify({
+          title,
+          content,
+          mood,
+          tags
+        })
+      }
+    );
 
-    const entries = await res.json();
+    const data = await res.json();
 
-    if (!entries || entries.length === 0) {
-      showToast("No entries to export.");
+    if (data.ok) {
+
+      showToast(
+        "Entry saved successfully!"
+      );
+
+      document.getElementById(
+        "journal-entry"
+      ).value = "";
+
+      document.getElementById(
+        "entry-title"
+      ).value = "";
+
+      await loadHistory();
+
+    } else {
+
+      showToast("Save failed.");
+
+    }
+
+  } catch (err) {
+
+    console.error(
+      "❌ Save error:",
+      err
+    );
+
+  }
+
+}
+      // Clear inputs
+    
+
+  function searchJournal(query){
+
+    const container =
+      document.getElementById("history");
+
+    const q =
+      query.toLowerCase();
+
+    const filtered =
+    journalData.filter(rec =>
+
+      (rec.title || "")
+        .toLowerCase()
+        .includes(q) ||
+
+      (rec.content || "")
+        .toLowerCase()
+        .includes(q) ||
+
+      (rec.tags || "")
+        .toLowerCase()
+        .includes(q)
+
+    );
+
+    container.innerHTML = '';
+
+    if(!filtered.length){
+
+      container.textContent =
+        "No entries match your search.";
+
       return;
+
+    }
+
+    filtered.forEach((rec,i)=>{
+
+      const div =
+        document.createElement("div");
+
+      div.className = "entry-item";
+
+      div.innerHTML = `
+        <span>
+          ${rec.date} - ${rec.title}
+          [${rec.mood}]
+        </span>
+
+        <div class="entry-actions">
+          <button onclick="deleteEntry(${i})">
+            🗑️
+          </button>
+        </div>
+      `;
+
+      div.addEventListener("click",(e)=>{
+
+        if(!e.target.closest("button"))
+          openModal(i)
+
+      });
+
+      container.appendChild(div);
+
+    });
+
+  }
+
+  function changeFont(font){ document.getElementById("journal-entry").style.fontFamily=font; showToast("Font changed!"); }
+
+  function readAloud(){
+
+    const text =
+      document.getElementById("journal-entry").value.trim();
+
+    if (!text){
+
+      showToast("No text to read.");
+
+      return;
+
+    }
+
+    // Stop previous speech
+    speechSynthesis.cancel();
+
+    const utter =
+      new SpeechSynthesisUtterance(text);
+
+    utter.lang = "en-IN";
+
+    utter.rate = 1;
+
+    utter.pitch = 1;
+
+    utter.onstart = () => {
+
+      showToast("Reading journal 🔊");
+
+    };
+
+    utter.onerror = () => {
+
+      showToast("Speech failed.");
+
+    };
+
+    speechSynthesis.speak(utter);
+
+  }
+
+  function detectJournalLanguage(text) {
+    // Hindi vs English
+    return /[ऀ-ॿ]/.test(text) ? "hi-IN" : "en-IN";
+  }
+  let recognition, recognizing=false;
+  function toggleDictation(){
+    if (!navigator.mediaDevices) {
+    showToast("Microphone not supported.");
+    return;
+  }
+
+    const SpeechRecognition =
+      window.SpeechRecognition ||
+      window.webkitSpeechRecognition;
+
+    if (!SpeechRecognition){
+      showToast("Speech recognition not supported in this browser.");
+      return;
+    }
+
+    const textarea =
+      document.getElementById("journal-entry");
+
+    const btn =
+      document.querySelector(".speech-button");
+
+    if (!recognition){
+
+      recognition = new SpeechRecognition();
+
+      recognition.continuous = true;
+      recognition.interimResults = false;
+
+      recognition.lang = "en-IN";
+
+      recognition.onresult = (event) => {
+
+        let transcript = "";
+
+        for (let i = event.resultIndex; i < event.results.length; i++){
+
+          if (event.results[i].isFinal){
+
+            transcript +=
+              event.results[i][0].transcript + " ";
+
+          }
+
+        }
+
+        textarea.value += transcript;
+
+      };
+
+      recognition.onerror = (event) => {
+
+        console.error(event.error);
+
+        showToast("Microphone error: " + event.error);
+
+        recognizing = false;
+
+        btn.textContent = "🎤 Start Dictation";
+
+      };
+
+      recognition.onend = () => {
+
+        recognizing = false;
+
+        btn.textContent = "🎤 Start Dictation";
+
+      };
+
+    }
+
+    if (!recognizing){
+
+      recognition.start();
+      btn.style.background = "#ef4444";
+
+      recognizing = true;
+
+      btn.textContent = "🛑 Stop Dictation";
+
+      showToast("Dictation started 🎤");
+
+    }
+
+    else {
+
+      recognition.stop();
+
+      recognizing = false;
+
+      btn.textContent = "🎤 Start Dictation";
+
+      showToast("Dictation stopped");
+
+    }
+
+  }
+
+  async function exportPDF() {
+
+  try {
+
+    if (!journalData.length) {
+
+      await loadHistory();
+
+    }
+
+    if (!journalData.length) {
+
+      alert("No entries to export.");
+
+      return;
+
     }
 
     const { jsPDF } = window.jspdf;
@@ -1185,104 +1214,123 @@ async function exportPDF() {
 
     let y = 10;
 
-    doc.setFont("Helvetica");
+    journalData.forEach(entry => {
 
-    doc.setFontSize(14);
+      doc.text(
+        `Title: ${entry.title}`,
+        10,
+        y
+      );
 
-    doc.text("Journal Entries", 10, y);
+      y += 8;
 
-    y += 10;
+      doc.text(
+        `Date: ${entry.date}`,
+        10,
+        y
+      );
 
-    entries.forEach((entry, index) => {
+      y += 8;
 
-      const textBlock =
-        `${entry.date || ""}\n` +
-        `${entry.title || "Untitled"}\n` +
-        `${entry.content || ""}\n\n`;
+      doc.text(
+        `Mood: ${entry.mood}`,
+        10,
+        y
+      );
 
-      const lines =
-        doc.splitTextToSize(textBlock, 180);
+      y += 8;
 
-      if (y + lines.length * 7 > 280) {
+      const contentLines =
+        doc.splitTextToSize(
+          entry.content,
+          180
+        );
+
+      doc.text(
+        contentLines,
+        10,
+        y
+      );
+
+      y += contentLines.length * 8;
+
+      y += 10;
+
+      if (y > 270) {
+
         doc.addPage();
+
         y = 10;
+
       }
-
-      doc.text(lines, 10, y);
-
-      y += lines.length * 7;
 
     });
 
     doc.save("journal_entries.pdf");
 
-    showToast("PDF exported successfully 📄");
+  } catch (err) {
 
-  }
-
-  catch (err) {
-
-    console.error("PDF export error:", err);
-
-    showToast("PDF export failed.");
-
-  }
-
-}
-
-async function exportAll() {
-  try {
-    const res = await fetch("/api/history/journals", {
-  credentials: "include"
-});
-    if (!res.ok) throw new Error("Failed to fetch journals");
-
-    const journalData = await res.json();
-
-    if (!journalData.length) {
-      showToast("No entries to export.");
-      return;
-    }
-
-    const blob = new Blob(
-      [JSON.stringify(journalData, null, 2)],
-      { type: "application/json" }
+    console.error(
+      "❌ Export failed:",
+      err
     );
 
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = "Theramind_Journal.json";
-
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-
-    showToast("All entries exported!");
-
-  } catch (err) {
-    console.error(err);
-    showToast("Could not export entries.");
   }
+
 }
+  async function exportAll() {
+    try {
+      const res = await fetch("/api/history/journals", {
+    credentials: "include"
+  });
+      if (!res.ok) throw new Error("Failed to fetch journals");
 
+      const journalData = await res.json();
 
-const sidebar = document.getElementById("sidebar");
-const sidebarToggle = document.getElementById("sidebarToggle");
+      if (!journalData.length) {
+        showToast("No entries to export.");
+        return;
+      }
 
-sidebarToggle?.addEventListener("click", () => {
-  sidebar.classList.toggle("show");
-  document.body.classList.toggle("sidebar-open");
+      const blob = new Blob(
+        [JSON.stringify(journalData, null, 2)],
+        { type: "application/json" }
+      );
 
-  const isOpen = sidebar.classList.contains("show");
-  sidebarToggle.setAttribute("aria-expanded", isOpen);
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "Theramind_Journal.json";
 
-  // Accessibility polish
-  if (isOpen) {
-    sidebar.querySelector("a")?.focus();
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+
+      showToast("All entries exported!");
+
+    } catch (err) {
+      console.error(err);
+      showToast("Could not export entries.");
+    }
   }
-});
-</script>
-</body>
-</html>
+
+
+  const sidebar = document.getElementById("sidebar");
+  const sidebarToggle = document.getElementById("sidebarToggle");
+
+  sidebarToggle?.addEventListener("click", () => {
+    sidebar.classList.toggle("show");
+    document.body.classList.toggle("sidebar-open");
+
+    const isOpen = sidebar.classList.contains("show");
+    sidebarToggle.setAttribute("aria-expanded", isOpen);
+
+    // Accessibility polish
+    if (isOpen) {
+      sidebar.querySelector("a")?.focus();
+    }
+  });
+  </script>
+  </body>
+  </html>
