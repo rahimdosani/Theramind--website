@@ -1674,7 +1674,7 @@ def journaling():
     try:
         print("📥 POST /journaling received")
 
-        data = request.get_json(silent=True)
+        data = request.get_json(force=True)
 
         if not data:
             data = request.form
@@ -1684,10 +1684,11 @@ def journaling():
         title = data.get("title", "Untitled")
 
         content = (
-            data.get("content")
-            or data.get("entry")
-            or ""
-        )
+    data.get("content")
+    or data.get("entry")
+    or data.get("journal-entry")   
+    or ""
+)
 
         mood = data.get("mood", "")
         tags = data.get("tags", "")
