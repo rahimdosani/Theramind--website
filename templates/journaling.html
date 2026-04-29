@@ -919,60 +919,37 @@ async function loadHistory() {
   if (!content.trim()) {
 
     showToast("Write something first.");
-
     return;
 
   }
 
-  try {
+  const formData = new FormData();
 
-    const res = await fetch(
-      "/journaling",
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        credentials: "include",
-        body: JSON.stringify({
-          title,
-          content,
-          mood,
-          tags
-        })
-      }
-    );
+  formData.append("title", title);
+  formData.append("content", content);
+  formData.append("mood", mood);
+  formData.append("tags", tags);
 
-    const data = await res.json();
-
-    if (data.ok) {
-
-      showToast(
-        "Entry saved successfully!"
-      );
-
-      document.getElementById(
-        "journal-entry"
-      ).value = "";
-
-      document.getElementById(
-        "entry-title"
-      ).value = "";
-
-      await loadHistory();
-
-    } else {
-
-      showToast("Save failed.");
-
+  const res = await fetch(
+    "/journaling",
+    {
+      method: "POST",
+      credentials: "include",
+      body: formData
     }
+  );
 
-  } catch (err) {
+  const data = await res.json();
 
-    console.error(
-      "❌ Save error:",
-      err
-    );
+  if (data.ok) {
+
+    showToast("Entry saved!");
+
+    await loadHistory();
+
+  } else {
+
+    showToast("Save failed.");
 
   }
 

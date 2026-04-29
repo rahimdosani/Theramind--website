@@ -1674,25 +1674,18 @@ def journaling():
     try:
         print("📥 POST /journaling received")
 
-        data = request.get_json(force=True)
+        # ✅ USE FORM DATA ONLY
+        data = request.form
 
-        if not data:
-            data = request.form
+        print("📦 Form Data received:", data)
 
-        print("📦 Data received:", data)
-
+        # Extract fields
         title = data.get("title", "Untitled")
-
-        content = (
-    data.get("content")
-    or data.get("entry")
-    or data.get("journal-entry")   
-    or ""
-)
-
+        content = data.get("content", "")
         mood = data.get("mood", "")
         tags = data.get("tags", "")
 
+        # Validate content
         if not content.strip():
             print("⚠️ Empty content")
             return jsonify({
@@ -1700,12 +1693,14 @@ def journaling():
                 "message": "Empty entry"
             })
 
+        # Get logged-in user
         user_id = session.get("user_id")
 
         if not user_id:
             print("❌ No user_id in session")
             return jsonify({"ok": False})
 
+        # Insert into DB
         conn = get_db(JOURNAL_DB)
 
         conn.execute(
@@ -1731,8 +1726,13 @@ def journaling():
         return jsonify({"ok": True})
 
     except Exception as e:
-        logger.exception("❌ Journal save failed: %s", e)
-        return jsonify({"ok": False})
+
+        print("❌ SAVE ERROR:", e)
+
+        return jsonify({
+            "ok": False,
+            "error": str(e)
+        })
     
 @app.route("/api/history/journals")
 @csrf.exempt
