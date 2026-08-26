@@ -1,4 +1,4 @@
-﻿annotated-types==0.7.0
+annotated-types==0.7.0
 anyio==4.9.0
 Authlib==1.7.2
 blinker==1.9.0
@@ -56,10 +56,8 @@ pydantic==2.11.7
 pydantic_core==2.33.2
 Pygments==2.19.2
 pyparsing==3.2.3
-pypiwin32==223
 python-dotenv==1.1.0
 pyttsx3==2.98
-pywin32==312
 regex==2024.11.6
 reportlab==4.4.3
 requests==2.32.4
