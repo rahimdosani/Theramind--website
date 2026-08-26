@@ -1,44 +1,53 @@
 import os
-import base64
-import json
-from email.message import EmailMessage
-from google.oauth2.credentials import Credentials
-from googleapiclient.discovery import build
 
-EMAIL_FROM = "Theramind <theramind12@gmail.com>"
-SCOPES = ["https://www.googleapis.com/auth/gmail.send"]
+import requests
+from dotenv import load_dotenv
 
-def _get_gmail_service():
-    token_b64 = os.getenv("GMAIL_TOKEN_BASE64")
-    if not token_b64:
-        raise RuntimeError("GMAIL_TOKEN_BASE64 not set")
+load_dotenv()
 
-    token_json = base64.b64decode(token_b64).decode("utf-8")
+MAILJET_API_KEY = os.getenv("MAILJET_API_KEY")
+MAILJET_SECRET_KEY = os.getenv("MAILJET_SECRET_KEY")
+MAILJET_SENDER_EMAIL = os.getenv("MAILJET_SENDER_EMAIL")
+MAILJET_SENDER_NAME = os.getenv("MAILJET_SENDER_NAME", "Theramind")
 
-    creds = Credentials.from_authorized_user_info(
-        json.loads(token_json),
-        SCOPES
-    )
-
-    return build("gmail", "v1", credentials=creds)
 
 def send_email(to_email: str, subject: str, body: str):
-    service = _get_gmail_service()
+    if not MAILJET_API_KEY or not MAILJET_SECRET_KEY:
+        raise RuntimeError("Mailjet API credentials are not configured")
 
-    msg = EmailMessage()
-    msg["From"] = EMAIL_FROM
-    msg["To"] = to_email
-    msg["Subject"] = subject
-    msg.set_content(body)
+    if not MAILJET_SENDER_EMAIL:
+        raise RuntimeError("MAILJET_SENDER_EMAIL is not configured")
 
-    encoded = base64.urlsafe_b64encode(
-        msg.as_bytes()
-    ).decode("utf-8")
+    payload = {
+        "Messages": [
+            {
+                "From": {
+                    "Email": MAILJET_SENDER_EMAIL,
+                    "Name": MAILJET_SENDER_NAME
+                },
+                "To": [
+                    {
+                        "Email": to_email
+                    }
+                ],
+                "Subject": subject,
+                "TextPart": body
+            }
+        ]
+    }
 
-    service.users().messages().send(
-        userId="me",
-        body={"raw": encoded}
-    ).execute()
+    response = requests.post(
+        "https://api.mailjet.com/v3.1/send",
+        auth=(MAILJET_API_KEY, MAILJET_SECRET_KEY),
+        json=payload,
+        timeout=15
+    )
+
+    if not response.ok:
+        raise RuntimeError(
+            f"Mailjet email failed: {response.status_code} - {response.text}"
+        )
+
 
 def send_otp_email(to_email: str, otp: str):
     body = f"""
@@ -54,5 +63,5 @@ This code will expire in 10 minutes.
     send_email(
         to_email=to_email,
         subject="Your Theramind verification code",
-        body=body,
+        body=body
     )

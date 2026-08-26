@@ -2,18 +2,25 @@
 *.pyc
 __pycache__/
 
-# Virtual environment
+# Virtual environments
 venv/
+.venv/
+venv_old/
+
+# Local databases
+*.db
 
 # Log files
 *.log
 
-# Environment file (for secrets)
+# Environment / secrets
 .env
+.env.*
 
-# VS Code settings
-.vscode/
-
+# Credentials / tokens
 gmail_credentials.json
 gmail_token.pickle
 token.json
+
+# VS Code settings
+.vscode/
