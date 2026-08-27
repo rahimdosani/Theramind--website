@@ -103,6 +103,9 @@ logger.setLevel(logging.INFO)
 
 # Compatibility labels: the existing route code passes these names to
 # get_db(). All application data is now stored in one PostgreSQL database.
+
+def now():
+    return datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 DB_DIR = BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 CONV_DB = os.path.join(DB_DIR, "conversations.db")
 JOURNAL_DB = os.path.join(DB_DIR, "journal.db")
@@ -155,20 +158,27 @@ class _PGCursor:
         return sql.replace("?", "%s")
 
     def execute(self, sql, params=None):
-        sql2 = self._sql(sql)
-        upper = sql2.lstrip().upper()
+    sql2 = self._sql(sql)
+    upper = sql2.lstrip().upper()
 
-        # Preserve the existing two c.lastrowid call sites.
-        if upper.startswith("INSERT INTO") and " RETURNING " not in upper:
-            sql2 = sql2.rstrip().rstrip(";") + " RETURNING id"
+    # Preserve the existing two c.lastrowid call sites.
+    if upper.startswith("INSERT INTO") and " RETURNING " not in upper:
+        sql2 = sql2.rstrip().rstrip(";") + " RETURNING id"
 
-        result = self._cursor.execute(sql2, params)
+    result = self._cursor.execute(sql2, params)
 
-        if upper.startswith("INSERT INTO"):
-            row = self._cursor.fetchone()
-            self._lastrowid = row[0] if row else None
+    if upper.startswith("INSERT INTO"):
+        row = self._cursor.fetchone()
 
-        return result
+        if row:
+            if isinstance(row, dict):
+                self._lastrowid = next(iter(row.values()))
+            else:
+                self._lastrowid = row[0]
+        else:
+            self._lastrowid = None
+
+    return result
 
     def executemany(self, sql, params_seq):
         return self._cursor.executemany(self._sql(sql), params_seq)
