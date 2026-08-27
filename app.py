@@ -5,7 +5,8 @@ import json
 import time
 import math
 import random
-import sqlite3
+import psycopg
+from psycopg import errors as psycopg_errors
 import logging
 import datetime
 import requests
@@ -95,270 +96,217 @@ logger.setLevel(logging.INFO)
 # ======================================================
 # DB paths & helpers
 # ======================================================
+# ======================================================
+# PostgreSQL database
+# ======================================================
+
+# Compatibility labels: the existing route code passes these names to
+# get_db(). All application data is now stored in one PostgreSQL database.
+DB_DIR = BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 CONV_DB = os.path.join(DB_DIR, "conversations.db")
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-
-JOURNAL_DB = os.path.abspath(
-    os.path.join(BASE_DIR, "journal.db")
-)
-
-print("📂 JOURNAL DB:", JOURNAL_DB)
+JOURNAL_DB = os.path.join(DB_DIR, "journal.db")
 MOOD_DB = os.path.join(DB_DIR, "mood_data.db")
-USER_DB = os.path.join(DB_DIR, "users.db")  # new DB for user/auth
+USER_DB = os.path.join(DB_DIR, "users.db")
 
-def now():
-    return datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+DATABASE_URL = os.getenv("DATABASE_URL")
+if not DATABASE_URL:
+    raise RuntimeError("DATABASE_URL is not set")
 
-def connect_for_setup(db_path):
-    """Open a bare connection for setup/migration"""
-    conn = sqlite3.connect(db_path, check_same_thread=False)
-    conn.row_factory = sqlite3.Row
-    return conn
 
-def get_db(db_path):
-    """
-    Get (and cache in flask.g) a sqlite connection for this DB.
-    """
-    key = f"db_{os.path.basename(db_path)}"
-    if not hasattr(g, key):
-        conn = sqlite3.connect(db_path, check_same_thread=False)
-        conn.row_factory = sqlite3.Row
+class _HybridRow:
+    def __init__(self, row):
+        self._row = row
 
-        # 🔹 Enable foreign key enforcement (required for ON DELETE CASCADE)
-        conn.execute("PRAGMA foreign_keys = ON")
+    def __getitem__(self, key):
+        if isinstance(key, int):
+            if hasattr(self._row, "values"):
+                return list(self._row.values())[key]
+            return self._row[key]
+        return self._row[key]
 
-        setattr(g, key, conn)
+    def __iter__(self):
+        return iter(self._row.values())
 
-    return getattr(g, key, None)
+    def keys(self):
+        return self._row.keys()
+
+    def values(self):
+        return self._row.values()
+
+    def items(self):
+        return self._row.items()
+
+    def get(self, key, default=None):
+        return self._row.get(key, default)
+
+    def __bool__(self):
+        return bool(self._row)
+
+class _PGCursor:
+    """Compatibility cursor for the app's existing SQLite-style SQL."""
+    def __init__(self, cursor):
+        self._cursor = cursor
+        self._lastrowid = None
+
+    @staticmethod
+    def _sql(sql):
+        # Convert SQLite qmark placeholders at the DB boundary.
+        return sql.replace("?", "%s")
+
+    def execute(self, sql, params=None):
+        sql2 = self._sql(sql)
+        upper = sql2.lstrip().upper()
+
+        # Preserve the existing two c.lastrowid call sites.
+        if upper.startswith("INSERT INTO") and " RETURNING " not in upper:
+            sql2 = sql2.rstrip().rstrip(";") + " RETURNING id"
+
+        result = self._cursor.execute(sql2, params)
+
+        if upper.startswith("INSERT INTO"):
+            row = self._cursor.fetchone()
+            self._lastrowid = row[0] if row else None
+
+        return result
+
+    def executemany(self, sql, params_seq):
+        return self._cursor.executemany(self._sql(sql), params_seq)
+
+    def fetchone(self):
+        row = self._cursor.fetchone()
+        return None if row is None else _HybridRow(row)
+
+    def fetchall(self):
+        return [_HybridRow(row) for row in self._cursor.fetchall()]
+
+    @property
+    def rowcount(self):
+        return self._cursor.rowcount
+
+    @property
+    def lastrowid(self):
+        return self._lastrowid
+
+    def close(self):
+        return self._cursor.close()
+
+    def __getattr__(self, name):
+        return getattr(self._cursor, name)
+
+
+class _PGConnection:
+    """Compatibility wrapper around psycopg for the existing application."""
+    def __init__(self, connection):
+        self._connection = connection
+
+    def cursor(self):
+        return _PGCursor(self._connection.cursor())
+
+    def execute(self, sql, params=None):
+        return self.cursor().execute(sql, params)
+
+    def commit(self):
+        return self._connection.commit()
+
+    def rollback(self):
+        return self._connection.rollback()
+
+    def close(self):
+        return self._connection.close()
+
+    @property
+    def row_factory(self):
+        return None
+
+    @row_factory.setter
+    def row_factory(self, value):
+        # Existing SQLite code assigns sqlite3.Row. PostgreSQL rows are
+        # converted to _HybridRow by _PGCursor instead.
+        pass
+
+    def __getattr__(self, name):
+        return getattr(self._connection, name)
+
+
+def _postgres_connection():
+    return _PGConnection(psycopg.connect(DATABASE_URL))
+
+
+def connect_for_setup(db_path=None):
+    """Compatibility connection; schema is managed in PostgreSQL."""
+    return _postgres_connection()
+
+
+def get_db(db_path=None):
+    """Get and cache the single PostgreSQL connection for this request."""
+    if not hasattr(g, "db"):
+        g.db = _postgres_connection()
+    return g.db
+
 
 @app.teardown_appcontext
 def close_dbs(exception=None):
-    """
-    Close any cached DB connections on appcontext teardown.
-    """
-    for attr in list(g.__dict__.keys()):
-        if attr.startswith("db_"):
-            conn = getattr(g, attr)
+    """Close the PostgreSQL connection at request teardown."""
+    conn = g.pop("db", None)
+    if conn is not None:
+        try:
+            if exception is not None:
+                conn.rollback()
+            else:
+                conn.commit()
+        except Exception:
+            logger.exception("Error finalizing PostgreSQL transaction")
             try:
-                conn.close()
+                conn.rollback()
             except Exception:
-                logger.exception("Error closing DB connection")
-            delattr(g, attr)
+                pass
+        finally:
+            conn.close()
 
 # ======================================================
-# Database setup (including users table)
+# Database setup
 # ======================================================
-def setup_conversations_db():
-    conn = connect_for_setup(CONV_DB)
-    c = conn.cursor()
-
-    # Main conversations table
-    c.execute(
-        """CREATE TABLE IF NOT EXISTS conversations (
-               id INTEGER PRIMARY KEY AUTOINCREMENT,
-               user_id INTEGER NOT NULL,
-               title TEXT NOT NULL,
-               history TEXT NOT NULL,
-               created_at TEXT NOT NULL,
-               FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
-           )"""
-    )
-
-    # 🔹 INDEX for fast per-user queries (IMPORTANT)
-    c.execute(
-        "CREATE INDEX IF NOT EXISTS idx_conv_user ON conversations(user_id)"
-    )
-
-    conn.commit()
-    conn.close()
-
 
 def setup_databases():
-    # mood_data
-    conn = connect_for_setup(MOOD_DB)
-    c = conn.cursor()
-    c.execute("""
-        CREATE TABLE IF NOT EXISTS mood_logs (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            user_id INTEGER NOT NULL,
-            date TEXT,
-            mood TEXT,
-            message TEXT,
-            FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
-        )
-    """)
-    c.execute("CREATE INDEX IF NOT EXISTS idx_mood_user ON mood_logs(user_id)")
-    conn.commit()
-    conn.close()
+    """
+    PostgreSQL schema is managed separately by schema.sql.
+    Do not create or migrate SQLite databases at application startup.
+    """
+    logger.info("PostgreSQL database ready; skipping SQLite setup.")
 
-    # journal
-       
-    conn = connect_for_setup(JOURNAL_DB)
-    c = conn.cursor()
-
-    c.execute("""
-        CREATE TABLE IF NOT EXISTS journal_entries (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            user_id INTEGER NOT NULL,
-            date TEXT,
-            content TEXT,
-            FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
-        )
-    """)
-
-    # 🔧 MIGRATION — Add missing columns safely
-    c.execute("PRAGMA table_info(journal_entries)")
-    columns = [col[1] for col in c.fetchall()]
-
-    if "title" not in columns:
-        c.execute("ALTER TABLE journal_entries ADD COLUMN title TEXT")
-
-    if "mood" not in columns:
-        c.execute("ALTER TABLE journal_entries ADD COLUMN mood TEXT")
-
-    if "tags" not in columns:
-        c.execute("ALTER TABLE journal_entries ADD COLUMN tags TEXT")
-
-    c.execute(
-        "CREATE INDEX IF NOT EXISTS idx_journal_user ON journal_entries(user_id)"
-    )
-
-    conn.commit()
-    conn.close()
-    
-    
-
-    # conversations + rest
-    setup_conversations_db()
-    setup_users_db()
-    setup_user_profile()
-    setup_otp_table()
-    
-    conn = connect_for_setup(USER_DB)
-    c = conn.cursor()
-    c.execute("""
-        CREATE TABLE IF NOT EXISTS admin_logs (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            admin_id INTEGER,
-            action TEXT,
-            target_user_id INTEGER,
-            timestamp TEXT
-             )
-    """)
-    conn.commit()
-    conn.close()
-    
-    
-
-
-    # memories table for short summaries
-    conn = connect_for_setup(CONV_DB)
-    c = conn.cursor()
-    c.execute(
-        """CREATE TABLE IF NOT EXISTS memories (
-               id INTEGER PRIMARY KEY AUTOINCREMENT,
-               conv_id INTEGER NOT NULL,
-               summary TEXT,
-               updated_at TEXT,
-               FOREIGN KEY (conv_id) REFERENCES conversations(id) ON DELETE CASCADE
-           )"""
-    )
-    conn.commit()
-    conn.close()
-
-
-
-def setup_users_db():
-    conn = connect_for_setup(USER_DB)
-    c = conn.cursor()
-
-    # Create table with auth_provider included
-    c.execute("""
-        CREATE TABLE IF NOT EXISTS users (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            username TEXT UNIQUE NOT NULL,
-            email TEXT UNIQUE NOT NULL,
-            password_hash TEXT NOT NULL,
-            display_name TEXT,
-            intent TEXT,
-            auth_provider TEXT DEFAULT 'email',
-            email_verified INTEGER DEFAULT 0,
-            is_admin INTEGER DEFAULT 0,
-            created_at TEXT NOT NULL,
-            last_login TEXT
-        )
-    """)
-
-    # Ensure column exists (for older DB versions)
-    c.execute("PRAGMA table_info(users)")
-    columns = [col[1] for col in c.fetchall()]
-
-    if "auth_provider" not in columns:
-        c.execute("ALTER TABLE users ADD COLUMN auth_provider TEXT DEFAULT 'email'")
-
-    # Add useful indexes
-    c.execute("CREATE INDEX IF NOT EXISTS idx_users_email ON users(email)")
-    c.execute("CREATE INDEX IF NOT EXISTS idx_users_created ON users(created_at)")
-
-    conn.commit()
-    conn.close()
-
-def setup_user_profile():
-    conn = connect_for_setup(USER_DB)
-    c = conn.cursor()
-    c.execute("""
-        CREATE TABLE IF NOT EXISTS user_profile (
-            user_id INTEGER PRIMARY KEY,
-            goals TEXT
-        )
-    """)
-    conn.commit()
-    conn.close()
-    
-def setup_otp_table():
-    conn = connect_for_setup(USER_DB)
-    c = conn.cursor()
-    c.execute("""
-        CREATE TABLE IF NOT EXISTS email_otps (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            email TEXT NOT NULL,
-            otp TEXT NOT NULL,
-            expires_at INTEGER NOT NULL
-        )
-    """)
-    conn.commit()
-    conn.close()
-    
-    
-    # ensure an admin exists if ADMIN_PASSWORD provided
-    create_admin_if_missing()
 
 def create_admin_if_missing():
     """
     Create initial admin user from environment variables.
-    If ADMIN_PASSWORD is not set, we do not create a seeded admin (safer).
+    If ADMIN_PASSWORD is not set, no seeded admin is created.
     """
     if not ADMIN_PASSWORD:
         logger.info("ADMIN_PASSWORD not provided: skipping auto-create admin")
         return
-    # Use a direct connection to avoid app context caching issues during setup
-    conn = sqlite3.connect(USER_DB, check_same_thread=False)
-    conn.row_factory = sqlite3.Row
+
+    conn = _postgres_connection()
     c = conn.cursor()
-    c.execute("SELECT id FROM users WHERE username = ?", (ADMIN_USER,))
-    if c.fetchone():
+
+    try:
+        c.execute("SELECT id FROM users WHERE username = ?", (ADMIN_USER,))
+        if c.fetchone():
+            return
+
+        pw_hash = generate_password_hash(ADMIN_PASSWORD)
+        c.execute(
+            "INSERT INTO users "
+            "(username, email, password_hash, email_verified, is_admin, created_at) "
+            "VALUES (?, ?, ?, ?, ?, ?)",
+            (ADMIN_USER, "", pw_hash, 1, 1, now())
+        )
+        conn.commit()
+        logger.info("Admin user created: %s", ADMIN_USER)
+    finally:
         conn.close()
-        return
-    pw_hash = generate_password_hash(ADMIN_PASSWORD)
-    c.execute(
-        "INSERT INTO users (username, email, password_hash, email_verified, is_admin, created_at) VALUES (?, ?, ?, ?, ?, ?)",
-        (ADMIN_USER, "", pw_hash, 1, 1, now())
-    )
-    conn.commit()
-    conn.close()
-    logger.info("Admin user created: %s", ADMIN_USER)
+
 
 setup_databases()
+create_admin_if_missing()
 
 # ======================================================
 # Session / conversation helpers
@@ -1256,7 +1204,6 @@ def user_login():
         password = request.form.get("password", "")
 
         conn = get_db(USER_DB)
-        conn.row_factory = sqlite3.Row
         c = conn.cursor()
 
         c.execute("""
@@ -1324,7 +1271,6 @@ def auth_google_callback():
     name = user_info.get("name") or email.split("@")[0]
 
     conn = get_db(USER_DB)
-    conn.row_factory = sqlite3.Row
     c = conn.cursor()
 
     c.execute("SELECT * FROM users WHERE email = ?", (email,))
@@ -1355,7 +1301,6 @@ def oauth_confirm():
         return redirect(url_for("user_login"))
 
     conn = get_db(USER_DB)
-    conn.row_factory = sqlite3.Row
     c = conn.cursor()
 
     #  Check if user already exists
@@ -1424,7 +1369,6 @@ def verify_signup_otp():
         return redirect(url_for("verify_signup_otp"))
 
     conn = get_db(USER_DB)
-    conn.row_factory = sqlite3.Row
     c = conn.cursor()
 
     c.execute(
@@ -1482,7 +1426,6 @@ def signup():
             return redirect(url_for("signup"))
 
         conn = get_db(USER_DB)
-        conn.row_factory = sqlite3.Row
         c = conn.cursor()
 
         c.execute("SELECT id, email_verified FROM users WHERE email = ?", (email,))
@@ -1575,16 +1518,12 @@ def profile():
     display_name = get_display_name(user)
 
     conn_users = get_db(USER_DB)
-    conn_users.row_factory = sqlite3.Row
 
     conn_conv = get_db(CONV_DB)
-    conn_conv.row_factory = sqlite3.Row
 
     conn_journal = get_db(JOURNAL_DB)
-    conn_journal.row_factory = sqlite3.Row
 
     conn_mood = get_db(MOOD_DB)
-    conn_mood.row_factory = sqlite3.Row
 
     # ---------- PASSWORD UPDATE ----------
     if request.method == "POST" and "current_password" in request.form:
@@ -1691,8 +1630,7 @@ def journaling():
 
         user_id = session.get("user_id")
 
-        conn = sqlite3.connect(JOURNAL_DB)
-        conn.row_factory = sqlite3.Row
+        conn = _postgres_connection()
 
         conn.execute("""
             INSERT INTO journal_entries
@@ -1727,8 +1665,7 @@ def get_journal_history():
 
     try:
 
-        conn = sqlite3.connect(JOURNAL_DB)
-        conn.row_factory = sqlite3.Row
+        conn = _postgres_connection()
 
         rows = conn.execute("""
             SELECT id, date, title, content, mood, tags
@@ -2011,7 +1948,7 @@ def admin_create_user():
 
         return jsonify({"status": "ok", "id": new_user_id})
 
-    except sqlite3.IntegrityError:
+    except psycopg_errors.UniqueViolation:
         return jsonify({"status": "failed", "message": "username or email already exists"}), 400
 
 # ---------- Admin management API endpoints (attach near other /admin routes) ----------
@@ -2171,7 +2108,7 @@ def admin_stats():
 @admin_required
 def admin_health():
     try:
-        conn = sqlite3.connect(USER_DB)
+        conn = _postgres_connection()
         conn.execute("SELECT 1")
         conn.close()
 
