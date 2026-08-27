@@ -1,11 +1,12 @@
 from werkzeug.middleware.proxy_fix import ProxyFix
+import psycopg
+from psycopg.rows import dict_row
 import os
 import re
 import json
 import time
 import math
 import random
-import psycopg
 from psycopg import errors as psycopg_errors
 import logging
 import datetime
