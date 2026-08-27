@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Theramind – Journal</title>
     <link rel="icon" type="image/png" href="{{ url_for('static', filename='journal.png') }}">
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&family=Shadows+Into+Light&family=Merriweather&family=Roboto+Mono&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&family=Shadows+Into+Light&family=Merriweather&family=Roboto+Mono&family=Inter:wght@400;600&family=Playfair+Display:wght@400;600&family=Source+Serif+4:wght@400;600&display=swap" rel="stylesheet" />
     <script src="https://cdn.jsdelivr.net/npm/tsparticles@2.12.0/tsparticles.bundle.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
@@ -38,18 +38,24 @@
   * { box-sizing: border-box; }
 
   body {
-    margin: 0;
-    font-family: "Poppins", sans-serif;
-    background: var(--background);
-    color: var(--foreground);
-    transition: background 0.3s, color 0.3s;
-  }
+  margin: 0;
+  font-family: "Poppins", sans-serif;
+  background:
+    radial-gradient(circle at 15% 10%, rgba(79, 70, 229, 0.08), transparent 30%),
+    radial-gradient(circle at 85% 20%, rgba(6, 182, 212, 0.08), transparent 30%),
+    var(--background);
+  color: var(--foreground);
+  transition: background 0.3s, color 0.3s;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
 
   #tsparticles {
-    position: fixed;
-    inset: 0;
-    z-index: 1;
-  }
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+}
 
   /* =====================
     Navbar
@@ -195,89 +201,238 @@
     Journal Layout
   ===================== */
   .journal-container {
-    max-width: 900px;
-    margin: 100px auto;
-    padding: 40px;
-    background: rgba(255, 255, 255, 0.08);
-    border-radius: 20px;
-    backdrop-filter: blur(12px);
-    position: relative;
-    z-index: 2;
-    box-shadow: 0 8px 40px rgba(0, 0, 0, 0.2);
-  }
+  width: min(1000px, calc(100% - 40px));
+  margin: 50px auto 80px;
+  padding: 38px;
+  background: rgba(255, 255, 255, 0.72);
+  border: 1px solid rgba(255, 255, 255, 0.65);
+  border-radius: 28px;
+  backdrop-filter: blur(18px) saturate(160%);
+  -webkit-backdrop-filter: blur(18px) saturate(160%);
+  position: relative;
+  z-index: 2;
+  box-shadow:
+    0 20px 60px rgba(31, 38, 135, 0.12),
+    0 4px 20px rgba(0, 0, 0, 0.06);
+}
 
-  body.dark-theme .journal-container {
-    background-color: rgba(44, 44, 62, 0.8);
-  }
-
+body.dark-theme .journal-container {
+  background: rgba(20, 22, 40, 0.78);
+  border-color: rgba(255, 255, 255, 0.08);
+  box-shadow:
+    0 20px 60px rgba(0, 0, 0, 0.35),
+    0 4px 20px rgba(0, 0, 0, 0.2);
+}
   h2 {
-    font-size: 2rem;
-    margin-bottom: 20px;
-  }
+  font-size: clamp(1.8rem, 4vw, 2.5rem);
+  margin: 0 0 8px;
+  font-weight: 700;
+  letter-spacing: -0.5px;
+}
 
-  .mood-select,
-  .prompt-section,
-  .entry-section,
-  .history-section {
-    margin-top: 24px;
-  }
+.journal-container > h2::after {
+  content: "A quiet space to put your thoughts into words.";
+  display: block;
+  margin-top: 8px;
+  font-size: 0.95rem;
+  font-weight: 400;
+  color: #6b7280;
+  letter-spacing: 0;
+}
+
+body.dark-theme .journal-container > h2::after {
+  color: #a8afc2;
+}
+
 
   select,
-  textarea,
-  input[type="text"] {
-    width: 100%;
-    margin-top: 10px;
-    padding: 12px;
-    font-size: 1rem;
-    border-radius: 10px;
-    border: 1px solid #ccc;
-    background-color: inherit;
-    color: inherit;
-  }
+textarea,
+input[type="text"] {
+  width: 100%;
+  margin-top: 10px;
+  padding: 14px 16px;
+  font-size: 1rem;
+  font-family: inherit;
+  border-radius: 14px;
+  border: 1px solid rgba(107, 114, 128, 0.25);
+  background: rgba(255, 255, 255, 0.72);
+  color: inherit;
+  outline: none;
+  transition:
+    border-color 0.25s ease,
+    box-shadow 0.25s ease,
+    background 0.25s ease;
+}
+
+select:focus,
+textarea:focus,
+input[type="text"]:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.10);
+}
+
+textarea {
+  min-height: 300px;
+  resize: vertical;
+  line-height: 1.8;
+  padding: 20px;
+}
+
+body.dark-theme select,
+body.dark-theme textarea,
+body.dark-theme input[type="text"] {
+  background: rgba(15, 18, 37, 0.75);
+  border-color: rgba(255, 255, 255, 0.12);
+  color: #f5f7ff;
+}
+
+body.dark-theme select:focus,
+body.dark-theme textarea:focus,
+body.dark-theme input[type="text"]:focus {
+  border-color: var(--accent);
+}
 
   /* =====================
     Buttons
   ===================== */
   .prompt-section button,
-  .actions button,
-  .speech-button,
-  #font-select,
-  #export-all,
-  #export-pdf {
-    padding: 12px 18px;
-    border: none;
-    border-radius: 10px;
-    background-color: var(--primary);
-    color: var(--button-color);
-    font-weight: 600;
-    cursor: pointer;
-    margin: 10px 10px 0 0;
-    transition: background-color 0.2s;
-  }
+.actions button,
+.speech-button,
+#font-select,
+#export-all,
+#export-pdf {
+  padding: 11px 17px;
+  border: none;
+  border-radius: 12px;
+  background: linear-gradient(135deg, var(--primary), var(--accent));
+  color: #fff;
+  font-family: inherit;
+  font-weight: 600;
+  cursor: pointer;
+  margin: 10px 8px 0 0;
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease,
+    opacity 0.2s ease;
+}
 
-  .prompt-section button:hover,
-  .actions button:hover,
-  .speech-button:hover,
-  #font-select:hover,
-  #export-all:hover,
-  #export-pdf:hover {
-    background-color: var(--accent);
-  }
+.prompt-section button:hover,
+.actions button:hover,
+.speech-button:hover,
+#font-select:hover,
+#export-all:hover,
+#export-pdf:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(79, 70, 229, 0.22);
+}
+
+.prompt-section button:active,
+.actions button:active,
+.speech-button:active {
+  transform: translateY(0);
+}
+.prompt-section {
+  padding: 24px;
+  border-radius: 20px;
+  background:
+    linear-gradient(
+      135deg,
+      rgba(79, 70, 229, 0.08),
+      rgba(6, 182, 212, 0.08)
+    );
+  border: 1px solid rgba(79, 70, 229, 0.10);
+}
+
+.prompt-section p {
+  margin: 16px 0 0;
+  padding: 18px;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.55);
+  font-family: "Merriweather", serif;
+  font-size: 1.05rem;
+  line-height: 1.7;
+}
+
+body.dark-theme .prompt-section {
+  background:
+    linear-gradient(
+      135deg,
+      rgba(79, 70, 229, 0.12),
+      rgba(79, 209, 197, 0.08)
+    );
+}
+
+body.dark-theme .prompt-section p {
+  background: rgba(255, 255, 255, 0.04);
+}
 
   /* =====================
     Illustration
   ===================== */
   .illustration {
-    text-align: center;
-    margin-top: 16px;
-  }
+  text-align: center;
+  margin-top: 22px;
+  min-height: 100px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
 
-  .illustration img {
-    max-width: 220px;
-    border-radius: 12px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-    animation: float 3s ease-in-out infinite;
-  }
+.illustration img {
+  width: 90px;
+  height: 90px;
+  object-fit: contain;
+  border-radius: 50%;
+  box-shadow: 0 10px 30px rgba(79, 70, 229, 0.15);
+  animation: float 3s ease-in-out infinite;
+}
+.entry-section {
+  padding: 24px;
+  border-radius: 22px;
+  background: rgba(255, 255, 255, 0.48);
+  border: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+body.dark-theme .entry-section {
+  background: rgba(255, 255, 255, 0.035);
+  border-color: rgba(255, 255, 255, 0.07);
+}
+
+#entry-title {
+  font-size: 1.15rem;
+  font-weight: 600;
+}
+
+#journal-entry {
+  font-family: "Shadows Into Light", cursive;
+  font-size: 1.15rem;
+}
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px;
+  margin-top: 4px;
+}
+
+.actions #font-select {
+  appearance: none;
+  background: linear-gradient(135deg, var(--primary), var(--accent));
+  color: white;
+  width: auto;
+  margin-top: 10px;
+}
+
+.search-tags {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-top: 18px;
+}
+
+.search-tags input {
+  margin-top: 0;
+}
 
   @keyframes float {
     0%, 100% { transform: translateY(0); }
@@ -288,36 +443,144 @@
     Insights
   ===================== */
   .insights-card {
-    margin: 16px 0;
-    padding: 14px 16px;
-    border-radius: 14px;
-    background: var(--sidebar-bg);
-    backdrop-filter: blur(14px);
-    box-shadow: 0 6px 18px rgba(0,0,0,0.08);
+  margin: 20px 0;
+  padding: 20px;
+  border-radius: 18px;
+  background:
+    linear-gradient(
+      135deg,
+      rgba(79, 70, 229, 0.07),
+      rgba(6, 182, 212, 0.06)
+    );
+  border: 1px solid rgba(79, 70, 229, 0.10);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.05);
+}
+
+.insights-card h3 {
+  margin: 0 0 12px;
+  font-size: 1rem;
+  color: var(--primary);
+}
+
+.insights-card ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.insights-card li {
+  font-size: 0.9rem;
+  opacity: 0.9;
+  margin-bottom: 8px;
+  line-height: 1.5;
+}
+
+.insights-card.hidden {
+  display: none;
+}
+.journal-history {
+  margin-top: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.entry-item {
+  padding: 16px 18px;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.55);
+  border: 1px solid rgba(0, 0, 0, 0.05);
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.entry-item:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
+}
+
+.actions button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+@media (max-width: 600px) {
+  .entry-item > div {
+    flex-wrap: wrap;
   }
 
-  .insights-card h3 {
-    margin-bottom: 8px;
-    font-size: 1rem;
-    color: var(--primary);
+  .entry-actions {
+    width: 100%;
+    justify-content: flex-end;
   }
 
-  .insights-card ul {
-    list-style: none;
-    padding: 0;
-    margin: 0;
+  .view-btn,
+  .delete-btn {
+    margin-left: 0;
   }
 
-  .insights-card li {
-    font-size: 0.9rem;
-    opacity: 0.85;
-    margin-bottom: 6px;
+  .search-tags {
+    grid-template-columns: 1fr;
   }
+}
 
-  .insights-card.hidden {
-    display: none;
-  }
+body.dark-theme .entry-item {
+  background: rgba(255, 255, 255, 0.04);
+  border-color: rgba(255, 255, 255, 0.07);
+}
 
+.entry-actions {
+  display: flex;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.view-btn,
+.delete-btn {
+  padding: 7px 11px;
+  border-radius: 9px;
+  border: none;
+  cursor: pointer;
+  font-size: 13px;
+  margin-left: 0;
+  color: white;
+  transition: transform 0.2s ease;
+}
+
+.view-btn:hover,
+.delete-btn:hover {
+  transform: translateY(-1px);
+}
+
+.view-btn {
+  background: linear-gradient(135deg, #4f46e5, #06b6d4);
+}
+
+.delete-btn {
+  background: linear-gradient(135deg, #ef4444, #f97316);
+}
+.modal-close {
+  float: right;
+  font-size: 1.5rem;
+  cursor: pointer;
+  opacity: 0.7;
+}
+
+.modal-close:hover {
+  opacity: 1;
+}
+
+.modal-content h3 {
+  margin-top: 0;
+  margin-bottom: 14px;
+}
+
+.modal-content p {
+  line-height: 1.7;
+  margin: 10px 0;
+}
   /* =====================
     Dark Mode Select Fix
   ===================== */
@@ -481,6 +744,26 @@
       display: none !important;
     }
   }
+  .modal-close {
+  float: right;
+  font-size: 1.5rem;
+  cursor: pointer;
+  opacity: 0.7;
+}
+
+.modal-close:hover {
+  opacity: 1;
+}
+
+.modal-content h3 {
+  margin-top: 0;
+  margin-bottom: 14px;
+}
+
+.modal-content p {
+  line-height: 1.7;
+  margin: 10px 0;
+}
 
   </style>
 
@@ -579,6 +862,7 @@
 
           </select>
           <button onclick="exportPDF()">📄 Export PDF</button>
+          <button onclick="exportAll()">📦 Export All</button>
         </div>
         <div class="search-tags">
           <input type="text" placeholder="Search journal..." oninput="searchJournal(this.value)">
@@ -615,828 +899,1149 @@
   </div>
 
 
-  <script>
+    <script>
     const JOURNAL_DRAFT_KEY = "journalDraft";
 
-  function autoSaveDraft() {
-    const entry = document.getElementById("journal-entry").value.trim();
-    if (!entry) return;
+    let journalData = [];
+    let deleteIndex = null;
+    let recognition = null;
+    let recognizing = false;
+    let saveInProgress = false;
 
-    localStorage.setItem(
-      JOURNAL_DRAFT_KEY,
-      JSON.stringify({
-        title: document.getElementById("entry-title").value,
-        mood: document.getElementById("moodSelect").value,
-        content: entry,
-        timestamp: Date.now()
-      })
-    );
+    /* =========================
+       Small utilities
+    ========================= */
 
-    
-  }
+    function showToast(message) {
+      const toast = document.getElementById("toast");
+      if (!toast) return;
 
-    // --- Session-aware Journal Greeting ---
-  const JOURNAL_USER_NAME =
-    localStorage.getItem("userName") || "Friend";
-  const JOURNAL_GREETING_SHOWN =
-    sessionStorage.getItem("journalGreetingShown") === "true";
+      toast.textContent = message;
+      toast.classList.add("show");
 
-  function setJournalGreeting() {
-    const el = document.getElementById("journalGreeting");
-    if (!el) return;
-
-    if (!JOURNAL_GREETING_SHOWN) {
-      el.textContent = JOURNAL_USER_NAME
-        ? `Welcome back, ${JOURNAL_USER_NAME}. How are you feeling today?`
-        : "Welcome back. How are you feeling today?";
-
-      sessionStorage.setItem("journalGreetingShown", "true");
-    } else {
-      el.textContent = "How are you feeling right now?";
-    }
-  }
-
-  function generateReflectionInsights() {
-    if (!journalData || journalData.length < 1) return;
-
-    const insightsEl = document.getElementById("reflectionInsights");
-    if (!insightsEl) return;
-
-    // Filter last 7 days
-    const oneWeekAgo = Date.now() - 7 * 24 * 60 * 60 * 1000;
-    const recentEntries = journalData.filter(e => {
-    const d = new Date(e.date).getTime();
-    return !isNaN(d) && d >= oneWeekAgo;
-  });
-
-
-    if (recentEntries.length === 0) return;
-
-    // Mood frequency
-    const moodCount = {};
-    recentEntries.forEach(e => {
-      if (e.mood) moodCount[e.mood] = (moodCount[e.mood] || 0) + 1;
-    });
-
-    const dominantMood = Object.keys(moodCount).reduce((a, b) =>
-      moodCount[a] > moodCount[b] ? a : b
-    );
-
-    // Writing length vs mood
-    const lengthByMood = {};
-    recentEntries.forEach(e => {
-      if (!e.mood || !e.content) return;
-      if (!lengthByMood[e.mood]) lengthByMood[e.mood] = [];
-      lengthByMood[e.mood].push(e.content.length);
-    });
-
-    let longestMood = null;
-    let longestAvg = 0;
-    Object.keys(lengthByMood).forEach(m => {
-      const avg =
-        lengthByMood[m].reduce((a, b) => a + b, 0) /
-        lengthByMood[m].length;
-      if (avg > longestAvg) {
-        longestAvg = avg;
-        longestMood = m;
-      }
-    });
-
-    // Populate UI
-    document.getElementById("insightMood").textContent =
-      `Most frequent mood this week: ${dominantMood}`;
-
-    document.getElementById("insightPattern").textContent =
-      longestMood
-        ? `You tend to write longer entries when you feel ${longestMood}.`
-        : `Your writing patterns are becoming more consistent.`;
-
-    document.getElementById("insightEncouragement").textContent =
-      `Regular journaling helps build self-awareness over time.`;
-
-    insightsEl.classList.remove("hidden");
-  }
-
-  document.addEventListener("DOMContentLoaded", () => {
-    tsParticles.load("tsparticles", {
-      background: { color: { value: "transparent" } },
-    fullScreen: false,
-    particles: {
-      number: {
-        value: 70,
-        density: { enable: true, area: 800 }
-      },
-      color: {
-        value: ["#6b7cff", "#67e8f9"]
-      },
-      shape: { type: "circle" },
-      opacity: {
-        value: 0.35,
-        random: true
-      },
-      size: {
-        value: { min: 1.5, max: 3.5 }
-      },
-      links: {
-        enable: true,
-        distance: 120,
-        color: "#aab8ff",
-        opacity: 0.15,
-        width: 1
-      },
-      move: {
-        enable: true,
-        speed: 0.6,
-        direction: "none",
-        outModes: "out"
-      }
-    }
-  });
-
-
-    const themeToggle = document.getElementById("themeToggle");
-    const prefersDark = localStorage.getItem("theme") === "dark";
-    if(prefersDark){ document.body.classList.add("dark-theme"); themeToggle.textContent = "☀️ Theme"; }
-    else{ document.body.classList.remove("dark-theme"); themeToggle.textContent = "🌙 Theme"; }
-
-    themeToggle.addEventListener("click", toggleTheme);
-
-    const draft = localStorage.getItem(JOURNAL_DRAFT_KEY);
-    if (draft) {
-      try {
-        const d = JSON.parse(draft);
-        document.getElementById("entry-title").value = d.title || "";
-        document.getElementById("moodSelect").value = d.mood || "";
-        document.getElementById("journal-entry").value = d.content || "";
-        showToast("Draft restored");
-      } catch (e) {
-        console.warn("Failed to restore journal draft", e);
-      }
+      clearTimeout(showToast._timer);
+      showToast._timer = setTimeout(() => {
+        toast.classList.remove("show");
+      }, 2500);
     }
 
-    loadHistory();
-    updateIllustrationAndPrompt();
-    setInterval(autoSaveDraft, 5000);
-    setJournalGreeting();
-  });
-
-
-  function showToast(msg){ const toast=document.getElementById("toast"); toast.textContent=msg; toast.classList.add("show"); setTimeout(()=>{toast.classList.remove("show");},2500); }
-
-  function toggleTheme(){
-    const themeToggle=document.getElementById("themeToggle");
-    document.body.classList.toggle("dark-theme");
-    const isDark=document.body.classList.contains("dark-theme");
-    localStorage.setItem("theme", isDark?"dark":"light");
-    themeToggle.textContent=isDark?"☀️ Theme":"🌙 Theme";
-    showToast("Theme changed");
-  }
-
-  // --- Prompts + Mood Images ---
-  const promptMap = {
-    "😃 Happy": ["What made you smile today?","Who brought joy into your life today?","What small victory did you achieve today?","Which moment made you laugh out loud?","What are you grateful for today?","Describe a joyful interaction you had.","What inspired your happiness today?","How can you spread positivity?","Share a happy memory from today.","What energized you today?"],
-    "😔 Sad": ["What’s weighing on your heart?","How are you comforting yourself today?","What made you feel low today?","Describe a moment of sadness today.","What would help lighten your mood?","Who or what can support you today?","Reflect on a challenging emotion.","How can you nurture yourself?","What lesson does your sadness teach?","Share a moment of vulnerability today."],
-    "😠 Angry": ["What triggered your anger?","How can you express it constructively?","Which situation frustrated you?","What could have gone differently?","How can you release anger safely?","Identify any unfair treatment today.","How did you respond to your anger?","What emotions lie beneath your anger?","Share an experience where you stayed calm.","What steps can prevent anger tomorrow?"],
-    "😨 Anxious": ["What's causing anxiety right now?","What can you control in this moment?","Which thoughts are overwhelming you?","How can you ground yourself?","What support can you seek?","Describe your anxious feelings.","What steps help reduce stress?","Identify triggers for anxiety today.","Reflect on past moments you managed anxiety.","What reassures you?"],
-    "😌 Calm": ["What brings you peace?","Today I feel calm because…","Describe a serene moment you had.","What activities help you relax?","Who contributes to your tranquility?","How did you manage stress today?","Reflect on mindful breathing moments.","What music or sounds soothe you?","Share a quiet moment from today.","What positive thoughts keep you grounded?"],
-    "😵 Overwhelmed": ["What’s making you feel overwhelmed?","Break down your feelings into parts.","Identify top stressors today.","Which tasks are weighing on you?","What is outside your control?","What small wins occurred today?","How can you prioritize tasks?","Who can help you manage responsibilities?","Reflect on emotions and reactions.","How can you reset and recharge?"]
-  };
-  const imageMap = {
-    "😃 Happy":"https://img.icons8.com/emoji/96/000000/smiling-face-with-smiling-eyes.png",
-    "😔 Sad":"https://img.icons8.com/emoji/96/000000/pensive-face.png",
-    "😠 Angry":"https://img.icons8.com/emoji/96/000000/pouting-face.png",
-    "😨 Anxious":"https://img.icons8.com/emoji/96/000000/fearful-face.png",
-    "😌 Calm":"https://img.icons8.com/emoji/96/000000/relieved-face.png",
-    "😵 Overwhelmed":"https://img.icons8.com/emoji/96/000000/dizzy-face.png"
-  };
-
-  function updateIllustrationAndPrompt() {
-    const select = document.getElementById("moodSelect");
-    if (!select || !select.value || !imageMap[select.value]) return;
-
-    document.getElementById("mood-image").src = imageMap[select.value];
-    generatePrompt();
-  }
-
-
-  function generatePrompt() {
-    const mood = document.getElementById("moodSelect").value;
-    const prompts = promptMap[mood];
-    const prompt = prompts[Math.floor(Math.random() * prompts.length)];
-    document.getElementById("prompt-display").textContent = prompt;
-    document.getElementById("journal-entry").placeholder = prompt.startsWith("Today") ? prompt : "";
-  }
-
-  // --- Journal Storage + Functions ---
-  let journalData = [];
-
-async function loadHistory() {
-
-  try {
-
-    const res = await fetch(
-      "/api/history/journals",
-      {
-        credentials: "include"
-      }
-    );
-
-    const data = await res.json();
-
-    console.log("📘 Loaded history:", data);
-
-    // 🔥 IMPORTANT — store globally
-    journalData = data || [];
-
-    const historyDiv =
-      document.getElementById("history");
-
-    historyDiv.innerHTML = "";
-
-    if (journalData.length === 0) {
-
-      historyDiv.innerHTML =
-        "<p>No journal entries yet.</p>";
-
-      return;
+    function escapeHTML(value) {
+      return String(value ?? "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
     }
 
-    journalData.forEach((entry, i) => {
-
-  const div =
-    document.createElement("div");
-
-  div.className = "entry-item";
-
-  div.innerHTML = `
-
-    <div style="
-      display:flex;
-      justify-content:space-between;
-      align-items:center;
-      margin-bottom:6px;
-    ">
-
-      <span>
-        ${entry.date} — ${entry.title}
-      </span>
-
-      <div class="entry-actions">
-
-        <button 
-          onclick="openModal(${i})"
-          class="view-btn">
-
-          👁 View
-
-        </button>
-
-        <button 
-          onclick="deleteEntry(${i})"
-          class="delete-btn">
-
-          🗑 Delete
-
-        </button>
-
-      </div>
-
-    </div>
-
-  `;
-
-  historyDiv.appendChild(div);
-
-});
-    generateReflectionInsights();
-
-  }
-
-  catch (err) {
-
-    console.error(
-      "❌ Failed loading history:",
-      err
-    );
-
-  }
-
-}
-  function openModal(index) {
-    currentModalIndex=index;
-    const entry=journalData[index];
-    document.getElementById("modal-title").textContent=entry.title;
-    document.getElementById("modal-content").textContent=entry.content;
-    document.getElementById("modal-tags").textContent=entry.tags?`Tags: ${entry.tags}`:'';
-    document.getElementById("modal-mood").textContent=`Mood: ${entry.mood}`;
-    document.getElementById("entryModal").classList.add("active");
-  }
-  function closeModal() { document.getElementById("entryModal").classList.remove("active"); }
-
-  let deleteIndex = null;
-
-  function deleteEntry(i){
-    deleteIndex = i;
-    document.getElementById("deleteModal").classList.add("active");
-  }
-
-  function closeDeleteModal(){
-    document.getElementById("deleteModal").classList.remove("active");
-    deleteIndex = null;
-  }
-
-  async function confirmDelete() {
-    if (deleteIndex === null || !journalData[deleteIndex]) {
-      closeDeleteModal();
-      return;
+    function getEntryText(entry) {
+      return String(entry?.content ?? entry?.entry ?? "");
     }
 
-    const entryId = journalData[deleteIndex].id;
-
-    try {
-      const res = await fetch(`/api/journals/${entryId}`, {
-        method: "DELETE",
-      });
-
-      if (!res.ok) throw new Error("Delete failed");
-
-      showToast("Entry deleted 🗑️");
-      await loadHistory(); // reload from backend
-
-    } catch (err) {
-      console.error(err);
-      showToast("Could not delete entry.");
+    function getEntryTitle(entry) {
+      return String(entry?.title || "Untitled");
     }
 
-    closeDeleteModal();
-  }
-
-  async function saveEntry() {
-
-  const title =
-    document.getElementById("entry-title").value;
-
-  const content =
-    document.getElementById("journal-entry").value;
-
-  const mood =
-    document.getElementById("moodSelect").value;
-
-  const tags =
-    document.getElementById("tags").value;
-
-  if (!content.trim()) {
-
-    showToast("Write something first ✍️");
-    return;
-
-  }
-
-  const formData = new FormData();
-
-  formData.append("title", title);
-  formData.append("content", content);
-  formData.append("mood", mood);
-  formData.append("tags", tags);
-
-  try {
-
-    const res = await fetch(
-      "/journaling",
-      {
-        method: "POST",
-        credentials: "include",
-        body: formData
-      }
-    );
-
-    const data = await res.json();
-
-    if (data.ok) {
-
-      showToast("Entry saved successfully ✅");
-
-      // reload entries
-      await loadHistory();
-
-      // clear inputs
-      document.getElementById(
-        "journal-entry"
-      ).value = "";
-
-      document.getElementById(
-        "entry-title"
-      ).value = "";
-
-    }
-
-    else {
-
-      showToast("Unable to save entry ❌");
-
-    }
-
-  }
-
-  catch (err) {
-
-    console.error(err);
-
-    showToast("Server error while saving ⚠️");
-
-  }
-
-}
-      // Clear inputs
-    
-
-  function searchJournal(query){
-
-    const container =
-      document.getElementById("history");
-
-    const q =
-      query.toLowerCase();
-
-    const filtered =
-    journalData.filter(rec =>
-
-      (rec.title || "")
-        .toLowerCase()
-        .includes(q) ||
-
-      (rec.content || "")
-        .toLowerCase()
-        .includes(q) ||
-
-      (rec.tags || "")
-        .toLowerCase()
-        .includes(q)
-
-    );
-
-    container.innerHTML = '';
-
-    if(!filtered.length){
-
-      container.textContent =
-        "No entries match your search.";
-
-      return;
-
-    }
-
-    filtered.forEach((rec)=>{
-
-  const originalIndex =
-    journalData.findIndex(
-      e => e.id === rec.id
-    );
-
-  const div =
-    document.createElement("div");
-
-  div.className = "entry-item";
-
-  div.innerHTML = `
-
-    <div style="
-      display:flex;
-      justify-content:space-between;
-      align-items:center;
-      margin-bottom:6px;
-    ">
-
-      <span>
-        ${rec.date} — ${rec.title}
-        [${rec.mood}]
-      </span>
-
-      <div class="entry-actions">
-
-        <button 
-          onclick="openModal(${originalIndex})"
-          class="view-btn">
-
-          👁 View
-
-        </button>
-
-        <button 
-          onclick="deleteEntry(${originalIndex})"
-          class="delete-btn">
-
-          🗑 Delete
-
-        </button>
-
-      </div>
-
-    </div>
-
-  `;
-
-  container.appendChild(div);
-
-});
-
-      div.addEventListener("click",(e)=>{
-
-        if(!e.target.closest("button"))
-          openModal(i)
-
-      });
-
-      container.appendChild(div);
-
-    });
-
-  }
-
-  function changeFont(font){ document.getElementById("journal-entry").style.fontFamily=font; showToast("Font changed!"); }
-
-  function readAloud(){
-
-    const text =
-      document.getElementById("journal-entry").value.trim();
-
-    if (!text){
-
-      showToast("No text to read.");
-
-      return;
-
-    }
-
-    // Stop previous speech
-    speechSynthesis.cancel();
-
-    const utter =
-      new SpeechSynthesisUtterance(text);
-
-    utter.lang = "en-IN";
-
-    utter.rate = 1;
-
-    utter.pitch = 1;
-
-    utter.onstart = () => {
-
-      showToast("Reading journal 🔊");
-
-    };
-
-    utter.onerror = () => {
-
-      showToast("Speech failed.");
-
-    };
-
-    speechSynthesis.speak(utter);
-
-  }
-
-  function detectJournalLanguage(text) {
-    // Hindi vs English
-    return /[ऀ-ॿ]/.test(text) ? "hi-IN" : "en-IN";
-  }
-  let recognition, recognizing=false;
-  function toggleDictation(){
-    if (!navigator.mediaDevices) {
-    showToast("Microphone not supported.");
-    return;
-  }
-
-    const SpeechRecognition =
-      window.SpeechRecognition ||
-      window.webkitSpeechRecognition;
-
-    if (!SpeechRecognition){
-      showToast("Speech recognition not supported in this browser.");
-      return;
-    }
-
-    const textarea =
-      document.getElementById("journal-entry");
-
-    const btn =
-      document.querySelector(".speech-button");
-
-    if (!recognition){
-
-      recognition = new SpeechRecognition();
-
-      recognition.continuous = true;
-      recognition.interimResults = false;
-
-      recognition.lang = "en-IN";
-
-      recognition.onresult = (event) => {
-
-        let transcript = "";
-
-        for (let i = event.resultIndex; i < event.results.length; i++){
-
-          if (event.results[i].isFinal){
-
-            transcript +=
-              event.results[i][0].transcript + " ";
-
-          }
-
-        }
-
-        textarea.value += transcript;
-
-      };
-
-      recognition.onerror = (event) => {
-
-        console.error(event.error);
-
-        showToast("Microphone error: " + event.error);
-
-        recognizing = false;
-
-        btn.textContent = "🎤 Start Dictation";
-
-      };
-
-      recognition.onend = () => {
-
-        recognizing = false;
-
-        btn.textContent = "🎤 Start Dictation";
-
-      };
-
-    }
-
-    if (!recognizing){
-
-      recognition.start();
-      btn.style.background = "#ef4444";
-
-      recognizing = true;
-
-      btn.textContent = "🛑 Stop Dictation";
-
-      showToast("Dictation started 🎤");
-
-    }
-
-    else {
-
-      recognition.stop();
-
-      recognizing = false;
-
-      btn.textContent = "🎤 Start Dictation";
-
-      showToast("Dictation stopped");
-
-    }
-
-  }
-
-  async function exportPDF() {
-
-  try {
-
-    // reload history if empty
-    if (!journalData.length) {
-
-      await loadHistory();
-
-    }
-
-    if (!journalData.length) {
-
-      showToast("No entries to export 📄");
-      return;
-
-    }
-
-    const { jsPDF } = window.jspdf;
-
-    const doc = new jsPDF();
-
-    let y = 10;
-
-    journalData.forEach(entry => {
-
-      doc.text(
-        `Title: ${entry.title}`,
-        10,
-        y
-      );
-
-      y += 8;
-
-      doc.text(
-        `Date: ${entry.date}`,
-        10,
-        y
-      );
-
-      y += 8;
-
-      doc.text(
-        `Mood: ${entry.mood}`,
-        10,
-        y
-      );
-
-      y += 8;
-
-      const lines =
-        doc.splitTextToSize(
-          entry.content,
-          180
-        );
-
-      doc.text(lines, 10, y);
-
-      y += lines.length * 8;
-
-      y += 10;
-
-      if (y > 270) {
-
-        doc.addPage();
-        y = 10;
-
+    /* =========================
+       Theme
+    ========================= */
+
+    function toggleTheme() {
+      const themeToggle = document.getElementById("themeToggle");
+      document.body.classList.toggle("dark-theme");
+
+      const isDark = document.body.classList.contains("dark-theme");
+      localStorage.setItem("theme", isDark ? "dark" : "light");
+
+      if (themeToggle) {
+        themeToggle.textContent = isDark ? "☀️ Theme" : "🌙 Theme";
       }
 
-    });
+      showToast("Theme changed");
+    }
 
-    doc.save("journal_entries.pdf");
+    /* =========================
+       Drafts
+    ========================= */
 
-  }
+    function autoSaveDraft() {
+      const entryEl = document.getElementById("journal-entry");
+      const titleEl = document.getElementById("entry-title");
+      const moodEl = document.getElementById("moodSelect");
+      const tagsEl = document.getElementById("tags");
 
-  catch (err) {
+      if (!entryEl) return;
 
-    console.error(
-      "❌ Export failed:",
-      err
-    );
+      const content = entryEl.value.trim();
 
-  }
-
-}
-  async function exportAll() {
-    try {
-      const res = await fetch("/api/history/journals", {
-    credentials: "include"
-  });
-      if (!res.ok) throw new Error("Failed to fetch journals");
-
-      const journalData = await res.json();
-
-      if (!journalData.length) {
-        showToast("No entries to export.");
+      if (!content) {
+        localStorage.removeItem(JOURNAL_DRAFT_KEY);
         return;
       }
 
-      const blob = new Blob(
-        [JSON.stringify(journalData, null, 2)],
-        { type: "application/json" }
+      localStorage.setItem(
+        JOURNAL_DRAFT_KEY,
+        JSON.stringify({
+          title: titleEl?.value || "",
+          mood: moodEl?.value || "",
+          content,
+          tags: tagsEl?.value || "",
+          timestamp: Date.now()
+        })
+      );
+    }
+
+    function restoreDraft() {
+      const raw = localStorage.getItem(JOURNAL_DRAFT_KEY);
+      if (!raw) return;
+
+      try {
+        const draft = JSON.parse(raw);
+
+        document.getElementById("entry-title").value = draft.title || "";
+        document.getElementById("journal-entry").value = draft.content || "";
+        document.getElementById("tags").value = draft.tags || "";
+
+        if (draft.mood) {
+          const moodSelect = document.getElementById("moodSelect");
+          const optionExists = [...moodSelect.options].some(
+            option => option.value === draft.mood
+          );
+          if (optionExists) moodSelect.value = draft.mood;
+        }
+
+        showToast("Draft restored");
+      } catch (error) {
+        console.warn("Failed to restore journal draft:", error);
+        localStorage.removeItem(JOURNAL_DRAFT_KEY);
+      }
+    }
+
+    function clearDraft() {
+      localStorage.removeItem(JOURNAL_DRAFT_KEY);
+    }
+
+    /* =========================
+       Greeting
+    ========================= */
+
+    function setJournalGreeting() {
+      const el = document.getElementById("journalGreeting");
+      if (!el) return;
+
+      const userName = (localStorage.getItem("userName") || "").trim();
+      const shown = sessionStorage.getItem("journalGreetingShown") === "true";
+
+      if (!shown) {
+        el.textContent = userName
+          ? `Welcome back, ${userName}. How are you feeling today?`
+          : "Welcome back. How are you feeling today?";
+
+        sessionStorage.setItem("journalGreetingShown", "true");
+      } else {
+        el.textContent = "How are you feeling right now?";
+      }
+    }
+
+    /* =========================
+       Reflection insights
+    ========================= */
+
+    function generateReflectionInsights() {
+      const insightsEl = document.getElementById("reflectionInsights");
+      if (!insightsEl) return;
+
+      if (!Array.isArray(journalData) || journalData.length === 0) {
+        insightsEl.classList.add("hidden");
+        return;
+      }
+
+      const oneWeekAgo = Date.now() - 7 * 24 * 60 * 60 * 1000;
+
+      const recentEntries = journalData.filter(entry => {
+        const date = new Date(entry.date).getTime();
+        return !Number.isNaN(date) && date >= oneWeekAgo;
+      });
+
+      if (recentEntries.length === 0) {
+        insightsEl.classList.add("hidden");
+        return;
+      }
+
+      const moodCount = {};
+
+      recentEntries.forEach(entry => {
+        const mood = String(entry.mood || "").trim();
+        if (mood) moodCount[mood] = (moodCount[mood] || 0) + 1;
+      });
+
+      const moodKeys = Object.keys(moodCount);
+
+      if (!moodKeys.length) {
+        insightsEl.classList.add("hidden");
+        return;
+      }
+
+      const dominantMood = moodKeys.reduce((a, b) =>
+        moodCount[a] >= moodCount[b] ? a : b
       );
 
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = "Theramind_Journal.json";
+      const lengthByMood = {};
 
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      URL.revokeObjectURL(url);
+      recentEntries.forEach(entry => {
+        const mood = String(entry.mood || "").trim();
+        const content = getEntryText(entry);
 
-      showToast("All entries exported!");
+        if (!mood || !content) return;
 
-    } catch (err) {
-      console.error(err);
-      showToast("Could not export entries.");
+        if (!lengthByMood[mood]) lengthByMood[mood] = [];
+        lengthByMood[mood].push(content.length);
+      });
+
+      let longestMood = null;
+      let longestAvg = 0;
+
+      Object.keys(lengthByMood).forEach(mood => {
+        const values = lengthByMood[mood];
+        const avg = values.reduce((a, b) => a + b, 0) / values.length;
+
+        if (avg > longestAvg) {
+          longestAvg = avg;
+          longestMood = mood;
+        }
+      });
+
+      document.getElementById("insightMood").textContent =
+        `Most frequent mood this week: ${dominantMood}`;
+
+      document.getElementById("insightPattern").textContent =
+        longestMood
+          ? `You tend to write longer entries when you feel ${longestMood}.`
+          : "Your writing patterns are becoming more consistent.";
+
+      document.getElementById("insightEncouragement").textContent =
+        "Regular journaling helps build self-awareness over time.";
+
+      insightsEl.classList.remove("hidden");
     }
-  }
 
+    /* =========================
+       Prompts + Mood Images
+    ========================= */
 
-  const sidebar = document.getElementById("sidebar");
-  const sidebarToggle = document.getElementById("sidebarToggle");
+    const promptMap = {
+      "😃 Happy": [
+        "What made you smile today?",
+        "Who brought joy into your life today?",
+        "What small victory did you achieve today?",
+        "Which moment made you laugh out loud?",
+        "What are you grateful for today?",
+        "Describe a joyful interaction you had.",
+        "What inspired your happiness today?",
+        "How can you spread positivity?",
+        "Share a happy memory from today.",
+        "What energized you today?"
+      ],
+      "😔 Sad": [
+        "What’s weighing on your heart?",
+        "How are you comforting yourself today?",
+        "What made you feel low today?",
+        "Describe a moment of sadness today.",
+        "What would help lighten your mood?",
+        "Who or what can support you today?",
+        "Reflect on a challenging emotion.",
+        "How can you nurture yourself?",
+        "What lesson does your sadness teach?",
+        "Share a moment of vulnerability today."
+      ],
+      "😠 Angry": [
+        "What triggered your anger?",
+        "How can you express it constructively?",
+        "Which situation frustrated you?",
+        "What could have gone differently?",
+        "How can you release anger safely?",
+        "Identify any unfair treatment today.",
+        "How did you respond to your anger?",
+        "What emotions lie beneath your anger?",
+        "Share an experience where you stayed calm.",
+        "What steps can prevent anger tomorrow?"
+      ],
+      "😨 Anxious": [
+        "What's causing anxiety right now?",
+        "What can you control in this moment?",
+        "Which thoughts are overwhelming you?",
+        "How can you ground yourself?",
+        "What support can you seek?",
+        "Describe your anxious feelings.",
+        "What steps help reduce stress?",
+        "Identify triggers for anxiety today.",
+        "Reflect on past moments you managed anxiety.",
+        "What reassures you?"
+      ],
+      "😌 Calm": [
+        "What brings you peace?",
+        "Today I feel calm because…",
+        "Describe a serene moment you had.",
+        "What activities help you relax?",
+        "Who contributes to your tranquility?",
+        "How did you manage stress today?",
+        "Reflect on mindful breathing moments.",
+        "What music or sounds soothe you?",
+        "Share a quiet moment from today.",
+        "What positive thoughts keep you grounded?"
+      ],
+      "😵 Overwhelmed": [
+        "What’s making you feel overwhelmed?",
+        "Break down your feelings into parts.",
+        "Identify top stressors today.",
+        "Which tasks are weighing on you?",
+        "What is outside your control?",
+        "What small wins occurred today?",
+        "How can you prioritize tasks?",
+        "Who can help you manage responsibilities?",
+        "Reflect on emotions and reactions.",
+        "How can you reset and recharge?"
+      ]
+    };
 
-  sidebarToggle?.addEventListener("click", () => {
-    sidebar.classList.toggle("show");
-    document.body.classList.toggle("sidebar-open");
+    const imageMap = {
+      "😃 Happy": "https://img.icons8.com/emoji/96/000000/smiling-face-with-smiling-eyes.png",
+      "😔 Sad": "https://img.icons8.com/emoji/96/000000/pensive-face.png",
+      "😠 Angry": "https://img.icons8.com/emoji/96/000000/pouting-face.png",
+      "😨 Anxious": "https://img.icons8.com/emoji/96/000000/fearful-face.png",
+      "😌 Calm": "https://img.icons8.com/emoji/96/000000/relieved-face.png",
+      "😵 Overwhelmed": "https://img.icons8.com/emoji/96/000000/dizzy-face.png"
+    };
 
-    const isOpen = sidebar.classList.contains("show");
-    sidebarToggle.setAttribute("aria-expanded", isOpen);
+    function updateIllustrationAndPrompt() {
+      const select = document.getElementById("moodSelect");
+      const image = document.getElementById("mood-image");
 
-    // Accessibility polish
-    if (isOpen) {
-      sidebar.querySelector("a")?.focus();
+      if (!select || !select.value) return;
+
+      if (imageMap[select.value] && image) {
+        image.src = imageMap[select.value];
+        image.alt = select.value;
+      }
+
+      generatePrompt();
     }
-  });
+
+    function generatePrompt() {
+      const mood = document.getElementById("moodSelect")?.value;
+      const prompts = promptMap[mood];
+
+      if (!prompts?.length) return;
+
+      const prompt = prompts[Math.floor(Math.random() * prompts.length)];
+      const display = document.getElementById("prompt-display");
+      const textarea = document.getElementById("journal-entry");
+
+      if (display) display.textContent = prompt;
+
+      if (textarea) {
+        textarea.placeholder = prompt;
+      }
+    }
+
+    /* =========================
+       History rendering
+    ========================= */
+
+    function renderHistory(entries = journalData) {
+      const container = document.getElementById("history");
+      if (!container) return;
+
+      container.innerHTML = "";
+
+      if (!entries.length) {
+        container.innerHTML = "<p>No journal entries yet.</p>";
+        return;
+      }
+
+      entries.forEach(entry => {
+        const originalIndex = journalData.findIndex(item => item.id === entry.id);
+
+        if (originalIndex === -1) return;
+
+        const div = document.createElement("div");
+        div.className = "entry-item";
+
+        const date = escapeHTML(entry.date || "");
+        const title = escapeHTML(getEntryTitle(entry));
+        const mood = escapeHTML(entry.mood || "");
+
+        div.innerHTML = `
+          <div style="
+            display:flex;
+            justify-content:space-between;
+            align-items:center;
+            gap:12px;
+            margin-bottom:6px;
+          ">
+            <span style="min-width:0;overflow-wrap:anywhere;">
+              ${date} — ${title}${mood ? ` [${mood}]` : ""}
+            </span>
+
+            <div class="entry-actions">
+              <button
+                type="button"
+                onclick="openModal(${originalIndex})"
+                class="view-btn">
+                👁 View
+              </button>
+
+              <button
+                type="button"
+                onclick="deleteEntry(${originalIndex})"
+                class="delete-btn">
+                🗑 Delete
+              </button>
+            </div>
+          </div>
+        `;
+
+        container.appendChild(div);
+      });
+    }
+
+    async function loadHistory() {
+      const container = document.getElementById("history");
+
+      if (container) {
+        container.innerHTML = "<p>Loading your journal...</p>";
+      }
+
+      try {
+        const res = await fetch("/api/history/journals", {
+          method: "GET",
+          credentials: "include",
+          headers: {
+            "Accept": "application/json"
+          }
+        });
+
+        if (!res.ok) {
+          throw new Error(`History request failed: ${res.status}`);
+        }
+
+        const data = await res.json();
+
+        if (!Array.isArray(data)) {
+          throw new Error("History response was not an array");
+        }
+
+        journalData = data;
+
+        console.log("📘 Loaded history:", journalData);
+
+        renderHistory();
+        generateReflectionInsights();
+      } catch (error) {
+        console.error("❌ Failed loading history:", error);
+
+        journalData = [];
+
+        if (container) {
+          container.innerHTML =
+            "<p>Could not load journal history. Please refresh and try again.</p>";
+        }
+
+        generateReflectionInsights();
+      }
+    }
+
+    /* =========================
+       View entry
+    ========================= */
+
+    function openModal(index) {
+      const entry = journalData[index];
+
+      if (!entry) {
+        showToast("Journal entry could not be found.");
+        return;
+      }
+
+      const titleEl = document.getElementById("modal-title");
+      const contentEl = document.getElementById("modal-content");
+      const moodEl = document.getElementById("modal-mood");
+      const tagsEl = document.getElementById("modal-tags");
+
+      if (titleEl) titleEl.textContent = getEntryTitle(entry);
+      if (contentEl) contentEl.textContent = getEntryText(entry);
+      if (moodEl) moodEl.textContent = entry.mood ? `Mood: ${entry.mood}` : "";
+      if (tagsEl) tagsEl.textContent = entry.tags ? `Tags: ${entry.tags}` : "";
+
+      document.getElementById("entryModal")?.classList.add("active");
+    }
+
+    function closeModal() {
+      document.getElementById("entryModal")?.classList.remove("active");
+    }
+
+    /* =========================
+       Delete
+    ========================= */
+
+    function deleteEntry(index) {
+      if (!journalData[index]) {
+        showToast("Journal entry could not be found.");
+        return;
+      }
+
+      deleteIndex = index;
+      document.getElementById("deleteModal")?.classList.add("active");
+    }
+
+    function closeDeleteModal() {
+      document.getElementById("deleteModal")?.classList.remove("active");
+      deleteIndex = null;
+    }
+
+    async function confirmDelete() {
+      if (deleteIndex === null || !journalData[deleteIndex]) {
+        closeDeleteModal();
+        return;
+      }
+
+      const entry = journalData[deleteIndex];
+      const entryId = entry.id;
+
+      if (entryId === undefined || entryId === null) {
+        closeDeleteModal();
+        showToast("This entry has no valid ID.");
+        return;
+      }
+
+      const deleteButton =
+        document.querySelector("#deleteModal button[onclick='confirmDelete()']");
+
+      if (deleteButton) {
+        deleteButton.disabled = true;
+        deleteButton.textContent = "Deleting...";
+      }
+
+      try {
+        const res = await fetch(`/api/journals/${encodeURIComponent(entryId)}`, {
+          method: "DELETE",
+          credentials: "include",
+          headers: {
+            "Accept": "application/json"
+          }
+        });
+
+        let data = null;
+        try {
+          data = await res.json();
+        } catch (_) {}
+
+        if (!res.ok || (data && data.ok === false)) {
+          throw new Error(data?.message || `Delete failed: ${res.status}`);
+        }
+
+        closeDeleteModal();
+        showToast("Entry deleted 🗑️");
+        await loadHistory();
+      } catch (error) {
+        console.error("❌ Delete failed:", error);
+        showToast("Could not delete entry. Please try again.");
+      } finally {
+        if (deleteButton) {
+          deleteButton.disabled = false;
+          deleteButton.textContent = "Delete";
+        }
+      }
+    }
+
+    /* =========================
+       Save
+    ========================= */
+
+    async function saveEntry() {
+      if (saveInProgress) return;
+
+      const titleEl = document.getElementById("entry-title");
+      const contentEl = document.getElementById("journal-entry");
+      const moodEl = document.getElementById("moodSelect");
+      const tagsEl = document.getElementById("tags");
+      const saveButton =
+        document.querySelector(".actions button[onclick='saveEntry()']");
+
+      const title = titleEl?.value.trim() || "Untitled";
+      const content = contentEl?.value.trim() || "";
+      const mood = moodEl?.value || "";
+      const tags = tagsEl?.value.trim() || "";
+
+      if (!content) {
+        showToast("Write something first ✍️");
+        contentEl?.focus();
+        return;
+      }
+
+      saveInProgress = true;
+
+      if (saveButton) {
+        saveButton.disabled = true;
+        saveButton.textContent = "💾 Saving...";
+      }
+
+      const formData = new FormData();
+      formData.append("title", title);
+      formData.append("content", content);
+      formData.append("mood", mood);
+      formData.append("tags", tags);
+
+      try {
+        const res = await fetch("/journaling", {
+          method: "POST",
+          credentials: "include",
+          body: formData
+        });
+
+        let data = null;
+
+        try {
+          data = await res.json();
+        } catch (_) {
+          throw new Error("Server returned an invalid response.");
+        }
+
+        if (!res.ok || !data.ok) {
+          throw new Error(data.message || `Save failed: ${res.status}`);
+        }
+
+        clearDraft();
+
+        if (contentEl) contentEl.value = "";
+        if (titleEl) titleEl.value = "";
+        if (tagsEl) tagsEl.value = "";
+
+        await loadHistory();
+
+        showToast("Entry saved successfully ✅");
+      } catch (error) {
+        console.error("❌ Save failed:", error);
+        showToast("Could not save entry. Please try again.");
+      } finally {
+        saveInProgress = false;
+
+        if (saveButton) {
+          saveButton.disabled = false;
+          saveButton.textContent = "💾 Save Entry";
+        }
+      }
+    }
+
+    /* =========================
+       Search
+    ========================= */
+
+    function searchJournal(query) {
+      const q = String(query || "").trim().toLowerCase();
+
+      if (!q) {
+        renderHistory();
+        return;
+      }
+
+      const filtered = journalData.filter(entry => {
+        const title = getEntryTitle(entry).toLowerCase();
+        const content = getEntryText(entry).toLowerCase();
+        const tags = String(entry?.tags || "").toLowerCase();
+        const mood = String(entry?.mood || "").toLowerCase();
+
+        return (
+          title.includes(q) ||
+          content.includes(q) ||
+          tags.includes(q) ||
+          mood.includes(q)
+        );
+      });
+
+      const container = document.getElementById("history");
+      if (!container) return;
+
+      if (!filtered.length) {
+        container.innerHTML = "<p>No entries match your search.</p>";
+        return;
+      }
+
+      renderHistory(filtered);
+    }
+
+    /* =========================
+       Font
+    ========================= */
+
+    function changeFont(font) {
+      const editor = document.getElementById("journal-entry");
+      if (!editor) return;
+
+      editor.style.fontFamily = font;
+      localStorage.setItem("journalFont", font);
+      showToast("Font changed!");
+    }
+
+    function restoreFont() {
+      const savedFont = localStorage.getItem("journalFont");
+      const select = document.getElementById("font-select");
+      const editor = document.getElementById("journal-entry");
+
+      if (!savedFont || !select || !editor) return;
+
+      const exists = [...select.options].some(
+        option => option.value === savedFont
+      );
+
+      if (exists) {
+        select.value = savedFont;
+        editor.style.fontFamily = savedFont;
+      }
+    }
+
+    /* =========================
+       Read aloud
+    ========================= */
+
+    function detectJournalLanguage(text) {
+      if (/[ऀ-ॿ]/.test(text)) return "hi-IN";
+      return "en-IN";
+    }
+
+    function readAloud() {
+      const text =
+        document.getElementById("journal-entry")?.value.trim() || "";
+
+      if (!text) {
+        showToast("No text to read.");
+        return;
+      }
+
+      if (!("speechSynthesis" in window)) {
+        showToast("Read Aloud is not supported in this browser.");
+        return;
+      }
+
+      speechSynthesis.cancel();
+
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.lang = detectJournalLanguage(text);
+      utterance.rate = 1;
+      utterance.pitch = 1;
+
+      utterance.onstart = () => showToast("Reading journal 🔊");
+      utterance.onend = () => {};
+      utterance.onerror = event => {
+        console.error("Speech error:", event.error);
+        showToast("Speech failed.");
+      };
+
+      speechSynthesis.speak(utterance);
+    }
+
+    /* =========================
+       Dictation
+    ========================= */
+
+    function stopDictation() {
+      if (recognition && recognizing) {
+        try {
+          recognition.stop();
+        } catch (_) {}
+      }
+
+      recognizing = false;
+
+      const btn = document.querySelector(".speech-button");
+      if (btn) {
+        btn.textContent = "🎤 Start Dictation";
+        btn.style.background = "";
+      }
+    }
+
+    function toggleDictation() {
+      const SpeechRecognition =
+        window.SpeechRecognition ||
+        window.webkitSpeechRecognition;
+
+      if (!SpeechRecognition) {
+        showToast("Speech recognition is not supported in this browser.");
+        return;
+      }
+
+      const textarea = document.getElementById("journal-entry");
+      const btn = document.querySelector(".speech-button");
+
+      if (!textarea) return;
+
+      if (!recognition) {
+        recognition = new SpeechRecognition();
+        recognition.continuous = true;
+        recognition.interimResults = false;
+        recognition.maxAlternatives = 1;
+
+        recognition.onresult = event => {
+          let transcript = "";
+
+          for (
+            let i = event.resultIndex;
+            i < event.results.length;
+            i++
+          ) {
+            if (event.results[i].isFinal) {
+              transcript += event.results[i][0].transcript + " ";
+            }
+          }
+
+          if (transcript.trim()) {
+            const current = textarea.value.trimEnd();
+            textarea.value =
+              current + (current ? " " : "") + transcript.trim();
+            textarea.dispatchEvent(new Event("input", { bubbles: true }));
+          }
+        };
+
+        recognition.onerror = event => {
+          console.error("Speech recognition error:", event.error);
+
+          if (event.error === "not-allowed" || event.error === "service-not-allowed") {
+            showToast("Microphone permission was denied.");
+          } else if (event.error === "no-speech") {
+            showToast("No speech detected.");
+          } else {
+            showToast("Microphone error: " + event.error);
+          }
+
+          stopDictation();
+        };
+
+        recognition.onend = () => {
+          if (recognizing) {
+            recognizing = false;
+
+            if (btn) {
+              btn.textContent = "🎤 Start Dictation";
+              btn.style.background = "";
+            }
+          }
+        };
+      }
+
+      if (recognizing) {
+        stopDictation();
+        showToast("Dictation stopped");
+        return;
+      }
+
+      recognition.lang = detectJournalLanguage(textarea.value);
+
+      try {
+        recognition.start();
+
+        recognizing = true;
+
+        if (btn) {
+          btn.textContent = "🛑 Stop Dictation";
+          btn.style.background = "#ef4444";
+        }
+
+        showToast(
+          recognition.lang === "hi-IN"
+            ? "Hindi dictation started 🎤"
+            : "English dictation started 🎤"
+        );
+      } catch (error) {
+        console.error("Could not start dictation:", error);
+        stopDictation();
+        showToast("Could not start dictation.");
+      }
+    }
+
+    /* =========================
+       PDF export
+    ========================= */
+
+    async function exportPDF() {
+      try {
+        if (!journalData.length) {
+          await loadHistory();
+        }
+
+        if (!journalData.length) {
+          showToast("No entries to export 📄");
+          return;
+        }
+
+        if (!window.jspdf?.jsPDF) {
+          showToast("PDF export is unavailable right now.");
+          return;
+        }
+
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF();
+
+        const margin = 15;
+        const pageWidth = doc.internal.pageSize.getWidth();
+        const pageHeight = doc.internal.pageSize.getHeight();
+        const maxWidth = pageWidth - margin * 2;
+
+        let y = margin;
+
+        const ensureSpace = requiredHeight => {
+          if (y + requiredHeight > pageHeight - margin) {
+            doc.addPage();
+            y = margin;
+          }
+        };
+
+        journalData.forEach((entry, index) => {
+          const title = getEntryTitle(entry);
+          const content = getEntryText(entry);
+          const date = String(entry.date || "");
+          const mood = String(entry.mood || "");
+          const tags = String(entry.tags || "");
+
+          const titleLines = doc.splitTextToSize(
+            `Title: ${title}`,
+            maxWidth
+          );
+
+          const contentLines = doc.splitTextToSize(
+            content || "(No content)",
+            maxWidth
+          );
+
+          ensureSpace(
+            18 +
+            titleLines.length * 7 +
+            contentLines.length * 6 +
+            30
+          );
+
+          if (index > 0) {
+            doc.setLineWidth(0.2);
+            doc.line(margin, y - 5, pageWidth - margin, y - 5);
+          }
+
+          doc.setFontSize(14);
+          doc.text(titleLines, margin, y);
+          y += titleLines.length * 7 + 2;
+
+          doc.setFontSize(10);
+
+          if (date) {
+            ensureSpace(8);
+            doc.text(`Date: ${date}`, margin, y);
+            y += 6;
+          }
+
+          if (mood) {
+            ensureSpace(8);
+            doc.text(`Mood: ${mood}`, margin, y);
+            y += 6;
+          }
+
+          if (tags) {
+            const tagLines = doc.splitTextToSize(
+              `Tags: ${tags}`,
+              maxWidth
+            );
+
+            ensureSpace(tagLines.length * 6 + 4);
+            doc.text(tagLines, margin, y);
+            y += tagLines.length * 6 + 2;
+          }
+
+          for (const line of contentLines) {
+            ensureSpace(7);
+            doc.text(line, margin, y);
+            y += 6;
+          }
+
+          y += 10;
+        });
+
+        doc.save("Theramind_Journal.pdf");
+        showToast("Journal PDF exported 📄");
+      } catch (error) {
+        console.error("❌ PDF export failed:", error);
+        showToast("Could not export PDF.");
+      }
+    }
+
+    /* =========================
+       Export all JSON
+    ========================= */
+
+    async function exportAll() {
+      try {
+        if (!journalData.length) {
+          await loadHistory();
+        }
+
+        if (!journalData.length) {
+          showToast("No entries to export.");
+          return;
+        }
+
+        const blob = new Blob(
+          [JSON.stringify(journalData, null, 2)],
+          { type: "application/json;charset=utf-8" }
+        );
+
+        const url = URL.createObjectURL(blob);
+        const anchor = document.createElement("a");
+
+        anchor.href = url;
+        anchor.download = "Theramind_Journal.json";
+
+        document.body.appendChild(anchor);
+        anchor.click();
+        anchor.remove();
+
+        URL.revokeObjectURL(url);
+
+        showToast("All entries exported!");
+      } catch (error) {
+        console.error("❌ JSON export failed:", error);
+        showToast("Could not export entries.");
+      }
+    }
+
+    /* =========================
+       Sidebar
+    ========================= */
+
+    function closeSidebar() {
+      const sidebar = document.getElementById("sidebar");
+
+      if (!sidebar) return;
+
+      sidebar.classList.remove("show");
+      document.body.classList.remove("sidebar-open");
+
+      document.getElementById("sidebarToggle")?.setAttribute(
+        "aria-expanded",
+        "false"
+      );
+    }
+
+    /* =========================
+       Page initialization
+    ========================= */
+
+    document.addEventListener("DOMContentLoaded", async () => {
+      const themeToggle = document.getElementById("themeToggle");
+
+      if (localStorage.getItem("theme") === "dark") {
+        document.body.classList.add("dark-theme");
+
+        if (themeToggle) {
+          themeToggle.textContent = "☀️ Theme";
+        }
+      } else {
+        document.body.classList.remove("dark-theme");
+
+        if (themeToggle) {
+          themeToggle.textContent = "🌙 Theme";
+        }
+      }
+
+      themeToggle?.addEventListener("click", toggleTheme);
+
+      const sidebar = document.getElementById("sidebar");
+      const sidebarToggle = document.getElementById("sidebarToggle");
+
+      sidebarToggle?.addEventListener("click", () => {
+        if (!sidebar) return;
+
+        sidebar.classList.toggle("show");
+        document.body.classList.toggle("sidebar-open");
+
+        const isOpen = sidebar.classList.contains("show");
+
+        sidebarToggle.setAttribute("aria-expanded", String(isOpen));
+
+        if (isOpen) {
+          sidebar.querySelector("a")?.focus();
+        }
+      });
+
+      sidebar?.querySelectorAll("a").forEach(link => {
+        link.addEventListener("click", closeSidebar);
+      });
+
+      // Close modals by clicking the backdrop.
+      document.getElementById("entryModal")?.addEventListener("click", event => {
+        if (event.target.id === "entryModal") closeModal();
+      });
+
+      document.getElementById("deleteModal")?.addEventListener("click", event => {
+        if (event.target.id === "deleteModal") closeDeleteModal();
+      });
+
+      // Escape closes open overlays.
+      document.addEventListener("keydown", event => {
+        if (event.key !== "Escape") return;
+
+        closeModal();
+        closeDeleteModal();
+        closeSidebar();
+      });
+
+      // Particle background.
+      if (window.tsParticles) {
+        try {
+          await tsParticles.load("tsparticles", {
+            background: { color: { value: "transparent" } },
+            fullScreen: false,
+            particles: {
+              number: {
+                value: 70,
+                density: { enable: true, area: 800 }
+              },
+              color: {
+                value: ["#6b7cff", "#67e8f9"]
+              },
+              shape: { type: "circle" },
+              opacity: {
+                value: 0.35,
+                random: true
+              },
+              size: {
+                value: { min: 1.5, max: 3.5 }
+              },
+              links: {
+                enable: true,
+                distance: 120,
+                color: "#aab8ff",
+                opacity: 0.15,
+                width: 1
+              },
+              move: {
+                enable: true,
+                speed: 0.6,
+                direction: "none",
+                outModes: "out"
+              }
+            }
+          });
+        } catch (error) {
+          console.warn("Particles could not initialize:", error);
+        }
+      }
+
+      restoreFont();
+      restoreDraft();
+      setJournalGreeting();
+      updateIllustrationAndPrompt();
+
+      await loadHistory();
+
+      // Keep draft state fresh without creating a new interval on reload.
+      setInterval(autoSaveDraft, 5000);
+    });
   </script>
   </body>
   </html>
