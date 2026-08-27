@@ -229,7 +229,9 @@ class _PGConnection:
 
 
 def _postgres_connection():
-    return _PGConnection(psycopg.connect(DATABASE_URL))
+    return _PGConnection(
+    psycopg.connect(DATABASE_URL, row_factory=dict_row)
+)
 
 
 def connect_for_setup(db_path=None):
