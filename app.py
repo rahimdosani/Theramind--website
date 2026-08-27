@@ -158,27 +158,27 @@ class _PGCursor:
         return sql.replace("?", "%s")
 
     def execute(self, sql, params=None):
-    sql2 = self._sql(sql)
-    upper = sql2.lstrip().upper()
+        sql2 = self._sql(sql)
+        upper = sql2.lstrip().upper()
 
-    # Preserve the existing two c.lastrowid call sites.
-    if upper.startswith("INSERT INTO") and " RETURNING " not in upper:
-        sql2 = sql2.rstrip().rstrip(";") + " RETURNING id"
+        # Preserve the existing two c.lastrowid call sites.
+        if upper.startswith("INSERT INTO") and " RETURNING " not in upper:
+            sql2 = sql2.rstrip().rstrip(";") + " RETURNING id"
 
-    result = self._cursor.execute(sql2, params)
+        result = self._cursor.execute(sql2, params)
 
-    if upper.startswith("INSERT INTO"):
-        row = self._cursor.fetchone()
+        if upper.startswith("INSERT INTO"):
+            row = self._cursor.fetchone()
 
-        if row:
-            if isinstance(row, dict):
-                self._lastrowid = next(iter(row.values()))
+            if row:
+                if isinstance(row, dict):
+                    self._lastrowid = next(iter(row.values()))
+                else:
+                    self._lastrowid = row[0]
             else:
-                self._lastrowid = row[0]
-        else:
-            self._lastrowid = None
+                self._lastrowid = None
 
-    return result
+        return result
 
     def executemany(self, sql, params_seq):
         return self._cursor.executemany(self._sql(sql), params_seq)
